@@ -1,0 +1,47 @@
+# Local editor settings
+.vscode/
+
+# Spec workflow artifacts
+.spec-workflow/
+
+# Dependencies
+node_modules/
+.pnp.*
+
+# Build output
+/dist/
+/build/
+/out/
+/.next/
+/.nuxt/
+/.output/
+/coverage/
+
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.pnpm-store/
+*.tsbuildinfo
+.eslintcache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files (keep .env.example committed)
+.env
+.env.*
+!.env.example
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp

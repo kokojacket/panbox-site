@@ -1,0 +1,196 @@
+:root {
+  --pb-bg-1: #f6f8ff;
+  --pb-bg-2: #f3fbff;
+  --pb-ink: #0b1220;
+  --pb-muted: #4b5568;
+  --pb-border: rgba(15, 23, 42, 0.10);
+  --pb-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --pb-shadow-hover: 0 18px 50px rgba(15, 23, 42, 0.12);
+
+  /* Brand: deep blue + cyan tint (avoid purple) */
+  --vp-c-brand-1: #0b3d91;
+  --vp-c-brand-2: #0a2f73;
+  --vp-c-brand-3: #0d4fb9;
+  --vp-c-brand-soft: rgba(11, 61, 145, 0.14);
+
+  --vp-font-family-base: "MiSans", "HarmonyOS Sans SC", "Source Han Sans SC", "Noto Sans SC", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --vp-font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  color: var(--pb-ink);
+  background:
+    radial-gradient(1200px 800px at 12% 8%, rgba(13, 79, 185, 0.12), transparent 55%),
+    radial-gradient(1000px 700px at 92% 0%, rgba(0, 170, 190, 0.12), transparent 52%),
+    linear-gradient(180deg, var(--pb-bg-2), var(--pb-bg-1));
+}
+
+/* Subtle pattern overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.03) 0px,
+      rgba(15, 23, 42, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  opacity: 0.25;
+  mix-blend-mode: multiply;
+}
+
+.VPNav {
+  backdrop-filter: blur(10px);
+}
+
+/* Pill CTA buttons */
+.VPButton {
+  border-radius: 999px !important;
+  padding: 10px 18px !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.10);
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.VPButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+}
+
+/* Make brand button more "engineering" */
+.VPButton.brand {
+  background: linear-gradient(180deg, #0b3d91, #082c66) !important;
+}
+
+/* Home hero tuning */
+.VPHome {
+  position: relative;
+}
+
+.VPHomeHero .name {
+  letter-spacing: -0.02em;
+}
+
+.VPHomeHero .text {
+  max-width: 20em;
+}
+
+.VPHomeHero .tagline {
+  max-width: 48ch;
+  color: var(--pb-muted);
+}
+
+/* Feature cards */
+.VPFeature {
+  border: 1px solid var(--pb-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.70);
+  box-shadow: var(--pb-shadow);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.VPFeature:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--pb-shadow-hover);
+  border-color: rgba(11, 61, 145, 0.25);
+}
+
+/* Custom sections on home */
+.pb-section {
+  margin: 28px auto;
+  padding: 22px;
+  border: 1px solid var(--pb-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.70);
+  box-shadow: var(--pb-shadow);
+}
+
+.pb-section h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.pb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pb-card {
+  border: 1px solid var(--pb-border);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.pb-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.10);
+  border-color: rgba(0, 170, 190, 0.28);
+}
+
+.pb-kicker {
+  font-size: 12px;
+  color: var(--pb-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pb-steps {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--pb-ink);
+}
+
+.pb-steps li {
+  margin: 6px 0;
+}
+
+.pb-risk {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.10);
+}
+
+.pb-risk strong {
+  color: #7c2d12;
+}
+
+@media (max-width: 900px) {
+  .pb-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Motion: gentle, respect reduced motion */
+@keyframes pb-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .VPHomeHero {
+    animation: pb-fade-up 520ms ease both;
+  }
+
+  .VPFeature {
+    animation: pb-fade-up 520ms ease both;
+  }
+
+  .VPFeature:nth-child(1) { animation-delay: 60ms; }
+  .VPFeature:nth-child(2) { animation-delay: 120ms; }
+  .VPFeature:nth-child(3) { animation-delay: 180ms; }
+}
