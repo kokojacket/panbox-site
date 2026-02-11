@@ -51,6 +51,25 @@ body::before {
   backdrop-filter: blur(10px);
 }
 
+/*
+  Fix: on wide screens with sidebar, VitePress paints the nav background on
+  `.content-body`, which doesn't cover `.content` padding. That can look like a
+  truncated white strip. Paint the background on the full nav bar instead.
+*/
+@media (min-width: 960px) {
+  .VPNavBar.has-sidebar {
+    background-color: var(--vp-nav-bg-color) !important;
+  }
+
+  .VPNavBar.has-sidebar .content-body {
+    background-color: transparent !important;
+  }
+
+  .VPNavBar.has-sidebar .divider {
+    padding-left: 0 !important;
+  }
+}
+
 /* Pill CTA buttons */
 .VPButton {
   border-radius: 999px !important;

@@ -23,15 +23,7 @@ export default defineConfig({
       },
       { text: '文档', link: '/getting-started' },
       { text: '部署', link: '/getting-started#部署路径建议' },
-      { text: '风险', link: '/risk/disclaimer' },
-      {
-        text: 'GitHub',
-        items: [
-          { text: 'panbox-search', link: 'https://github.com/kokojacket/panbox-search' },
-          { text: 'panbox-autosave', link: 'https://github.com/kokojacket/panbox-autosave' },
-          { text: 'panbox-sync', link: 'https://github.com/kokojacket/panbox-sync' }
-        ]
-      }
+      { text: '风险', link: '/risk/disclaimer' }
     ],
 
     sidebar: {
@@ -93,10 +85,6 @@ export default defineConfig({
     search: {
       provider: 'local'
     },
-
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/kokojacket' }
-    ],
 
     footer: {
       message: '请在遵守相关法律法规与平台规则的前提下使用。',
