@@ -1,14 +1,6 @@
 import { defineConfig } from 'vitepress'
 
-const githubRepository = process.env.GITHUB_REPOSITORY ?? ''
-const [githubOwner, githubRepo] = githubRepository.split('/')
-const isGithubActions = process.env.GITHUB_ACTIONS === 'true'
-const isUserOrOrgPages =
-  !!githubOwner &&
-  !!githubRepo &&
-  githubRepo.toLowerCase() === `${githubOwner.toLowerCase()}.github.io`
-
-const base = isGithubActions && githubRepo && !isUserOrOrgPages ? `/${githubRepo}/` : '/'
+const base = process.env.VITEPRESS_BASE ?? '/'
 
 export default defineConfig({
   base,
