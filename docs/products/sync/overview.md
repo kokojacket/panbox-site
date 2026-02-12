@@ -1,6 +1,6 @@
 # PanBox Sync 概览
 
-PanBox Sync 是一个面向“跨盘同步 + 可选文件处理”的自托管系统，核心是 **流水线并发架构**：
+PanBox Sync 是一个面向“跨盘同步 + 可选文件处理”的自托管系统，核心是 **流水线并发**：
 
 - 下载 → 处理（可选）→ 上传
 - 三队列（download/transcode/upload）
@@ -29,6 +29,6 @@ PanBox Sync 是一个面向“跨盘同步 + 可选文件处理”的自托管�
 ## 下一步
 
 - /products/sync/quickstart
-- /products/sync/docker
-- /products/sync/architecture
+- /products/sync/usage
 - /products/sync/security
+- /products/sync/risk

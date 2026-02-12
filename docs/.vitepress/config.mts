@@ -1,6 +1,17 @@
 import { defineConfig } from 'vitepress'
 
+const githubRepository = process.env.GITHUB_REPOSITORY ?? ''
+const [githubOwner, githubRepo] = githubRepository.split('/')
+const isGithubActions = process.env.GITHUB_ACTIONS === 'true'
+const isUserOrOrgPages =
+  !!githubOwner &&
+  !!githubRepo &&
+  githubRepo.toLowerCase() === `${githubOwner.toLowerCase()}.github.io`
+
+const base = isGithubActions && githubRepo && !isUserOrOrgPages ? `/${githubRepo}/` : '/'
+
 export default defineConfig({
+  base,
   lang: 'zh-CN',
   title: 'PanBox',
   description: '自托管的网盘工具套件：搜索 / 自动转存 / 同步',
@@ -14,67 +25,30 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       {
-        text: '产品',
+        text: '文档',
         items: [
+          { text: '服务器购买', link: '/server-purchase' },
+          { text: '域名购买与指向', link: '/domain-setup' },
+          { text: 'NginxWebUI 反向代理安装', link: '/nginxwebui-reverse-proxy' },
           { text: 'PanBox Search', link: '/products/search/overview' },
           { text: 'PanBox Autosave', link: '/products/autosave/overview' },
           { text: 'PanBox Sync', link: '/products/sync/overview' }
         ]
       },
-      { text: '文档', link: '/getting-started' },
-      { text: '部署', link: '/getting-started#部署路径建议' },
-      { text: '风险', link: '/risk/disclaimer' }
+      { text: '免责', link: '/risk/disclaimer' }
     ],
 
     sidebar: {
-      '/products/search/': [
+      '/': [
         {
-          text: 'PanBox Search',
+          text: '文档',
           items: [
-            { text: '概览', link: '/products/search/overview' },
-            { text: '快速开始', link: '/products/search/quickstart' },
-            { text: 'Docker 部署', link: '/products/search/docker' },
-            { text: '配置', link: '/products/search/configuration' },
-            { text: '使用', link: '/products/search/usage' },
-            { text: 'FAQ', link: '/products/search/faq' },
-            { text: '风险提示', link: '/products/search/risk' }
-          ]
-        }
-      ],
-      '/products/autosave/': [
-        {
-          text: 'PanBox Autosave',
-          items: [
-            { text: '概览', link: '/products/autosave/overview' },
-            { text: '快速开始', link: '/products/autosave/quickstart' },
-            { text: 'Docker 部署', link: '/products/autosave/docker' },
-            { text: '配置', link: '/products/autosave/configuration' },
-            { text: '使用', link: '/products/autosave/usage' },
-            { text: 'FAQ', link: '/products/autosave/faq' },
-            { text: '风险提示', link: '/products/autosave/risk' }
-          ]
-        }
-      ],
-      '/products/sync/': [
-        {
-          text: 'PanBox Sync',
-          items: [
-            { text: '概览', link: '/products/sync/overview' },
-            { text: '快速开始', link: '/products/sync/quickstart' },
-            { text: 'Docker 部署', link: '/products/sync/docker' },
-            { text: '配置', link: '/products/sync/configuration' },
-            { text: '使用', link: '/products/sync/usage' },
-            { text: '架构', link: '/products/sync/architecture' },
-            { text: '安全建议', link: '/products/sync/security' },
-            { text: 'FAQ', link: '/products/sync/faq' },
-            { text: '风险提示', link: '/products/sync/risk' }
-          ]
-        }
-      ],
-      '/risk/': [
-        {
-          text: '风险与声明',
-          items: [
+            { text: '服务器购买', link: '/server-purchase' },
+            { text: '域名购买与指向', link: '/domain-setup' },
+            { text: 'NginxWebUI 反向代理安装', link: '/nginxwebui-reverse-proxy' },
+            { text: 'PanBox Search', link: '/products/search/overview' },
+            { text: 'PanBox Autosave', link: '/products/autosave/overview' },
+            { text: 'PanBox Sync', link: '/products/sync/overview' },
             { text: '免责声明', link: '/risk/disclaimer' },
             { text: '安全基线', link: '/risk/security-baseline' }
           ]

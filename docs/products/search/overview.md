@@ -15,5 +15,5 @@ PanBox Search 是一个 **PHP / ThinkPHP6** 形态的 Web 站点，用于网盘�
 ## 下一步
 
 - /products/search/quickstart
-- /products/search/docker
-- /products/search/configuration
+- /products/search/usage
+- /products/search/risk

@@ -8,52 +8,77 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: /getting-started
-    - theme: alt
-      text: 查看文档
-      link: /getting-started
+      link: /products/search/overview
 
 features:
   - title: PanBox Search
-    details: 网盘搜索与聚合检索 Web 站点（PHP/ThinkPHP6 形态）。部署路径与 autosave/sync 不同。
+    details: 一键部署网盘搜索聚合站点
     link: /products/search/overview
   - title: PanBox Autosave
-    details: 自动追更转存 / 定时转存。Docker 一键安装，默认端口从 1888 开始探测递增。
+    details: 网盘资源自动追更转存 / 定时转存
     link: /products/autosave/overview
   - title: PanBox Sync
-    details: 三段流水线（下载→处理→上传）+ 三队列 + 多 Worker 并发，SSE 实时进度。文件“处理”不等同于媒体重编码。
+    details: 网盘资源自动转码、规避资源违规，跨网盘同步
     link: /products/sync/overview
 ---
 
 <div class="pb-section">
-  <h2>快速开始（3 步以内）</h2>
+  <h2>快速开始（按需选择）</h2>
   <div class="pb-grid">
     <div class="pb-card">
       <div class="pb-kicker">PanBox Search</div>
+      <p><strong>服务器脚本部署</strong></p>
       <ol class="pb-steps">
-        <li>准备 <code>docker</code> + <code>docker compose</code></li>
-        <li>（可选）复制并修改 <code>.env</code>（生产务必改密码）</li>
-        <li>执行 <code>docker-compose up -d</code>，访问 <code>http://localhost</code></li>
+        <li>拉取脚本</li>
       </ol>
-      <p><a href="/products/search/quickstart">进入 Search 快速开始 →</a></p>
-    </div>
-    <div class="pb-card">
-      <div class="pb-kicker">PanBox Autosave</div>
-      <ol class="pb-steps">
-        <li>先审阅安装脚本（会联网下载文件，可能使用代理源）</li>
-        <li>执行 <code>curl -fsSL .../install.sh | sudo bash</code></li>
-        <li>默认端口从 <code>1888</code> 开始，浏览器访问 <code>http://&lt;IP&gt;:1888</code></li>
+      <pre class="pb-cmd" data-copyable-cmd><code>curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh</code></pre>
+      <ol class="pb-steps" start="2">
+        <li>赋予执行权限</li>
       </ol>
-      <p><a href="/products/autosave/quickstart">进入 Autosave 快速开始 →</a></p>
+      <pre class="pb-cmd" data-copyable-cmd><code>chmod +x panbox-search.sh</code></pre>
+      <ol class="pb-steps" start="3">
+        <li>运行脚本</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo ./panbox-search.sh</code></pre>
+      <p><a href="https://github.com/kokojacket/panbox-search-deploy" target="_blank" rel="noreferrer">查看 Search 部署仓库 →</a></p>
     </div>
     <div class="pb-card">
       <div class="pb-kicker">PanBox Sync</div>
+      <p><strong>A. 服务器脚本部署</strong></p>
       <ol class="pb-steps">
-        <li>启动服务（Docker / Compose）并完成基础配置</li>
-        <li>创建任务：源目录 → 目标目录，选择是否启用文件处理</li>
-        <li>通过 SSE 查看实时进度与队列状态</li>
+        <li>拉取脚本</li>
       </ol>
-      <p><a href="/products/sync/quickstart">进入 Sync 快速开始 →</a></p>
+      <pre class="pb-cmd" data-copyable-cmd><code>curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh</code></pre>
+      <ol class="pb-steps" start="2">
+        <li>赋予执行权限</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>chmod +x panbox-sync.sh</code></pre>
+      <ol class="pb-steps" start="3">
+        <li>运行脚本</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo ./panbox-sync.sh</code></pre>
+      <p><a href="https://github.com/kokojacket/panbox-sync-deploy" target="_blank" rel="noreferrer">查看 Sync 部署仓库 →</a></p>
+      <p><strong>B. Windows App</strong></p>
+      <p><a href="https://github.com/kokojacket/panbox-sync-deploy/releases/latest" data-latest-exe-repo="kokojacket/panbox-sync-deploy" target="_blank" rel="noreferrer">下载最新版 Setup.exe（直链）→</a></p>
+    </div>
+    <div class="pb-card">
+      <div class="pb-kicker">PanBox Autosave</div>
+      <p><strong>A. 服务器脚本部署</strong></p>
+      <ol class="pb-steps">
+        <li>拉取脚本</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh</code></pre>
+      <ol class="pb-steps" start="2">
+        <li>赋予执行权限</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>chmod +x panbox-autosave.sh</code></pre>
+      <ol class="pb-steps" start="3">
+        <li>运行脚本</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo ./panbox-autosave.sh</code></pre>
+      <p><a href="https://github.com/kokojacket/panbox-autosave-open" target="_blank" rel="noreferrer">查看 Autosave 仓库 →</a></p>
+      <p><strong>B. Windows App</strong></p>
+      <p><a href="https://github.com/kokojacket/panbox-autosave-open/releases/latest" data-latest-exe-repo="kokojacket/panbox-autosave-open" target="_blank" rel="noreferrer">下载最新版 Setup.exe（直链）→</a></p>
     </div>
   </div>
 </div>

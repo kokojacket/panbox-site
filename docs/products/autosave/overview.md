@@ -20,5 +20,5 @@ PanBox Autosave 用于“自动追更转存 / 定时转存”类场景。
 ## 下一步
 
 - /products/autosave/quickstart
-- /products/autosave/docker
-- /products/autosave/configuration
+- /products/autosave/usage
+- /products/autosave/risk

@@ -70,12 +70,78 @@ body::before {
   }
 }
 
+/* Right side: use product docs menu on product pages */
+.pb-product-aside + .VPDocAsideOutline {
+  display: none;
+}
+
+.pb-product-aside {
+  border: 1px solid var(--pb-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--pb-shadow);
+  padding: 12px;
+}
+
+.pb-product-aside-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pb-ink);
+}
+
+.pb-product-aside-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pb-product-aside-list li + li {
+  margin-top: 6px;
+}
+
+.pb-product-aside-list a {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: var(--pb-muted);
+  text-decoration: none;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.pb-product-aside-list a:hover {
+  background: rgba(11, 61, 145, 0.08);
+  color: var(--pb-ink);
+}
+
+.pb-product-aside-list a.active {
+  background: rgba(11, 61, 145, 0.14);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+/* 1024-1279 width: aside becomes tight, keep compact spacing */
+@media (max-width: 1279px) {
+  .pb-product-aside {
+    padding: 10px;
+  }
+}
+
 /* Pill CTA buttons */
 .VPButton {
   border-radius: 999px !important;
   padding: 10px 18px !important;
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.10);
   transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+/* Keep markdown links styled as buttons without underline */
+.vp-doc a.VPButton {
+  text-decoration: none;
+}
+
+.vp-doc a.VPButton:hover {
+  text-decoration: none;
 }
 
 .VPButton:hover {
@@ -86,6 +152,7 @@ body::before {
 /* Make brand button more "engineering" */
 .VPButton.brand {
   background: linear-gradient(180deg, #0b3d91, #082c66) !important;
+  color: #ffffff !important;
 }
 
 /* Home hero tuning */
@@ -171,6 +238,57 @@ body::before {
 
 .pb-steps li {
   margin: 6px 0;
+}
+
+.pb-cmd {
+  position: relative;
+  margin: 8px 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(0, 170, 190, 0.26);
+  border-radius: 10px;
+  background: #0b1220;
+  color: #e5edf8;
+  overflow: auto;
+}
+
+.pb-cmd code {
+  display: block;
+  font-family: var(--vp-font-family-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.pb-step-copy-host {
+  position: relative;
+  padding-right: 68px;
+  min-height: 24px;
+}
+
+.pb-step-copy-btn {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: 6px;
+  background: rgba(11, 61, 145, 0.08);
+  color: #0b3d91;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pb-step-copy-btn:hover {
+  background: rgba(11, 61, 145, 0.14);
+}
+
+.pb-cmd > .pb-step-copy-btn {
+  top: 8px;
+  right: 8px;
+  transform: none;
 }
 
 .pb-risk {
