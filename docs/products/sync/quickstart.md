@@ -7,7 +7,7 @@
 1. 拉取脚本
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh
+sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh
 ```
 
 2. 赋予执行权限

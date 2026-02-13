@@ -19,7 +19,7 @@
 1. 拉取脚本
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh
+sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh
 ```
 
 2. 赋予执行权限

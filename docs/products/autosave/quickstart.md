@@ -7,7 +7,7 @@
 1. 拉取脚本
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh
+sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh
 ```
 
 2. 赋予执行权限

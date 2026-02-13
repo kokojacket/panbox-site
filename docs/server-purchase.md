@@ -55,7 +55,7 @@ timedatectl set-timezone Asia/Shanghai
 ## 四、安装 Docker 与 Compose
 
 ```bash
-curl -fsSL https://get.docker.com | sh
+sudo curl -fsSL https://get.docker.com | sh
 systemctl enable docker
 systemctl start docker
 docker --version
@@ -67,7 +67,7 @@ docker compose version
 按脚本方式部署 Search：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh
+sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh
 chmod +x panbox-search.sh
 sudo ./panbox-search.sh
 ```
@@ -79,7 +79,7 @@ sudo ./panbox-search.sh
 ### PanBox Autosave
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh
+sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh
 chmod +x panbox-autosave.sh
 sudo ./panbox-autosave.sh
 ```
@@ -87,7 +87,7 @@ sudo ./panbox-autosave.sh
 ### PanBox Sync
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh
+sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh
 chmod +x panbox-sync.sh
 sudo ./panbox-sync.sh
 ```

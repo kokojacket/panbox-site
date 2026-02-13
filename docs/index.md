@@ -31,7 +31,7 @@ features:
       <ol class="pb-steps">
         <li>拉取脚本</li>
       </ol>
-      <pre class="pb-cmd" data-copyable-cmd><code>curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh</code></pre>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-search-deploy/main/panbox-search.sh -o panbox-search.sh</code></pre>
       <ol class="pb-steps" start="2">
         <li>赋予执行权限</li>
       </ol>
@@ -48,7 +48,7 @@ features:
       <ol class="pb-steps">
         <li>拉取脚本</li>
       </ol>
-      <pre class="pb-cmd" data-copyable-cmd><code>curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh</code></pre>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh</code></pre>
       <ol class="pb-steps" start="2">
         <li>赋予执行权限</li>
       </ol>
@@ -67,7 +67,7 @@ features:
       <ol class="pb-steps">
         <li>拉取脚本</li>
       </ol>
-      <pre class="pb-cmd" data-copyable-cmd><code>curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh</code></pre>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-autosave-open/main/panbox-autosave.sh -o panbox-autosave.sh</code></pre>
       <ol class="pb-steps" start="2">
         <li>赋予执行权限</li>
       </ol>
