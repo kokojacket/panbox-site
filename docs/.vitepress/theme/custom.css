@@ -224,10 +224,23 @@ body::before {
 }
 
 .pb-kicker {
-  font-size: 12px;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--pb-ink);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.pb-kicker-cn {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 600;
   color: var(--pb-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .pb-steps {

@@ -26,7 +26,7 @@ features:
   <h2>快速开始（按需选择）</h2>
   <div class="pb-grid">
     <div class="pb-card">
-      <div class="pb-kicker">PanBox Search</div>
+      <div class="pb-kicker">PanBox Search<span class="pb-kicker-cn">搜索站</span></div>
       <p><strong>服务器脚本部署</strong></p>
       <ol class="pb-steps">
         <li>拉取脚本</li>
@@ -43,7 +43,7 @@ features:
       <p><a href="https://github.com/kokojacket/panbox-search-deploy" target="_blank" rel="noreferrer">查看 Search 部署仓库 →</a></p>
     </div>
     <div class="pb-card">
-      <div class="pb-kicker">PanBox Autosave</div>
+      <div class="pb-kicker">PanBox Autosave<span class="pb-kicker-cn">网盘自动转存</span></div>
       <p><strong>A. 服务器脚本部署</strong></p>
       <ol class="pb-steps">
         <li>拉取脚本</li>
@@ -62,7 +62,7 @@ features:
       <p><a href="https://github.com/kokojacket/panbox-autosave-open/releases/latest" data-latest-exe-repo="kokojacket/panbox-autosave-open" target="_blank" rel="noreferrer">下载最新版 Setup.exe（直链）→</a></p>
     </div>
     <div class="pb-card">
-      <div class="pb-kicker">PanBox Sync</div>
+      <div class="pb-kicker">PanBox Sync<span class="pb-kicker-cn">网盘自动转码</span></div>
       <p><strong>A. 服务器脚本部署</strong></p>
       <ol class="pb-steps">
         <li>拉取脚本</li>
