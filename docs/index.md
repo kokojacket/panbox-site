@@ -43,25 +43,6 @@ features:
       <p><a href="https://github.com/kokojacket/panbox-search-deploy" target="_blank" rel="noreferrer">查看 Search 部署仓库 →</a></p>
     </div>
     <div class="pb-card">
-      <div class="pb-kicker">PanBox Sync</div>
-      <p><strong>A. 服务器脚本部署</strong></p>
-      <ol class="pb-steps">
-        <li>拉取脚本</li>
-      </ol>
-      <pre class="pb-cmd" data-copyable-cmd><code>sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh</code></pre>
-      <ol class="pb-steps" start="2">
-        <li>赋予执行权限</li>
-      </ol>
-      <pre class="pb-cmd" data-copyable-cmd><code>chmod +x panbox-sync.sh</code></pre>
-      <ol class="pb-steps" start="3">
-        <li>运行脚本</li>
-      </ol>
-      <pre class="pb-cmd" data-copyable-cmd><code>sudo ./panbox-sync.sh</code></pre>
-      <p><a href="https://github.com/kokojacket/panbox-sync-deploy" target="_blank" rel="noreferrer">查看 Sync 部署仓库 →</a></p>
-      <p><strong>B. Windows App</strong></p>
-      <p><a href="https://github.com/kokojacket/panbox-sync-deploy/releases/latest" data-latest-exe-repo="kokojacket/panbox-sync-deploy" target="_blank" rel="noreferrer">下载最新版 Setup.exe（直链）→</a></p>
-    </div>
-    <div class="pb-card">
       <div class="pb-kicker">PanBox Autosave</div>
       <p><strong>A. 服务器脚本部署</strong></p>
       <ol class="pb-steps">
@@ -79,6 +60,25 @@ features:
       <p><a href="https://github.com/kokojacket/panbox-autosave-open" target="_blank" rel="noreferrer">查看 Autosave 仓库 →</a></p>
       <p><strong>B. Windows App</strong></p>
       <p><a href="https://github.com/kokojacket/panbox-autosave-open/releases/latest" data-latest-exe-repo="kokojacket/panbox-autosave-open" target="_blank" rel="noreferrer">下载最新版 Setup.exe（直链）→</a></p>
+    </div>
+    <div class="pb-card">
+      <div class="pb-kicker">PanBox Sync</div>
+      <p><strong>A. 服务器脚本部署</strong></p>
+      <ol class="pb-steps">
+        <li>拉取脚本</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo curl -fsSL https://raw.githubusercontent.com/kokojacket/panbox-sync-deploy/main/panbox-sync.sh -o panbox-sync.sh</code></pre>
+      <ol class="pb-steps" start="2">
+        <li>赋予执行权限</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>chmod +x panbox-sync.sh</code></pre>
+      <ol class="pb-steps" start="3">
+        <li>运行脚本</li>
+      </ol>
+      <pre class="pb-cmd" data-copyable-cmd><code>sudo ./panbox-sync.sh</code></pre>
+      <p><a href="https://github.com/kokojacket/panbox-sync-deploy" target="_blank" rel="noreferrer">查看 Sync 部署仓库 →</a></p>
+      <p><strong>B. Windows App</strong></p>
+      <p><a href="https://github.com/kokojacket/panbox-sync-deploy/releases/latest" data-latest-exe-repo="kokojacket/panbox-sync-deploy" target="_blank" rel="noreferrer">下载最新版 Setup.exe（直链）→</a></p>
     </div>
   </div>
 </div>
