@@ -41,25 +41,7 @@ async function copyTextToClipboard(text: string): Promise<boolean> {
   }
 }
 
-async function convertToProxyUrl(githubUrl: string): Promise<string | null> {
-  try {
-    const response = await fetch(
-      `https://git.mxg.pub/api/github/convert?url=${encodeURIComponent(githubUrl)}`
-    )
-
-    if (!response.ok) {
-      return null
-    }
-
-    const data = (await response.json()) as { data?: string[] }
-    const proxyUrls = data.data ?? []
-
-    // 返回第一个可用的镜像链接
-    return proxyUrls.length > 0 ? proxyUrls[0] : null
-  } catch {
-    return null
-  }
-}
+const PROXY_PREFIX = 'https://ghproxy.net/'
 
 async function getLatestExeUrl(repo: string): Promise<string | null> {
   if (latestExeCache.has(repo)) {
@@ -88,12 +70,11 @@ async function getLatestExeUrl(repo: string): Promise<string | null> {
       return null
     }
 
-    // 转换为代理链接
-    const proxyUrl = await convertToProxyUrl(exeAsset.browser_download_url)
-    const finalUrl = proxyUrl ?? exeAsset.browser_download_url
+    // 添加代理前缀
+    const proxyUrl = `${PROXY_PREFIX}${exeAsset.browser_download_url}`
 
-    latestExeCache.set(repo, finalUrl)
-    return finalUrl
+    latestExeCache.set(repo, proxyUrl)
+    return proxyUrl
   } catch {
     return null
   }
