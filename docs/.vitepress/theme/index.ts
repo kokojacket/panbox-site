@@ -41,7 +41,7 @@ async function copyTextToClipboard(text: string): Promise<boolean> {
   }
 }
 
-const PROXY_PREFIX = 'https://ghproxy.net/'
+const PROXY_PREFIX = 'https://gh.llkk.cc/'
 
 async function getLatestExeUrl(repo: string): Promise<string | null> {
   if (latestExeCache.has(repo)) {
