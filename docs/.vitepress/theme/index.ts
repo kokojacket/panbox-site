@@ -165,6 +165,42 @@ async function hydrateLatestExeLinks(): Promise<void> {
   )
 }
 
+function syncHomeContentBounds(): void {
+  if (typeof document === 'undefined' || typeof window === 'undefined') {
+    return
+  }
+
+  const root = document.documentElement
+
+  if (window.innerWidth < 960) {
+    root.style.removeProperty('--pb-home-bound-left')
+    root.style.removeProperty('--pb-home-bound-right')
+    return
+  }
+
+  const brandLink = document.querySelector<HTMLElement>('header a[href="/"]')
+  const disclaimerLink = document.querySelector<HTMLElement>('header a[href="/risk/disclaimer"]')
+  const navBody = document.querySelector<HTMLElement>('.VPNavBar .content-body')
+
+  if (!brandLink || (!disclaimerLink && !navBody)) {
+    root.style.removeProperty('--pb-home-bound-left')
+    root.style.removeProperty('--pb-home-bound-right')
+    return
+  }
+
+  const brandRect = brandLink.getBoundingClientRect()
+  const rightAnchorRect = (disclaimerLink ?? navBody)?.getBoundingClientRect()
+  if (!rightAnchorRect) {
+    root.style.removeProperty('--pb-home-bound-left')
+    root.style.removeProperty('--pb-home-bound-right')
+    return
+  }
+
+  const viewportWidth = root.clientWidth
+  root.style.setProperty('--pb-home-bound-left', `${Math.round(brandRect.left)}px`)
+  root.style.setProperty('--pb-home-bound-right', `${Math.max(0, Math.round(viewportWidth - rightAnchorRect.right))}px`)
+}
+
 export default {
   extends: DefaultTheme,
   enhanceApp({ app, router, siteData }) {
@@ -182,10 +218,12 @@ export default {
     const patchPageEnhancements = () => {
       void hydrateLatestExeLinks()
       hydrateCopyableCommands()
+      syncHomeContentBounds()
     }
 
     onMounted(() => {
       patchPageEnhancements()
+      window.addEventListener('resize', patchPageEnhancements)
     })
 
     watch(

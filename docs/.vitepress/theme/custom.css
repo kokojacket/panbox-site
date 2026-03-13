@@ -154,6 +154,26 @@ body::before {
   color: var(--pb-dark) !important;
 }
 
+@media (min-width: 960px) {
+  .VPHomeHero,
+  .VPHomeFeatures {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .VPHome .container,
+  .VPHomeHero .container,
+  .VPHomeFeatures .container {
+    max-width: none;
+    width: auto;
+    margin-left: var(--pb-home-bound-left, 32px);
+    margin-right: var(--pb-home-bound-right, 32px);
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+}
+
 .VPHome {
   position: relative;
 }
