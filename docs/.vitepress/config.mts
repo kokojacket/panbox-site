@@ -6,7 +6,7 @@ export default defineConfig({
   base,
   lang: 'zh-CN',
   title: 'PanBox',
-  description: '自托管的网盘工具套件：搜索 / 自动转存 / 同步',
+  description: '把搜索、转存、同步串成一条网盘资源自动化流水线',
 
   lastUpdated: true,
   cleanUrls: true,

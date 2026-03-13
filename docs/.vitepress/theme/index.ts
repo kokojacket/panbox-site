@@ -2,6 +2,7 @@ import { useRoute } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { h, onMounted, watch } from 'vue'
 import ProductAsideNav from './components/ProductAsideNav.vue'
+import HomeProductGrid from './components/HomeProductGrid.vue'
 import './custom.css'
 
 type GitHubReleaseAsset = {
@@ -166,6 +167,10 @@ async function hydrateLatestExeLinks(): Promise<void> {
 
 export default {
   extends: DefaultTheme,
+  enhanceApp({ app, router, siteData }) {
+    DefaultTheme.enhanceApp?.({ app, router, siteData })
+    app.component('HomeProductGrid', HomeProductGrid)
+  },
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
       'aside-outline-before': () => h(ProductAsideNav)
