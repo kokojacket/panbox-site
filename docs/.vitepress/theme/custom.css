@@ -99,6 +99,47 @@ body::before {
   padding: 14px;
 }
 
+.VPDocAsideOutline.has-outline {
+  margin-top: 14px;
+  border: 1px solid rgba(45, 29, 18, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 251, 245, 0.72);
+  box-shadow: 0 12px 32px rgba(70, 42, 18, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.VPDocAsideOutline .content {
+  border-left: 0;
+  padding: 12px 14px 14px 16px;
+}
+
+.VPDocAsideOutline .outline-title {
+  color: var(--pb-dark);
+  font-weight: 700;
+}
+
+.VPDocAsideOutline .outline-marker {
+  left: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--pb-accent), var(--pb-accent-2));
+}
+
+.VPDocAsideOutline .outline-link {
+  color: var(--pb-muted);
+  line-height: 30px;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.VPDocAsideOutline .outline-link:hover,
+.VPDocAsideOutline .outline-link.active {
+  color: var(--pb-ink);
+  transform: translateX(2px);
+}
+
+.VPDocAsideOutline .outline-link.nested {
+  padding-left: 12px;
+}
+
 .pb-product-aside-title {
   margin: 0 0 10px;
   font-size: 13px;
