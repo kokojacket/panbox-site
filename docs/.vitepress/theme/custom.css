@@ -58,9 +58,24 @@ body::before {
   backdrop-filter: blur(18px);
 }
 
+.VPNavBar {
+  background: linear-gradient(180deg, rgba(255, 248, 239, 0.78), rgba(255, 244, 233, 0.64)) !important;
+  border-bottom: 1px solid rgba(45, 29, 18, 0.08);
+  box-shadow: 0 8px 24px rgba(70, 42, 18, 0.05);
+}
+
+.VPSidebar,
+.VPSidebar .curtain {
+  background: linear-gradient(180deg, rgba(255, 248, 239, 0.9), rgba(255, 241, 222, 0.72)) !important;
+}
+
+.VPSidebar {
+  border-right: 1px solid rgba(45, 29, 18, 0.06);
+}
+
 @media (min-width: 960px) {
   .VPNavBar.has-sidebar {
-    background-color: var(--vp-nav-bg-color) !important;
+    background: linear-gradient(180deg, rgba(255, 248, 239, 0.78), rgba(255, 244, 233, 0.64)) !important;
   }
 
   .VPNavBar.has-sidebar .content-body {

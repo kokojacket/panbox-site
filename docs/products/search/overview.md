@@ -1,19 +1,53 @@
 # PanBox Search 概览
 
-PanBox Search 是一个 **PHP / ThinkPHP6** 形态的 Web 站点，用于网盘内容的搜索与聚合检索。
+PanBox Search 是一个面向网盘资源检索的自托管搜索站点，用于对外提供统一的搜索入口。
+
+## 产品定位
+
+Search 在 PanBox 体系中承担前台入口的角色，主要负责：
+
+- 对外提供可访问的搜索页面
+- 承接用户的搜索与浏览需求
+- 为 Autosave / Sync 处理后的资源提供展示面
+
+如果你希望先搭建一个可用的对外搜索站，通常从 Search 开始最合适。
 
 ## 适用场景
 
-- 你想快速上线一个“搜索站”，通过浏览器即可使用。
-- 你希望部署流程更偏传统 Web（PHP + Web Server + 数据库），而不是 Node 前端构建产物。
+- 需要上线一个公开可访问的资源站或搜索站
+- 希望把分散的资源入口统一到一个站点中
+- 计划后续接入 Autosave 和 Sync，形成完整链路
 
-## 部署形态（请先看这里）
+## 核心能力
 
-- 本产品的 Docker 部署更接近“网站应用”的方式：容器里跑 PHP 应用 + 数据库。
-- 与 Autosave / Sync 的部署逻辑不同：后者更像后端服务/任务系统。
+- 提供基于 Web 的资源搜索与聚合检索能力
+- 适合作为资源站、分享站或私域资源库的统一入口
+- 可作为 PanBox 其他产品的结果展示层
+
+## 部署形态
+
+PanBox Search 当前是 **PHP / ThinkPHP6** 形态，更接近传统 Web 应用：
+
+- 容器内运行 PHP 应用与相关依赖
+- 部署方式更偏网站应用，而不是任务型后端服务
+- 如果你熟悉 Web Server + 数据库的部署方式，上手会更自然
+
+## 与其他产品的关系
+
+- `Search`：负责搜索入口与结果展示
+- `Autosave`：负责把外部分享链接转存到自己的网盘
+- `Sync`：负责跨盘同步、处理与资源保活
+
+三者可以单独使用，但组合后效果更完整。
+
+## 注意事项
+
+- Search 更适合作为“前台站点”，不负责资源沉淀和跨盘处理
+- 如果你当前目标只是先把站点跑起来，可以先部署 Search
+- 后续需要补齐资源沉淀或保活时，再接入 Autosave / Sync
 
 ## 下一步
 
-- /products/search/quickstart
-- /products/search/usage
-- /products/search/risk
+- [查看快速开始](/products/search/quickstart)
+- [查看使用说明](/products/search/usage)
+- [查看风险说明](/products/search/risk)
