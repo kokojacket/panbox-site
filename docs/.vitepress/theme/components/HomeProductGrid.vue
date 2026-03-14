@@ -11,7 +11,7 @@
         <li>支持多来源搜索，适合做站点流量入口</li>
         <li>为 Autosave / Sync 提供最终展示面和回流入口</li>
       </ul>
-      <a class="VPButton brand" href="/products/search/overview">查看 Search 文档</a>
+      <a class="VPButton alt" href="/products/search/overview">查看 Search 文档</a>
     </article>
 
     <article class="pb-product-card pb-product-card-hot">
