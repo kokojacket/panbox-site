@@ -1,5 +1,7 @@
 # Local editor settings
 .vscode/
+.claude/
+.omc/
 
 # Spec workflow artifacts
 .spec-workflow/
