@@ -1,5 +1,7 @@
 # PanBox Search 快速开始
 
+PanBox Search - 网盘搜索站 适合先搭一个统一的对外搜索入口，用来承接搜索和分享流量，再把稳定资源持续分发出去。
+
 > 前置：Linux（推荐）或 macOS；Docker 20.10+；Docker Compose。
 
 ## 1) 购买服务器

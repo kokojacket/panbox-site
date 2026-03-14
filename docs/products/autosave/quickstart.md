@@ -1,5 +1,7 @@
 # PanBox Autosave 快速开始
 
+PanBox Autosave - 自动转存系统 适合把外部分享资源持续沉淀成自己的网盘库存，减少手工补链、重复搬运和资源流失。
+
 > 前置：Linux（推荐），Docker 20.10+，Docker Compose。
 
 ## 服务器脚本部署（推荐）
