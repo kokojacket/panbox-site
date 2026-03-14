@@ -369,38 +369,52 @@ body::before {
 .pb-lightbox-panel {
   position: relative;
   z-index: 1;
-  width: min(94vw, 1320px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(96vw, 1440px);
   max-height: calc(100vh - 32px);
-  padding: clamp(12px, 1.5vw, 18px);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: 28px;
-  background: rgba(255, 249, 242, 0.34);
-  box-shadow: 0 32px 90px rgba(13, 17, 24, 0.28);
-  backdrop-filter: blur(26px);
+  padding: 0;
 }
 
 .pb-lightbox-close {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  right: 16px;
   z-index: 2;
-  padding: 8px 14px;
-  border: 0;
+  padding: 6px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
-  background: rgba(23, 27, 42, 0.72);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
+  background: rgba(23, 27, 42, 0.32);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.pb-lightbox-close:hover {
+  background: rgba(23, 27, 42, 0.46);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.pb-lightbox-close:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.48);
+  outline-offset: 3px;
 }
 
 .pb-lightbox-image {
   display: block;
-  width: 100%;
-  max-height: calc(100vh - 72px);
-  border-radius: 20px;
+  width: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 32px);
+  border-radius: 16px;
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 32px 90px rgba(13, 17, 24, 0.28);
 }
 
 .pb-lightbox-enter-active,
