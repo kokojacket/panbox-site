@@ -3,6 +3,7 @@ import DefaultTheme from 'vitepress/theme'
 import { h, onMounted, watch } from 'vue'
 import ProductAsideNav from './components/ProductAsideNav.vue'
 import HomeProductGrid from './components/HomeProductGrid.vue'
+import HomeHeroShowcase from './components/HomeHeroShowcase.vue'
 import './custom.css'
 
 type GitHubReleaseAsset = {
@@ -209,7 +210,8 @@ export default {
   },
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
-      'aside-outline-before': () => h(ProductAsideNav)
+      'aside-outline-before': () => h(ProductAsideNav),
+      'home-hero-image': () => h(HomeHeroShowcase)
     })
   },
   setup() {
