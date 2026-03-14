@@ -139,6 +139,119 @@ features:
   </div>
 </div>
 
+<div class="pb-section pb-pricing">
+  <div class="pb-section-head">
+    <p class="pb-eyebrow">Pricing</p>
+    <h2>订阅价格</h2>
+    <p>三个项目能力统一打包，支持先试用再订阅。无论你是先测试链路，还是准备长期运营，都能直接用 Search + Autosave + Sync 跑完整闭环。</p>
+  </div>
+  <div class="pb-pricing-includes" aria-label="套餐统一包含能力">
+    <span>Search：统一搜索入口</span>
+    <span>Autosave：自动转存沉淀</span>
+    <span>Sync：跨网盘同步自动转码</span>
+    <span>多网盘协同分发</span>
+  </div>
+  <div class="pb-pricing-grid">
+    <div class="pb-price-card pb-price-card-free">
+      <div class="pb-price-head">
+        <div>
+          <p class="pb-price-kicker">试用版</p>
+          <h3>先免费体验</h3>
+        </div>
+        <span class="pb-price-badge">免费试用</span>
+      </div>
+      <div class="pb-price-row">
+        <span class="pb-price-currency">¥</span>
+        <strong>0</strong>
+        <span class="pb-price-unit">/ 试用</span>
+      </div>
+      <p class="pb-price-note">适合先体验搜索、转存、同步转码整条链路，再决定是否正式订阅。</p>
+      <ul class="pb-price-list">
+        <li>第一次接触 PanBox，想先完整体验整条资源分发链路的人</li>
+        <li>还在比较工具方案，想先验证资源稳定性和整体流程的人</li>
+        <li>希望先试用，再决定是否正式接入日常运营的人</li>
+      </ul>
+      <a class="VPButton alt" href="#pb-contact">立即试用</a>
+    </div>
+    <div class="pb-price-card pb-price-card-lite">
+      <div class="pb-price-head">
+        <div>
+          <p class="pb-price-kicker">月付版</p>
+          <h3>先体验，再按需续费</h3>
+        </div>
+        <span class="pb-price-badge pb-price-badge-soft">灵活开通</span>
+      </div>
+      <div class="pb-price-row">
+        <span class="pb-price-currency">¥</span>
+        <strong>69</strong>
+        <span class="pb-price-unit">/ 月</span>
+      </div>
+      <p class="pb-price-note">适合先跑通完整链路，随时升级到更长周期。</p>
+      <ul class="pb-price-list">
+        <li>新账号、新站点或刚开始做网盘推广的用户</li>
+        <li>想用较低门槛先测试投放、分发和资源沉淀效果的人</li>
+        <li>更看重开通灵活度，准备确认效果后再升级周期的人</li>
+      </ul>
+      <a class="VPButton alt" href="#pb-contact">立即订阅</a>
+    </div>
+    <div class="pb-price-card pb-price-card-pro">
+      <div class="pb-price-head">
+        <div>
+          <p class="pb-price-kicker">季付版</p>
+          <h3>持续运营更合适</h3>
+        </div>
+        <span class="pb-price-badge pb-price-badge-dark">最受欢迎</span>
+      </div>
+      <div class="pb-price-row">
+        <span class="pb-price-currency">¥</span>
+        <strong>179</strong>
+        <span class="pb-price-unit">/ 季</span>
+      </div>
+      <p class="pb-price-note">折合约 ¥59.7 / 月，比月付更划算，适合稳定更新和持续推广。</p>
+      <ul class="pb-price-list">
+        <li>已经开始稳定更新，需要持续维护资源池和分发链路的用户</li>
+        <li>想兼顾投入成本、使用周期和运营稳定性的主力使用人群</li>
+        <li>从试跑阶段进入常规运营阶段，准备长期跑量的人</li>
+      </ul>
+      <a class="VPButton brand" href="#pb-contact">立即订阅</a>
+    </div>
+    <div class="pb-price-card pb-price-card-annual">
+      <div class="pb-price-head">
+        <div>
+          <p class="pb-price-kicker">年付版</p>
+          <h3>长期做站更划算</h3>
+        </div>
+        <span class="pb-price-badge pb-price-badge-gold">推荐长期</span>
+      </div>
+      <div class="pb-price-row">
+        <span class="pb-price-currency">¥</span>
+        <strong>499</strong>
+        <span class="pb-price-unit">/ 年</span>
+      </div>
+      <p class="pb-price-note">折合约 ¥41.6 / 月，适合长期做资源站、私域沉淀和收益放大。</p>
+      <ul class="pb-price-list">
+        <li>长期做资源站、私域沉淀和稳定分发的个人或团队</li>
+        <li>已经验证链路有效，准备持续放大推广收益的人</li>
+        <li>希望把长期月均成本压到更低，并减少频繁续费操作的用户</li>
+      </ul>
+      <a class="VPButton brand" href="#pb-contact">立即订阅</a>
+    </div>
+  </div>
+  <div id="pb-contact" class="pb-pricing-contact">
+    <div class="pb-contact-card">
+      <p class="pb-price-kicker">免费试用</p>
+      <h3>可先体验，再决定订阅周期</h3>
+      <p>如果你想先看看搜索、转存、同步转码的整条链路是否适合自己，可以先联系领取试用。</p>
+    </div>
+    <div class="pb-contact-card pb-contact-card-wechat">
+      <p class="pb-price-kicker">客服微信</p>
+      <h3><code>KoKo-ke-</code></h3>
+      <p>添加时备注 <code>PanBox</code>，方便快速对接试用、订阅和接入问题。</p>
+      <HoverPreviewImage src="/img/wechat.png" alt="PanBox 客服微信二维码" />
+    </div>
+  </div>
+</div>
+
 <div class="pb-section pb-risk">
   <p><a href="/risk/disclaimer">进入统一免责声明 →</a></p>
 </div>

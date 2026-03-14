@@ -4,6 +4,7 @@ import { h, onMounted, watch } from 'vue'
 import ProductAsideNav from './components/ProductAsideNav.vue'
 import HomeProductGrid from './components/HomeProductGrid.vue'
 import HomeHeroShowcase from './components/HomeHeroShowcase.vue'
+import HoverPreviewImage from './components/HoverPreviewImage.vue'
 import './custom.css'
 
 type GitHubReleaseAsset = {
@@ -207,6 +208,7 @@ export default {
   enhanceApp({ app, router, siteData }) {
     DefaultTheme.enhanceApp?.({ app, router, siteData })
     app.component('HomeProductGrid', HomeProductGrid)
+    app.component('HoverPreviewImage', HoverPreviewImage)
   },
   Layout: () => {
     return h(DefaultTheme.Layout, null, {

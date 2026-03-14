@@ -806,6 +806,250 @@ body::before {
   background: linear-gradient(180deg, rgba(255, 234, 214, 0.88), rgba(255, 246, 233, 0.98));
 }
 
+.pb-pricing {
+  background:
+    radial-gradient(520px 260px at 100% 0%, rgba(255, 196, 110, 0.16), transparent 62%),
+    radial-gradient(420px 220px at 0% 100%, rgba(186, 205, 224, 0.14), transparent 60%),
+    linear-gradient(180deg, rgba(255, 252, 248, 0.98), rgba(255, 248, 239, 0.94));
+}
+
+.pb-pricing-grid,
+.pb-pricing-contact {
+  display: grid;
+  gap: 18px;
+}
+
+.pb-pricing-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.pb-pricing-includes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.pb-pricing-includes span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 179, 71, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--pb-dark);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pb-pricing-contact {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: stretch;
+  margin-top: 18px;
+}
+
+.pb-price-card,
+.pb-contact-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 26px;
+  border-radius: 28px;
+  border: 1px solid rgba(38, 40, 51, 0.10);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 34px rgba(76, 50, 20, 0.08);
+}
+
+.pb-price-card-free {
+  background: linear-gradient(180deg, rgba(252, 252, 252, 0.98), rgba(244, 247, 250, 0.96));
+  border-color: rgba(168, 180, 194, 0.28);
+}
+
+.pb-price-card-lite {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.pb-price-card-pro {
+  border-color: rgba(25, 25, 32, 0.72);
+  box-shadow: 0 18px 40px rgba(24, 24, 30, 0.10);
+}
+
+.pb-price-card-annual {
+  border-color: rgba(255, 198, 88, 0.54);
+  background: linear-gradient(180deg, rgba(255, 250, 237, 0.98), rgba(255, 246, 224, 0.96));
+  box-shadow: 0 18px 42px rgba(222, 159, 26, 0.14);
+}
+
+.pb-price-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pb-price-head > div {
+  flex: 1;
+}
+
+.pb-price-head h3,
+.pb-contact-card h3 {
+  margin: 8px 0 0;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--pb-dark);
+}
+
+.pb-price-head h3 {
+  min-height: 2.4em;
+}
+
+.pb-price-kicker {
+  margin: 0;
+  color: var(--pb-muted);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pb-price-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 236, 198, 0.72);
+  color: #a05a00;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pb-price-badge-soft {
+  background: rgba(243, 246, 250, 0.92);
+  color: #586171;
+}
+
+.pb-price-badge-dark {
+  background: #1f1f24;
+  color: #fff;
+}
+
+.pb-price-badge-gold {
+  background: rgba(255, 233, 175, 0.78);
+  color: #b06200;
+}
+
+.pb-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 28px;
+  color: var(--pb-dark);
+}
+
+.pb-price-row strong {
+  font-size: 66px;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+.pb-price-currency,
+.pb-price-unit {
+  font-size: 20px;
+  color: var(--pb-muted);
+  font-weight: 700;
+}
+
+.pb-price-note {
+  margin: 18px 0 0;
+  min-height: 56px;
+  color: var(--pb-muted);
+  line-height: 1.7;
+}
+
+.pb-price-card > .VPButton {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
+  padding: 0 18px;
+}
+
+.pb-price-card-annual > .VPButton.brand {
+  background: linear-gradient(135deg, #ffbe19, #f5a500) !important;
+  border-color: rgba(224, 144, 0, 0.42) !important;
+  color: #442100 !important;
+}
+
+.pb-price-list {
+  margin: 22px 0 0;
+  padding: 20px 0 0 0;
+  border-top: 1px solid rgba(109, 93, 76, 0.12);
+  list-style: none;
+}
+
+.pb-price-list li {
+  position: relative;
+  padding-left: 28px;
+  color: var(--pb-dark);
+  line-height: 1.7;
+}
+
+.pb-price-list li + li {
+  margin-top: 14px;
+}
+
+.pb-price-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--pb-accent);
+  font-weight: 800;
+}
+
+.pb-contact-card {
+  justify-content: flex-start;
+  min-height: 236px;
+  height: 100%;
+  padding: 22px 24px;
+}
+
+.pb-contact-card-wechat {
+  position: relative;
+  align-items: flex-start;
+  gap: 10px;
+  padding-right: 156px;
+}
+
+.pb-contact-qr {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  width: 96px;
+  max-width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(38, 40, 51, 0.10);
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(76, 50, 20, 0.08);
+  transition: box-shadow 0.22s ease;
+  cursor: zoom-in;
+  z-index: 2;
+}
+
+.pb-contact-card-wechat:hover .pb-contact-qr,
+.pb-contact-qr:hover {
+  box-shadow: 0 18px 34px rgba(76, 50, 20, 0.14);
+}
+
+.pb-contact-card code {
+  font-size: 24px;
+  font-weight: 700;
+}
+
 .pb-risk strong {
   color: var(--pb-accent-deep);
 }
@@ -1118,12 +1362,24 @@ body::before {
   }
 }
 
+@media (max-width: 1280px) {
+  .pb-pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pb-pricing-includes {
+    gap: 8px;
+  }
+}
+
 @media (max-width: 1100px) {
   .pb-marquee,
   .pb-flow,
   .pb-proof-grid,
   .pb-product-grid,
   .pb-scene-grid,
+  .pb-pricing-grid,
+  .pb-pricing-contact,
   .pb-cta-band {
     grid-template-columns: 1fr;
   }
@@ -1133,6 +1389,10 @@ body::before {
   }
 
   .pb-product-lead {
+    min-height: auto;
+  }
+
+  .pb-price-note {
     min-height: auto;
   }
 
@@ -1182,16 +1442,50 @@ body::before {
     font-size: 12px;
   }
 
+  .pb-pricing-includes span {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
   .pb-flow-card,
   .pb-proof-card,
   .pb-product-card,
-  .pb-scene-card {
+  .pb-scene-card,
+  .pb-price-card,
+  .pb-contact-card {
     padding: 18px;
+  }
+
+  .pb-contact-card-wechat {
+    padding-right: 118px;
+  }
+
+  .pb-contact-qr {
+    top: 18px;
+    right: 18px;
+    width: 82px;
+    border-radius: 16px;
   }
 
   .pb-section-head h2,
   .pb-risk h2 {
     font-size: 28px;
+  }
+
+  .pb-price-row strong {
+    font-size: 54px;
+  }
+
+  .pb-price-head,
+  .pb-price-row {
+    gap: 10px;
+  }
+
+  .pb-price-badge {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
   }
 
   .VPHomeHero .tagline {
