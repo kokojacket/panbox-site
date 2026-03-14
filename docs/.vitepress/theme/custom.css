@@ -728,6 +728,27 @@ body::before {
   border-color: rgba(255, 122, 24, 0.22);
 }
 
+.pb-product-card-cool {
+  background: linear-gradient(180deg, rgba(234, 241, 248, 0.92), rgba(248, 250, 252, 0.98));
+  border-color: rgba(133, 155, 181, 0.26);
+}
+
+.pb-product-card-cool:hover {
+  border-color: rgba(110, 138, 170, 0.42);
+  box-shadow: 0 18px 42px rgba(73, 99, 128, 0.12);
+}
+
+.pb-product-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pb-product-card > .VPButton {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
 .pb-product-lead {
   min-height: 76px;
 }

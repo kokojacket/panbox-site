@@ -3,85 +3,95 @@ layout: home
 
 hero:
   name: PanBox
-  text: 把搜索、转存、同步串成一条网盘资源自动化流水线
-  tagline: 面向资源站、分享站与私域资源库运营者。先把外部资源搜进来，再自动沉淀到自己的网盘，最后跨盘同步、转码与保活，把一次次手工操作变成可持续运转的资产链路。
+  text: 多网盘通用｜大幅降低屏蔽率｜提升收益更稳定
+  tagline: 还在为网盘资源频繁被屏蔽、限流、失效发愁吗？还在因为资源不稳定，导致粉丝流失、推广收益下降吗？PanBox 把搜索、自动转存、跨网盘同步与转码保活串成一条链路，让资源分发更稳、更久，也更适合长期运营。
   actions:
     - theme: brand
-      text: 从 Search 开始部署
-      link: /products/search/overview
+      text: 查看 Sync 总览
+      link: /products/sync/overview
     - theme: alt
-      text: 查看三大产品矩阵
-      link: /products/autosave/overview
+      text: 查看完整产品矩阵
+      link: /getting-started
 
 features:
-  - title: PanBox Search
-    details: 对外部署自己的网盘搜索站点，承接搜索流量，统一展示可检索资源入口。
+  - title: PanBox Search - 网盘搜索站
+    details: 搭一个统一的网盘搜索入口，先把用户流量接住，再把稳定资源持续分发出去。
     link: /products/search/overview
-  - title: PanBox Autosave
-    details: 把别人分享的链接自动转成你自己的网盘资源，再分享、再沉淀、再上传到 Search。
+  - title: PanBox Autosave - 自动转存系统
+    details: 把分享链接自动转存成你自己的网盘库存，减少手动补链、重复搬运和资源流失。
     link: /products/autosave/overview
-  - title: PanBox Sync
-    details: 负责跨盘同步、文件处理与资源保活，降低失效、违规与单盘依赖带来的风险。
+  - title: PanBox Sync - 跨网盘同步自动转码系统
+    details: 负责跨盘同步、文件处理与转码保活，适配多网盘协同分发，降低屏蔽与失效带来的波动。
     link: /products/sync/overview
 ---
 
 <div class="pb-marquee" aria-label="PanBox 核心卖点">
-  <span>自托管可控</span>
-  <span>多网盘协同</span>
-  <span>自动转存沉淀</span>
-  <span>跨盘同步保活</span>
-  <span>面向对外搜索站运营</span>
+  <span>多网盘通用</span>
+  <span>大幅降低屏蔽率</span>
+  <span>资源更稳更久</span>
+  <span>粉丝留存更高</span>
+  <span>收益更稳定</span>
 </div>
 
 <div class="pb-section pb-story">
   <div class="pb-section-head">
     <p class="pb-eyebrow">Why PanBox</p>
-    <h2>不是再做一个单点工具，而是把资源流转做成闭环</h2>
+    <h2>还在为网盘资源频繁被屏蔽、限流、失效发愁吗？</h2>
     <p>
-      大多数站点卡在三个环节：资源发现靠人工、转存沉淀靠手点、失效保活靠补锅。PanBox 把这三段拆成可部署、可扩展、可协同的产品矩阵，让资源从“被看到”开始，就能一路进入你的自有网盘体系。
+      还在因为资源不稳定，导致粉丝流失、推广收益下降吗？对做网盘推广和资源分发的人来说，最累的不是发链接，而是天天补链接、换网盘、救失效。现在有了 PanBox Sync，你可以把自动转码、跨盘同步和保活接进整条链路，让资源分发更稳、更久，也更适合长期经营。
     </p>
   </div>
 
   <div class="pb-flow">
     <div class="pb-flow-card">
       <div class="pb-flow-index">01</div>
-      <h3>Search：先把搜索入口搭起来</h3>
-      <p>部署后即可对外提供网盘资源搜索服务，承接自然搜索、站内搜索和分享流量。</p>
+      <h3>Search：先把流量入口统一起来</h3>
+      <p>部署自己的搜索站点，统一承接搜索和分享流量，让用户先找到你，而不是先流失。</p>
     </div>
     <div class="pb-flow-card">
       <div class="pb-flow-index">02</div>
-      <h3>Autosave：把别人的链接变成你的资源库</h3>
-      <p>自动转存分享链接到自己的网盘目录，持续沉淀可控资源，再反哺到 Search。</p>
+      <h3>Autosave：把外部链接沉淀成自己的库存</h3>
+      <p>自动追更、自动转存，把分散在外部的资源慢慢变成你可控、可复用的网盘资产。</p>
     </div>
     <div class="pb-flow-card">
       <div class="pb-flow-index">03</div>
-      <h3>Sync：把资源做成长期可运营资产</h3>
-      <p>跨盘同步、文件处理、转码与规避失效，把单盘波动与内容风险分摊到更稳的链路里。</p>
+      <h3>Sync：一键把转码与保活接进分发链路</h3>
+      <p>通过跨盘同步、文件处理和自动转码，尽量减少资源被屏蔽、限流和失效带来的反复维护。</p>
     </div>
   </div>
 </div>
 
 <div class="pb-section pb-proof">
   <div class="pb-section-head">
-    <p class="pb-eyebrow">Marketing Angle</p>
-    <h2>PanBox 卖的不是“功能堆叠”，而是更稳的资源经营方式</h2>
+    <p class="pb-eyebrow">Core Benefits</p>
+    <h2>核心优势</h2>
   </div>
 
   <div class="pb-proof-grid">
     <article class="pb-proof-card">
-      <p class="pb-proof-kicker">更少人工</p>
-      <h3>把重复操作压缩成自动任务</h3>
-      <p>搜索、转存、同步、处理不再靠人盯人，适合长期维护资源站点与资源库。</p>
+      <p class="pb-proof-kicker">多网盘兼容</p>
+      <h3>主流网盘都能协同分工</h3>
+      <p>支持夸克、百度、迅雷、UC 等常见网盘场景，把收集、沉淀、分发与保活拆成更稳的组合。</p>
     </article>
     <article class="pb-proof-card">
-      <p class="pb-proof-kicker">更强可控</p>
-      <h3>资源入口、沉淀路径、分发路径都掌握在自己手里</h3>
-      <p>自托管部署，不把核心链路寄托在单一第三方页面或手工收藏夹上。</p>
+      <p class="pb-proof-kicker">大幅降低屏蔽影响</p>
+      <h3>资源存活更久，补链频率更低</h3>
+      <p>通过自动转存、跨盘同步与转码保活，尽量减少资源被屏蔽、限流或失效后带来的反复维护。</p>
     </article>
     <article class="pb-proof-card">
-      <p class="pb-proof-kicker">更容易放大</p>
-      <h3>从个人资源库到对外搜索站都能复用同一套逻辑</h3>
-      <p>先解决“能跑”，再逐步扩成“能运营”“能沉淀”“能持续更新”的体系。</p>
+      <p class="pb-proof-kicker">提升推广收益</p>
+      <h3>资源稳定，粉丝信任和转化才更稳定</h3>
+      <p>资源稳定 = 粉丝留存更高 = 转化更高 = 收益更稳，适合长期做推广和资源经营。</p>
+    </article>
+    <article class="pb-proof-card">
+      <p class="pb-proof-kicker">操作简单</p>
+      <h3>一键接入，新手也能快速上手</h3>
+      <p>无需把大量精力花在重复补链和搬运上，更快把流程从手工切到自动化。</p>
+    </article>
+    <article class="pb-proof-card">
+      <p class="pb-proof-kicker">支持试用体验</p>
+      <h3>先体验效果，再决定是否长期使用</h3>
+      <p>先验证稳定性和链路效果，再按自己的运营节奏继续扩展 Search、Autosave 与 Sync。</p>
     </article>
   </div>
 </div>
@@ -89,7 +99,7 @@ features:
 <div class="pb-section pb-products">
   <div class="pb-section-head">
     <p class="pb-eyebrow">Product Matrix</p>
-    <h2>三个产品，各管一段，但组合起来才真正有杀伤力</h2>
+    <h2>三个产品，分别解决流量、库存与稳定性问题</h2>
   </div>
 
 <HomeProductGrid />
@@ -97,35 +107,35 @@ features:
 
 <div class="pb-section pb-scenes">
   <div class="pb-section-head">
-    <p class="pb-eyebrow">Built For</p>
-    <h2>如果你正在做这些事，PanBox 会比零散工具组合更合适</h2>
+    <p class="pb-eyebrow">Why It Matters</p>
+    <h2>为什么网盘推广达人一定要用？</h2>
   </div>
 
   <div class="pb-scene-grid">
     <div class="pb-scene-card">
-      <h3>资源站运营</h3>
-      <p>需要稳定的搜索入口、持续可更新的资源池，以及可控的分发链路。</p>
+      <h3>资源不容易失效</h3>
+      <p>资源越稳，粉丝才更容易持续留存，不会因为链接频繁失效就快速流失。</p>
     </div>
     <div class="pb-scene-card">
-      <h3>私域资源库沉淀</h3>
-      <p>想把四处分享的链接慢慢转成自己的长期库存，而不是反复失效重找。</p>
+      <h3>推广转化更稳定</h3>
+      <p>链接更稳、访问更顺，推广链路才更容易形成稳定转化，而不是反复被中断。</p>
     </div>
     <div class="pb-scene-card">
-      <h3>多网盘协同管理</h3>
-      <p>希望把不同网盘的角色拆开：哪个负责收、哪个负责放、哪个负责保活。</p>
+      <h3>账号长期价值更高</h3>
+      <p>当工具更好用、资源更稳定、分发更省心，你的账号和资源体系才更值得长期经营。</p>
     </div>
   </div>
 </div>
 
 <div class="pb-section pb-cta-band">
   <div>
-    <p class="pb-eyebrow">Start Fast</p>
-    <h2>先搭 Search，再补 Autosave 与 Sync，最容易形成完整闭环</h2>
-    <p>如果你现在只有一个站点目标，建议先从 Search 起步；当需要沉淀与保活，再继续接入 Autosave 和 Sync。</p>
+    <p class="pb-eyebrow">One Line Pitch</p>
+    <h2>多网盘自动转码｜降低屏蔽率｜提升推广收益</h2>
+    <p>让你从“天天补链接、天天被限流”，慢慢变成资源稳定、收益稳定、粉丝稳定的长期运营状态。</p>
   </div>
   <div class="pb-cta-actions">
-    <a class="VPButton brand" href="/products/search/quickstart">查看 Search 快速开始</a>
-    <a class="VPButton alt" href="/server-purchase">先准备服务器环境</a>
+    <a class="VPButton brand" href="/products/sync/overview">查看 Sync 总览</a>
+    <a class="VPButton alt" href="/getting-started">查看接入路径</a>
   </div>
 </div>
 
