@@ -140,9 +140,5 @@ features:
 </div>
 
 <div class="pb-section pb-risk">
-  <h2>风险提示（请先读）</h2>
-  <p><strong>合规与平台策略</strong>：请在遵守相关法律法规与平台规则的前提下使用。</p>
-  <p><strong>敏感凭据</strong>：Cookie / Token / 密码属于敏感信息，建议只在内网或受控网络暴露，并配合 HTTPS 与访问控制。</p>
-  <p><strong>高权限部署</strong>：若部署方案涉及挂载 <code>docker.sock</code>，等同于给予容器宿主机级别权限，务必评估风险并做隔离。</p>
   <p><a href="/risk/disclaimer">进入统一免责声明 →</a></p>
 </div>

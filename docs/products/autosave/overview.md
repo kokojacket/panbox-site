@@ -57,14 +57,7 @@ PanBox Autosave 更接近长期运行的后端服务：
 
 Autosave 更偏资源沉淀层，适合把外部资源逐步变成自己可控、可复用的库存。
 
-## 注意事项
-
-- 生产环境不要直接使用默认数据库账号密码示例
-- 建议先小范围验证转存链路，再扩大到批量任务
-- 如果沉淀后的资源还需要更稳的保活与跨盘分发，可继续接入 Sync
-
 ## 下一步
 
 - [查看快速开始](/products/autosave/quickstart)
 - [查看使用说明](/products/autosave/usage)
-- [查看风险说明](/products/autosave/risk)

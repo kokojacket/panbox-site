@@ -24,11 +24,6 @@ chmod +x panbox-autosave.sh
 sudo ./panbox-autosave.sh
 ```
 
-### 安全提示
-
-- 脚本会联网下载文件，并可能使用代理镜像源。
-- 建议先下载并审阅 `panbox-autosave.sh` 后再执行。
-
 ## 访问
 
 - 默认端口从 `1888` 开始探测（1888/1889/1890...）。

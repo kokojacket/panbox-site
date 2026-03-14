@@ -54,12 +54,6 @@ PanBox Sync 的核心是流水线并发处理：
 
 Sync 更偏资源治理层，通常在已有资源库存之后发挥作用，用来提升资源稳定性和长期分发能力。
 
-## 注意事项
-
-- Compose 示例可能包含挂载 `docker.sock`，这会带来高权限风险
-- 建议先验证一条小规模同步链路，再逐步扩大范围
-- 如果处理阶段涉及文件修改，请先评估兼容性和完整性影响
-
 ## 截图
 
 ![任务页（当前任务）](/img/sync/current_tasks_page.png)
@@ -68,5 +62,3 @@ Sync 更偏资源治理层，通常在已有资源库存之后发挥作用，用
 
 - [查看快速开始](/products/sync/quickstart)
 - [查看使用说明](/products/sync/usage)
-- [查看安全说明](/products/sync/security)
-- [查看风险说明](/products/sync/risk)

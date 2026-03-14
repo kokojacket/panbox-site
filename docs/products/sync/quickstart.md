@@ -24,7 +24,3 @@ chmod +x panbox-sync.sh
 sudo ./panbox-sync.sh
 ```
 
-### 安全提示
-
-- 脚本会联网下载文件，可能使用代理镜像源。
-- 建议先下载并审阅脚本再执行。
