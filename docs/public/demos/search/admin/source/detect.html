@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>资源检测</title>
+    <style>
+        .detect-page {
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 24px;
+            background: #F7F8FA;
+            overflow-x: hidden;
+        }
+
+        .detect-card {
+            box-sizing: border-box;
+            min-width: 0;
+            max-width: 100%;
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .detect-cache-card {
+            margin-top: 20px;
+        }
+
+        .detect-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .detect-card-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .detect-card-title {
+            color: #111827;
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 26px;
+        }
+
+        .detect-card-count {
+            color: #6B7280;
+            font-size: 13px;
+            line-height: 20px;
+            white-space: nowrap;
+        }
+
+        .detect-card-desc {
+            margin-top: 6px;
+            color: #6B7280;
+            font-size: 13px;
+            line-height: 20px;
+        }
+
+        .detect-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .detect-page .el-button--small {
+            height: 38px;
+            padding: 9px 16px;
+            border-radius: 8px;
+        }
+
+        .detect-page .el-input__inner {
+            height: 38px;
+            line-height: 38px;
+            border-radius: 8px;
+        }
+
+        .detect-page .el-input-number--small {
+            line-height: 36px;
+        }
+
+        .detect-page .el-input-number--small .el-input__inner {
+            height: 38px;
+            line-height: 38px;
+            border-radius: 8px;
+        }
+
+        .detect-page .el-input-number__decrease,
+        .detect-page .el-input-number__increase {
+            height: 36px;
+            line-height: 18px;
+        }
+
+        .detect-config-form {
+            margin-top: 24px;
+        }
+
+        .detect-config-row {
+            display: flex;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .detect-config-row + .detect-config-row {
+            margin-top: 18px;
+        }
+
+        .detect-field {
+            min-width: 0;
+        }
+
+        .detect-field-base {
+            flex: 2 1 420px;
+            width: auto;
+        }
+
+        .detect-field-token {
+            flex: 1 1 320px;
+            width: auto;
+        }
+
+        .detect-field-timeout {
+            flex: 1 1 140px;
+            width: auto;
+            max-width: 180px;
+        }
+
+        .detect-field-cache {
+            flex: 1 1 180px;
+            width: auto;
+            max-width: 220px;
+        }
+
+        .detect-field-switch {
+            flex: 1 1 180px;
+            width: auto;
+        }
+
+        .detect-field-switch-wide {
+            flex: 1 1 220px;
+            width: auto;
+        }
+
+        .detect-field-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 13px;
+            line-height: 18px;
+        }
+
+        .detect-switch-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 38px;
+            color: #374151;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .detect-filter-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .detect-filter-keyword {
+            flex: 1 1 300px;
+            width: auto;
+            min-width: 200px;
+        }
+
+        .detect-filter-select {
+            flex: 0 1 140px;
+            width: 140px;
+        }
+
+        .detect-filter-bar > .el-button,
+        .detect-filter-bar > .el-button + .el-button {
+            margin-left: 0;
+        }
+
+        .detect-tip {
+            margin: 14px 0 12px;
+            color: #6B7280;
+            font-size: 13px;
+            line-height: 20px;
+        }
+
+        .detect-table-wrap {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .detect-table-wrap .el-loading-mask {
+            transition-duration: .12s;
+        }
+
+        .detect-table {
+            width: 100%;
+            min-width: 980px;
+            border-collapse: collapse;
+            border: none;
+            table-layout: fixed;
+            background: #FFFFFF;
+        }
+
+        .detect-table th {
+            height: 44px;
+            padding: 0 16px;
+            background: #F9FAFB;
+            color: #6B7280;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 20px;
+            text-align: left;
+            border: none;
+            border-bottom: 1px solid #EEF0F3;
+        }
+
+        .detect-table td {
+            height: 72px;
+            padding: 12px 16px;
+            color: #374151;
+            font-size: 13px;
+            line-height: 20px;
+            vertical-align: middle;
+            border: none;
+            border-bottom: 1px solid #EEF0F3;
+        }
+
+        .detect-resource-title {
+            overflow: hidden;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .detect-resource-url {
+            overflow: hidden;
+            color: #6B7280;
+            font-size: 13px;
+            line-height: 20px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .detect-time-text {
+            color: #374151;
+            font-size: 13px;
+            line-height: 20px;
+            white-space: nowrap;
+        }
+
+        .detect-empty {
+            padding: 36px 0;
+            color: #9CA3AF;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid #EEF0F3;
+        }
+
+        .detect-pagination {
+            display: flex;
+            justify-content: flex-end;
+            max-width: 100%;
+            margin-top: 16px;
+            padding-bottom: 2px;
+            overflow-x: auto;
+        }
+
+        .detect-pagination .el-pagination {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .detect-cache-confirm .detect-confirm-danger,
+        .detect-cache-confirm .detect-confirm-danger.el-button--primary {
+            background: #F56C6C !important;
+            border-color: #F56C6C !important;
+            color: #FFFFFF !important;
+            box-shadow: none !important;
+        }
+
+        .detect-cache-confirm .detect-confirm-danger:hover,
+        .detect-cache-confirm .detect-confirm-danger:focus,
+        .detect-cache-confirm .detect-confirm-danger.el-button--primary:hover,
+        .detect-cache-confirm .detect-confirm-danger.el-button--primary:focus {
+            background: #F78989 !important;
+            border-color: #F78989 !important;
+            color: #FFFFFF !important;
+        }
+
+        @media (max-width: 767px) {
+            .detect-card-head {
+                gap: 12px;
+            }
+
+            .detect-card-head > .el-button {
+                width: 100%;
+            }
+
+            .detect-config-row {
+                gap: 12px;
+            }
+
+            .detect-field,
+            .detect-field-base,
+            .detect-field-token,
+            .detect-field-timeout,
+            .detect-field-cache,
+            .detect-field-switch,
+            .detect-field-switch-wide,
+            .detect-filter-keyword,
+            .detect-filter-select {
+                flex: 1 1 100%;
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+
+            .detect-switch-box {
+                justify-content: space-between;
+            }
+
+            .detect-filter-bar > .el-button {
+                flex: 1 1 calc(50% - 6px);
+            }
+
+            .detect-table {
+                min-width: 840px;
+            }
+
+            .detect-pagination {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-124'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" class="is-active" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-124'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" class="is-active" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--source-detect">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>资源检测</h1>
+                                                    </header>
+                        
+
+    <div class="detect-page">
+        <div class="detect-card">
+            <div class="detect-card-head">
+                <div>
+                    <div class="detect-card-title">链接检测配置</div>
+                    <div class="detect-card-desc">本地搜索默认不实时检测，只用历史缓存过滤已确认失效链接；搜索命中资源会进入后台队列，检测结果服务下一次搜索。</div>
+                </div>
+                <el-button size="small" icon="el-icon-check" type="primary" @click="saveConfig">保存配置</el-button>
+            </div>
+
+            <el-form class="detect-config-form" :model="config" @submit.native.prevent>
+                <div class="detect-config-row">
+                    <div class="detect-field detect-field-base">
+                        <span class="detect-field-label">Autosave 地址</span>
+                        <el-input size="small" v-model="config.base_url" placeholder="https://autosave.panbox.online/"></el-input>
+                    </div>
+                    <div class="detect-field detect-field-token">
+                        <span class="detect-field-label">API Token</span>
+                        <el-input size="small" v-model="config.api_token" show-password></el-input>
+                    </div>
+                </div>
+                <div class="detect-config-row">
+                    <div class="detect-field detect-field-timeout">
+                        <span class="detect-field-label">超时</span>
+                        <el-input-number size="small" v-model="config.timeout" :min="1" :max="120" controls-position="right" style="width:100%;"></el-input-number>
+                    </div>
+                    <div class="detect-field detect-field-cache">
+                        <span class="detect-field-label">有效链接重复检测间隔（分钟）</span>
+                        <el-input-number size="small" v-model="config.valid_cache_minutes" :min="1" :max="1440" controls-position="right" style="width:100%;"></el-input-number>
+                    </div>
+                    <div class="detect-field detect-field-switch">
+                        <span class="detect-field-label">检测总开关</span>
+                        <div class="detect-switch-box">
+                            <span>{{config.is_quan_zc==1?'已开启':'已关闭'}}</span>
+                            <el-switch v-model="config.is_quan_zc" :active-value="1" :inactive-value="0"></el-switch>
+                        </div>
+                    </div>
+                    <div class="detect-field detect-field-switch-wide">
+                        <span class="detect-field-label">本地搜索过滤失效</span>
+                        <div class="detect-switch-box">
+                            <span>{{config.local_enabled==1?'已开启':'已关闭'}}</span>
+                            <el-switch v-model="config.local_enabled" :active-value="1" :inactive-value="0"></el-switch>
+                        </div>
+                    </div>
+                    <div class="detect-field detect-field-switch-wide">
+                        <span class="detect-field-label">本地搜索后异步检测</span>
+                        <div class="detect-switch-box">
+                            <span>{{config.local_async_enabled==1?'已开启':'已关闭'}}</span>
+                            <el-switch v-model="config.local_async_enabled" :active-value="1" :inactive-value="0"></el-switch>
+                        </div>
+                    </div>
+                </div>
+                <div class="detect-config-row">
+                    <div class="detect-field detect-field-switch-wide">
+                        <span class="detect-field-label">全网搜实时检测</span>
+                        <div class="detect-switch-box">
+                            <span>{{config.web_enabled==1?'已开启':'已关闭'}}</span>
+                            <el-switch v-model="config.web_enabled" :active-value="1" :inactive-value="0"></el-switch>
+                        </div>
+                    </div>
+                    <div class="detect-field detect-field-switch-wide">
+                        <span class="detect-field-label">机器人搜索检测</span>
+                        <div class="detect-switch-box">
+                            <span>{{config.openilink_enabled==1?'已开启':'已关闭'}}</span>
+                            <el-switch v-model="config.openilink_enabled" :active-value="1" :inactive-value="0"></el-switch>
+                        </div>
+                    </div>
+                </div>
+            </el-form>
+        </div>
+
+        <div class="detect-card detect-cache-card">
+            <div class="detect-card-head">
+                <div class="detect-card-title-row">
+                    <span class="detect-card-title">链接有效性缓存</span>
+                    <span class="detect-card-count">{{dataList.total || 0}} 条</span>
+                </div>
+                <div class="detect-card-actions">
+                    <el-button size="small" icon="el-icon-refresh" @click="getList" plain>刷新</el-button>
+                    <el-dropdown trigger="click" @command="handleCacheCommand">
+                        <el-button size="small" plain>清理缓存<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="invalid"><i class="el-icon-delete"></i> 清除失效链接记录</el-dropdown-item>
+                            <el-dropdown-item command="valid"><i class="el-icon-delete"></i> 清除有效链接记录</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </div>
+            </div>
+
+            <div class="detect-filter-bar">
+                <el-input class="detect-filter-keyword" size="small" v-model="form.keyword" placeholder="资源标题 / 链接 URL" clearable @keyup.enter.native="search"></el-input>
+                <el-select class="detect-filter-select" size="small" v-model="form.is_valid" clearable placeholder="有效性：全部">
+                    <el-option label="有效" value="1"></el-option>
+                    <el-option label="无效" value="0"></el-option>
+                </el-select>
+                <el-select class="detect-filter-select" size="small" v-model="form.is_type" clearable placeholder="网盘：全部">
+                    <el-option label="夸克" value="0"></el-option>
+                    <el-option label="阿里" value="1"></el-option>
+                    <el-option label="百度" value="2"></el-option>
+                    <el-option label="UC" value="3"></el-option>
+                    <el-option label="迅雷" value="4"></el-option>
+                    <el-option label="光鸭" value="5"></el-option>
+                </el-select>
+                <el-button size="small" type="primary" icon="el-icon-search" @click="search" plain>查询</el-button>
+                <el-button size="small" icon="el-icon-refresh-left" @click="resetSearch" plain>重置</el-button>
+            </div>
+
+            <div class="detect-tip">缓存用于过滤明确失效的分享；失效结果长期保留，有效链接在重复检测间隔内不会再次请求 autosave。本地搜索命中后只会把无新鲜缓存或缓存已过期的链接加入后台检测队列。</div>
+
+            <div class="detect-table-wrap" v-loading="loading">
+                <table class="detect-table">
+                    <colgroup>
+                        <col style="width:24%;">
+                        <col style="width:32%;">
+                        <col style="width:10%;">
+                        <col style="width:8%;">
+                        <col style="width:13%;">
+                        <col style="width:13%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>资源标题</th>
+                            <th>链接 URL</th>
+                            <th>网盘</th>
+                            <th>状态</th>
+                            <th>检测时间</th>
+                            <th>过期时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="row in dataList.data" :key="row.detect_cache_id">
+                            <td>
+                                <div class="detect-resource-title" :title="row.title || '-'">{{row.title || '-'}}</div>
+                            </td>
+                            <td>
+                                <div class="detect-resource-url" :title="row.url">{{row.url}}</div>
+                            </td>
+                            <td>{{row.pan_name || '-'}}</td>
+                            <td><el-tag size="mini" :type="getValidityTagType(row)">{{getValidityText(row)}}</el-tag></td>
+                            <td><span class="detect-time-text">{{row.checked_at_text}}</span></td>
+                            <td>
+                                <span v-if="row.expires_at===0" class="detect-time-text">长期缓存</span>
+                                <span v-else class="detect-time-text">{{row.expires_at_text}}</span>
+                            </td>
+                        </tr>
+                        <tr v-if="!dataList.data || dataList.data.length===0">
+                            <td colspan="6" class="detect-empty">暂无检测缓存</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div v-if="Number(dataList.total) > 0" class="detect-pagination">
+                <el-pagination @size-change="handleSizeChange" :page-sizes="[20, 50, 100, 200, 500]" :page-size="form.per_page"
+                    layout="total, sizes, prev, pager, next, jumper" background @current-change="changeCurrentPage"
+                    :current-page="dataList.current_page" :page-count="dataList.last_page" :total="dataList.total">
+                </el-pagination>
+            </div>
+        </div>
+    </div>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"cacheClearing":{"invalid":false,"valid":false},"config":{"api_token":"","base_url":"","is_quan_zc":1,"local_async_enabled":1,"local_enabled":1,"openilink_enabled":1,"timeout":30,"valid_cache_minutes":10,"web_enabled":1},"dataList":{"current_page":1,"data":[{"detect_cache_id":3,"title":"[DEMO] UC永久资源 029","url":"https://drive.uc.cn/s/demo-uc-029","pan_name":"UC网盘","is_valid":true,"checked_at_text":"2026-07-20 21:16","expires_at":0,"expires_at_text":"长期缓存"},{"detect_cache_id":2,"title":"[DEMO] 百度永久资源 028","url":"https://pan.baidu.com/s/demo-baidu-028","pan_name":"百度网盘","is_valid":true,"checked_at_text":"2026-07-20 21:14","expires_at":1784640000,"expires_at_text":"2026-07-21 21:14"},{"detect_cache_id":1,"title":"[DEMO] 迅雷永久资源 010","url":"https://pan.xunlei.com/s/demo-xunlei-010","pan_name":"迅雷网盘","is_valid":false,"checked_at_text":"2026-07-20 21:12","expires_at":1784556000,"expires_at_text":"2026-07-20 21:20"}],"has_more":false,"last_page":1,"per_page":20,"total":3},"form":{"is_type":"","is_valid":"","keyword":"","page":1,"per_page":20},"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"loading":false},"responses":[{"data":{"code":200,"message":"数据获取成功","data":{"current_page":1,"data":[{"detect_cache_id":3,"title":"[DEMO] UC永久资源 029","url":"https://drive.uc.cn/s/demo-uc-029","pan_name":"UC网盘","is_valid":true,"checked_at_text":"2026-07-20 21:16","expires_at":0,"expires_at_text":"长期缓存"},{"detect_cache_id":2,"title":"[DEMO] 百度永久资源 028","url":"https://pan.baidu.com/s/demo-baidu-028","pan_name":"百度网盘","is_valid":true,"checked_at_text":"2026-07-20 21:14","expires_at":1784640000,"expires_at_text":"2026-07-21 21:14"},{"detect_cache_id":1,"title":"[DEMO] 迅雷永久资源 010","url":"https://pan.xunlei.com/s/demo-xunlei-010","pan_name":"迅雷网盘","is_valid":false,"checked_at_text":"2026-07-20 21:12","expires_at":1784556000,"expires_at_text":"2026-07-20 21:20"}],"has_more":false,"last_page":1,"per_page":20,"total":3}},"method":"post","url":"/admin/resource_detect/getList"},{"data":{"code":200,"data":{"api_token":"","base_url":"","is_quan_zc":1,"local_async_enabled":1,"local_enabled":1,"openilink_enabled":1,"timeout":30,"valid_cache_minutes":10,"web_enabled":1},"message":"获取成功"},"method":"post","url":"/admin/resource_detect/getConfig"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    config: { base_url: '', api_token: '', timeout: 30, valid_cache_minutes: 10, is_quan_zc: 1, local_enabled: 1, local_async_enabled: 1, web_enabled: 1, openilink_enabled: 1 },
+                    form: { page: 1, per_page: 20, keyword: '', is_valid: '', is_type: '' },
+                    dataList: { data: [], total: 0, current_page: 1, last_page: 0 },
+                    loading: false,
+                    cacheClearing: { invalid: false, valid: false }
+                }
+            },
+            created() {
+                this.getList();
+                this.getConfig();
+            },
+            methods: {
+                getConfig() {
+                    axios.post('/admin/resource_detect/getConfig', Object.assign({}, PostBase)).then((response) => {
+                        if (response.data.code == CODE_SUCCESS) this.config = Object.assign({ timeout: 30, valid_cache_minutes: 10, is_quan_zc: 1, local_enabled: 1, local_async_enabled: 1, web_enabled: 1, openilink_enabled: 1 }, response.data.data || {});
+                    });
+                },
+                saveConfig() {
+                    axios.post('/admin/resource_detect/updateConfig', Object.assign({}, PostBase, this.config)).then((response) => {
+                        if (response.data.code == CODE_SUCCESS) this.$message.success(response.data.message);
+                        else this.$message.error(response.data.message);
+                    }).catch(() => this.$message.error('服务器内部错误'));
+                },
+                handleSizeChange(per_page) {
+                    this.form.per_page = per_page;
+                    this.form.page = 1;
+                    this.getList();
+                },
+                changeCurrentPage(page) {
+                    this.form.page = page;
+                    this.getList();
+                },
+                search() {
+                    this.form.page = 1;
+                    this.getList();
+                },
+                resetSearch() {
+                    this.form.keyword = '';
+                    this.form.is_valid = '';
+                    this.form.is_type = '';
+                    this.form.page = 1;
+                    this.getList();
+                },
+                getList() {
+                    this.loading = true;
+                    axios.post('/admin/resource_detect/getList', Object.assign({}, PostBase, this.form)).then((response) => {
+                        this.loading = false;
+                        if (response.data.code == CODE_SUCCESS) this.dataList = Object.assign({ data: [], total: 0, current_page: 1, last_page: 0 }, response.data.data || {});
+                        else this.$message.error(response.data.message);
+                    }).catch(() => { this.loading = false; this.$message.error('服务器内部错误'); });
+                },
+                handleCacheCommand(command) {
+                    if (command === 'invalid') {
+                        this.clearInvalidCache();
+                    } else if (command === 'valid') {
+                        this.clearValidCache();
+                    }
+                },
+                getValidityText(row) {
+                    if (row && row.is_valid === true) {
+                        return '有效';
+                    }
+                    if (row && row.is_valid === false) {
+                        return '无效';
+                    }
+                    return '未知';
+                },
+                getValidityTagType(row) {
+                    if (row && row.is_valid === true) {
+                        return 'success';
+                    }
+                    if (row && row.is_valid === false) {
+                        return 'danger';
+                    }
+                    return 'info';
+                },
+                clearInvalidCache() {
+                    this.clearCache('/admin/resource_detect/clearInvalidCache', 'invalid', '确认清除全部失效链接检测记录？清除后这些链接下次检测会重新请求 autosave，并可能重新标记本地资源状态。', '清除失效链接记录');
+                },
+                clearValidCache() {
+                    this.clearCache('/admin/resource_detect/clearValidCache', 'valid', '确认清除全部有效链接检测记录？清除后这些链接下次检测会重新请求 autosave。', '清除有效链接记录');
+                },
+                focusCacheConfirmCancel() {
+                    setTimeout(function () {
+                        var box = document.querySelector('.detect-cache-confirm');
+                        if (!box) {
+                            return;
+                        }
+                        var confirmButton = box.querySelector('.detect-confirm-danger');
+                        var cancelButton = box.querySelector('.el-message-box__btns .el-button:not(.detect-confirm-danger)');
+                        if (confirmButton && confirmButton.blur) {
+                            confirmButton.blur();
+                        }
+                        if (cancelButton && cancelButton.focus) {
+                            cancelButton.focus();
+                        }
+                    }, 50);
+                },
+                clearCache(url, type, message, title) {
+                    var that = this;
+                    var confirmTask = this.$confirm(message, title, {
+                        confirmButtonText: '确认清除',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        customClass: 'detect-cache-confirm',
+                        confirmButtonClass: 'detect-confirm-danger',
+                        autofocus: false,
+                        closeOnClickModal: false,
+                        distinguishCancelAndClose: true
+                    });
+                    this.focusCacheConfirmCancel();
+                    confirmTask.then(function () {
+                        that.cacheClearing[type] = true;
+                        axios.post(url, Object.assign({}, PostBase)).then(function (response) {
+                            that.cacheClearing[type] = false;
+                            if (response.data.code == CODE_SUCCESS) {
+                                var deleted = response.data.data && response.data.data.deleted ? response.data.data.deleted : 0;
+                                that.$message.success(response.data.message + '，共 ' + deleted + ' 条');
+                                that.getList();
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        }).catch(function () {
+                            that.cacheClearing[type] = false;
+                            that.$message.error('服务器内部错误');
+                        });
+                    }).catch(function () {});
+                }
+            }
+        })
+    </script>
+</html>

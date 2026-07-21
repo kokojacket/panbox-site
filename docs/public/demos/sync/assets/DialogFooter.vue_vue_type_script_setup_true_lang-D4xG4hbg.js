@@ -1,0 +1,1 @@
+import{c as a}from"./Label.vue_vue_type_script_setup_true_lang-Dud-mCxx.js";import{d as r,c,o as l,q as n,b as t,B as m}from"./index-CsIU4Bnl.js";const d=r({__name:"DialogFooter",props:{class:{}},setup(s){const e=s;return(o,p)=>(l(),c("div",{class:n(t(a)("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",e.class))},[m(o.$slots,"default")],2))}});export{d as _};

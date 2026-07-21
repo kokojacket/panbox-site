@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <meta charset="UTF-8">
+        <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1.0">
+    <title>搜索榜单 - Panbox Search</title>
+    <meta name="keywords" content="搜索榜单,热门搜索," />
+    <meta name="description" content="搜索榜单 - " />
+        <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="stylesheet" href="/demos/search/assets/front/css/index.min.css">
+    <link rel="stylesheet" href="/demos/search/assets/front/css/app.css">
+    <link rel="stylesheet" href="/demos/search/assets/front/css/m.css">
+    
+        
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+
+        :root {
+            --theme-color: #3e3e3e;
+            --theme-theme: #133ab3;
+            --theme-background: #fafafa;
+            --theme-other_background: #ffffff;
+        }
+            </style>
+</head>
+
+<body>
+    <style>
+        .rank-stage {
+            min-height: 68vh;
+            padding: 30px 16px 56px;
+            background: #f6f8fb;
+        }
+
+        .rank-wrap {
+            width: min(960px, 100%);
+            margin: 0 auto;
+        }
+
+        .rank-hero {
+            padding: 28px 32px;
+            border: 1px solid #e6eaf0;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+        }
+
+        .rank-kicker {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            padding: 0 8px;
+            border-radius: 5px;
+            background: #f2f5fa;
+            color: #667085;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+        }
+
+        .rank-hero h1 {
+            margin: 14px 0 8px;
+            color: #111827;
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.28;
+        }
+
+        .rank-hero p {
+            max-width: 560px;
+            margin: 0;
+            color: #667085;
+            font-size: 15px;
+            line-height: 1.75;
+        }
+
+        .rank-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .rank-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 16px;
+            border: 1px solid var(--theme-theme);
+            border-radius: 8px;
+            background: var(--theme-theme);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background .15s ease, border-color .15s ease, color .15s ease;
+        }
+
+        .rank-button:hover,
+        .rank-button:focus-visible {
+            border-color: #0f347c;
+            background: #0f347c;
+            color: #fff;
+        }
+
+        .rank-button-light {
+            border-color: #d7dde6;
+            background: #fff;
+            color: #344054;
+        }
+
+        .rank-button-light:hover,
+        .rank-button-light:focus-visible {
+            border-color: var(--theme-theme);
+            background: #f7faff;
+            color: var(--theme-theme);
+        }
+
+        .rank-card {
+            margin-top: 18px;
+            overflow: hidden;
+            border: 1px solid #e6eaf0;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, .045);
+        }
+
+        .rank-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 20px;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .rank-head h2 {
+            margin: 0;
+            color: #111827;
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .rank-head span {
+            color: #98a2b3;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .rank-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1px;
+            padding: 1px;
+            background: #edf0f5;
+        }
+
+        .rank-item {
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            min-height: 62px;
+            padding: 0 16px;
+            background: #fff;
+            color: #111827;
+            text-decoration: none;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .rank-item:hover,
+        .rank-item:focus-visible {
+            background: #f8fafc;
+            color: var(--theme-theme);
+        }
+
+        .rank-item:focus-visible,
+        .rank-button:focus-visible {
+            outline: 2px solid rgba(19, 63, 189, .28);
+            outline-offset: 2px;
+        }
+
+        .rank-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
+            background: #f2f4f7;
+            color: #667085;
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .rank-item:nth-child(1) .rank-num {
+            background: #ff3f6d;
+            color: #fff;
+        }
+
+        .rank-item:nth-child(2) .rank-num,
+        .rank-item:nth-child(3) .rank-num {
+            background: #fff1f3;
+            color: #d92d54;
+        }
+
+        .rank-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 5px;
+            background: #fff1f3;
+            color: #d92d54;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 20px;
+        }
+
+        .rank-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 15px;
+            font-weight: 650;
+            line-height: 1.45;
+        }
+
+        .rank-meta,
+        .rank-arrow {
+            color: #98a2b3;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .rank-arrow {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .rank-empty {
+            margin-top: 18px;
+            padding: 56px 20px;
+            border: 1px dashed #d7dde6;
+            border-radius: 12px;
+            background: #fff;
+            color: #8a94a6;
+            text-align: center;
+        }
+
+        @media (max-width: 780px) {
+            .rank-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .rank-stage {
+                padding: 18px 12px 42px;
+            }
+
+            .rank-hero {
+                padding: 22px 18px;
+                border-radius: 12px;
+            }
+
+            .rank-hero h1 {
+                font-size: 24px;
+            }
+
+            .rank-actions {
+                gap: 8px;
+            }
+
+            .rank-button {
+                flex: 1 1 auto;
+                min-width: 104px;
+            }
+
+            .rank-card {
+                border-radius: 12px;
+            }
+
+            .rank-head {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+                padding: 16px;
+            }
+
+            .rank-item {
+                grid-template-columns: 34px minmax(0, 1fr) auto;
+                min-height: 58px;
+                padding: 0 12px;
+            }
+
+            .rank-meta {
+                grid-column: 2;
+                justify-self: start;
+            }
+        }
+    </style>
+    <div class="headBg" style="background-image: url();"></div>
+    <div id="app" v-cloak>
+        <div class="headerBox">
+    <div class="bg" :style="{ opacity: elementOpacity }" ></div>
+    <div class="box">
+        <a href="/demos/search/index.html" class="logoBox" :style="{ opacity: elementOpacity }" >
+                        <div class="title">Panbox Search</div>
+                    </a>
+        <div class="search" :style="{ opacity: elementOpacity }" >
+            <input type="text" v-model="keyword" placeholder="输入关键字进行搜索" @keyup.enter="searchBtn" confirm-type="search"
+                @confirm="searchBtn">
+            <div class="btn" @click="searchBtn">
+                <i class="iconfont icon-sousuo"></i>
+            </div>
+        </div>
+        <div class="navs">
+                        <div class="item" @click="layerVisible = true">提交需求</div>
+                        <div class="btns" v-html="``"></div>
+
+            <div class="iconfont icon-caidan" @click="drawer = true"></div>
+        </div>
+    </div>
+</div>
+<div class="headerKox"></div>
+
+
+<div data-app-overlay v-if="qcodeVisible" @click="qcodeVisible = false" style="position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.58); padding: 16px;">
+    <div @click.stop style="width: min(300px, 100%); background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);">
+        <img src="" style="width: 100%; display: block; border-radius: 12px;" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+    </div>
+</div>
+
+<div data-app-overlay v-if="layerVisible" @click="layerVisible = false" style="position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.58); padding: 16px;">
+    <div @click.stop class="layerBox" style="width: min(360px, 100%); background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);">
+        <div class="vname">提交需求</div>
+        <textarea v-model="content" placeholder="请输入你想看的资源信息~" style="width: 100%; min-height: 110px; margin-top: 14px; padding: 12px 14px; border: 1px solid #d9dce3; border-radius: 12px; resize: none; outline: none; font: inherit;"></textarea>
+        <div class="vbtn" @click="saveBtn">提交</div>
+    </div>
+</div>
+
+<div data-app-overlay v-if="drawer" @click="drawer = false" style="position: fixed; inset: 0; z-index: 3000; background: rgba(15, 23, 42, 0.42);">
+    <div @click.stop class="drawer" style="margin-left: auto; width: min(300px, 88vw); height: 100%; background: #fff; padding: 24px 20px; box-shadow: -8px 0 30px rgba(15, 23, 42, 0.16); overflow-y: auto;">
+                <div class="item" @click="drawer = false; layerVisible = true">提交需求</div>
+                <div class="btns" v-html="``"></div>
+    </div>
+</div>
+
+        <div class="rank-stage">
+            <div class="rank-wrap">
+                <div class="rank-hero">
+                    <div class="rank-kicker">SEARCH RANK</div>
+                    <h1>搜索榜单</h1>
+                    <p>从搜索日志里提炼大家正在输入的关键词，补足首页热词之外的实时需求。</p>
+                    <div class="rank-actions">
+                        <a class="rank-button" href="/demos/search/index.html">返回首页</a>
+                        <a class="rank-button rank-button-light" href="/demos/search/hot.html">热门资源</a>
+                        <a class="rank-button rank-button-light" href="/demos/search/new.html">最新资源</a>
+                    </div>
+                </div>
+
+                                <div class="rank-empty">暂无搜索日志数据</div>
+                            </div>
+        </div>
+        <div class="footerBox">
+    <div class="box">
+        <p></p>
+        <p>
+                        <a href="/demos/search/index.html" target="_blank">网站地图</a>
+        </p>
+    </div>
+</div>
+    </div>
+    <script defer data-cfasync="false" src="/demos/search/assets/front/js/vue.global.min.js"></script>
+<script defer data-cfasync="false" src="/demos/search/assets/front/js/axios.min.js"></script><script>window.__PANBOX_DEMO_FRONT__={"ranking":{"短剧":{"code":200,"message":"获取成功","data":[{"title":"双向欲臣","src":"/demos/search/assets/posters/poster-01.webp","ranking":"1","hot_score":"8465","desc":"姜许为了缓解双向躁郁症的症状，以十万一次，“玩弄“负债的校草陆执。几年后姜家败落，姜许沦入北缅红灯区..."},{"title":"家里家外","src":"/demos/search/assets/posters/poster-02.webp","ranking":"2","hot_score":"5173","desc":"1981年，蔡晓艳和陈海清闪婚，各自带着孩子组成新家。蔡晓艳性格泼辣，陈海清却偏爱。相处中，蔡晓艳温..."},{"title":"花朝","src":"/demos/search/assets/posters/poster-03.avif","ranking":"3","hot_score":"2000","desc":"花朝女扮男装从军，封镇威大将军。拒皇帝赐婚自降为民。未婚夫秦京墨娶他人，辱花朝。西戎来访，花朝被迎回..."},{"title":"十九万岁玄门老祖，手捏天雷讲科学","src":"/demos/search/assets/posters/poster-06.png","ranking":"4","hot_score":"723","desc":"最强少年天师路世伍解散宗门下山求学，以 “科学” 为幌子化解京华大学灵异事件，揭穿蛊毒、阴阳术等阴谋..."},{"title":"开局被甩，我觉醒情绪系统","src":"/demos/search/assets/posters/poster-04.webp","ranking":"5","hot_score":"627","desc":"被前女友嫌弃\"没情绪\"的陈豪，意外觉醒情绪系统，只要让女人情绪波动，就能暴富!从此，他化身\"情绪猎人..."},{"title":"朝思暮时","src":"/demos/search/assets/posters/poster-07.png","ranking":"6","hot_score":"609","desc":"国际小提琴家时柒冷落丈夫，漠视儿子四年后，震惊发现多年恨意竟是错付，而那位她憎恨至深的丈夫顾寒深，实..."},{"title":"他不知道的秘密","src":"/demos/search/assets/posters/poster-08.png","ranking":"7","hot_score":"400","desc":"结婚十年，沈薇发现丈夫林子默出轨苏曼。林子默联手苏曼给沈薇灌下打胎药，杀死亲骨肉。沈薇发现林子默患遗..."},{"title":"闪婚后我成了大佬的掌中之物","src":"/demos/search/assets/posters/poster-05.webp","ranking":"8","hot_score":"368","desc":"宋察对救了自己的万妮一见钟情， 在万妮和胡恩的婚礼当天抢 亲，强势迎娶方妮。婚后宋察霸气护妻，万妮逐..."},{"title":"重生七年后，我竟娶了死对头校花","src":"/demos/search/assets/posters/poster-10.webp","ranking":"9","hot_score":"365","desc":"前一秒还在向白月光深情告白，下一秒竟在死对头校花的床上！宋远如遭雷击，原来他竟穿越到了七年后！更让他..."},{"title":"无双","src":"/demos/search/assets/posters/poster-09.avif","ranking":"10","hot_score":"344","desc":"该短剧主要讲述了龙王殿殿主楚青为了爱情，假装成囊废赘婿，过着普通人的生活。没想到，妻子为了金钱，不惜..."}]},"电影":{"code":200,"message":"获取成功","data":[{"title":"给阿嬷的情书","src":"/demos/search/assets/posters/poster-11.webp","ranking":"1","hot_score":"45858","desc":"潮汕阿嬷叶淑柔一直守着平淡的日子，安享晚年。孙子晓伟因债务缠身，瞒着家人远赴泰国，寻找传闻中的亿万富..."},{"title":"角头：斗阵欸","src":"/demos/search/assets/posters/poster-13.webp","ranking":"2","hot_score":"27790","desc":"因父亲挑起新旧敌对帮派的激烈地盘斗争，身为儿子的他则试图掌控腥风血雨的台湾黑社会，在兄弟情与自身处境..."},{"title":"四渡","src":"/demos/search/assets/posters/poster-12.webp","ranking":"3","hot_score":"21651","desc":"长征时期，红军身处绝境。四渡赤水堪称红军的绝地反击之战。在毛泽东（刘烨 饰）的带领下，红军一渡赤水时..."},{"title":"封神第二部：战火西岐","src":"/demos/search/assets/posters/poster-15.webp","ranking":"4","hot_score":"20328","desc":"姜子牙、姬发带队坚守西岐，家园保卫战一触即发！邓婵玉、闻仲奉商王殷寿之命，率魔家四将等殷商大军征伐西..."},{"title":"特立独行","src":"/demos/search/assets/posters/poster-14.webp","ranking":"5","hot_score":"13510","desc":"我们可不可以抛开世俗的眼光而活？一身本领的王长海（白敬亭 饰）回乡履职，初来乍到便锋芒毕露，他不顾老..."},{"title":"八仙！","src":"/demos/search/assets/posters/poster-16.webp","ranking":"6","hot_score":"13001","desc":"“八仙”在成仙和成功之间选择了“成团”，在搞钱和搞事业之间选择了“搞事情”？！吕洞宾、钟离权带队，集..."},{"title":"想你了","src":"/demos/search/assets/posters/poster-17.webp","ranking":"7","hot_score":"11212","desc":"你见过最好的友情是什么样呢？高凡（章若楠饰）和汪美丽（金靖饰）她俩一定有发言权。"},{"title":"苹果","src":"/demos/search/assets/posters/poster-18.webp","ranking":"8","hot_score":"6744","desc":"刘苹果（范冰冰饰）在北京一家洗脚城里做按摩妹，丈夫安坤（佟大为饰）是负责清洗高楼落地窗的工人，二人生..."},{"title":"10间敢死队","src":"/demos/search/assets/posters/poster-19.webp","ranking":"9","hot_score":"6045","desc":"医院走廊尽头的10号房是一个特别的存在，别看这里住着的都是重症病人，但却每天欢声笑语热闹非凡。而故事..."},{"title":"热烈","src":"/demos/search/assets/posters/poster-20.webp","ranking":"10","hot_score":"5700","desc":"街舞老炮儿丁雷（黄渤 饰），偶遇卖艺少年陈烁（王一博 饰），丁雷忽悠陈烁加入自己经营的舞团。舞团内高..."}]},"电视剧":{"code":200,"message":"获取成功","data":[{"title":"南部档案","src":"/demos/search/assets/posters/poster-21.webp","ranking":"1","hot_score":"365151","desc":"民国初年南洋地区发生的一系列诡异事件。故事以张海盐和张海虾两位南部档案馆的秘密探员为主角，他们调查一..."},{"title":"唐朝诡事录","src":"/demos/search/assets/posters/poster-22.webp","ranking":"2","hot_score":"355271","desc":"暗夜邪仙从天而降，鬼市地宫露出冰山一角，而风靡长安的诡异红茶究竟是养生之药还是害人之物？长安城里新娘..."},{"title":"灿如繁星","src":"/demos/search/assets/posters/poster-23.webp","ranking":"3","hot_score":"226801","desc":"该剧改编自晋江文学城作者长洱的同名青春热血竞技小说。"},{"title":"雀骨","src":"/demos/search/assets/posters/poster-24.webp","ranking":"4","hot_score":"115797","desc":"一纸赐婚，两段孽缘。心狠手辣的铁面将军强娶财迷机关太傅千金，从契约夫妻到人生合伙人，从猜忌争斗到相爱..."},{"title":"入戏","src":"/demos/search/assets/posters/poster-25.webp","ranking":"5","hot_score":"66559","desc":"改编自童子的小说《入戏》。"},{"title":"京城奇探","src":"/demos/search/assets/posters/poster-26.webp","ranking":"6","hot_score":"63872","desc":"京城纨绔赵少商为帮姐姐探查夫家怪事，结识了留洋归来的冷面警官元鸿。两人从针锋相对到默契搭档，一路追查..."},{"title":"千香","src":"/demos/search/assets/posters/poster-27.webp","ranking":"7","hot_score":"62469","desc":"该剧改编自十四郎的小说《千香百媚》。海陨至，建木现，得建木之实者，可御万物，仙、妖、魔三族为之陷入血..."},{"title":"这一秒过火","src":"/demos/search/assets/posters/poster-28.webp","ranking":"8","hot_score":"61925","desc":"民国沪上，军阀幼子慕容清峄（张凌赫 饰）因被抱错而受尽养父虐待，少年出逃时被任素素（王楚然 饰）所救..."},{"title":"入青云","src":"/demos/search/assets/posters/poster-29.webp","ranking":"9","hot_score":"47218","desc":"在合虚六境一年一度的“青云大会”上，罪囚出身的极星渊斗者纪伯宰（侯明昊 饰）一举击败已连胜七年的冷酷..."},{"title":"低智商犯罪","src":"/demos/search/assets/posters/poster-30.webp","ranking":"10","hot_score":"39883","desc":"脱离一线刑侦几年的警察张一昂（王骁 饰），因为省厅收到的匿名举报信，被派往三江口调查案件。张一昂到三..."}]},"动漫":{"code":200,"message":"获取成功","data":[{"title":"光阴之外","src":"/demos/search/assets/posters/poster-31.webp","ranking":"1","hot_score":"96903","desc":"天地是万物众生的客舍，光阴是古往今来的过客。苍天残面张开诡异之眼，所视之处生灵涂炭，化为永恒的禁区。..."},{"title":"吞噬星空 第4季","src":"/demos/search/assets/posters/poster-33.webp","ranking":"2","hot_score":"32041","desc":"感谢长期以来大家对《吞噬星空》动画的支持，《吞噬星空》第三季将于3月8日收官。守护之路仍在继续，对抗..."},{"title":"择天记","src":"/demos/search/assets/posters/poster-32.webp","ranking":"3","hot_score":"11015","desc":"西宁少年陈长生身患奇症活不过二十岁，为寻改命之法，前往神都参加大朝试，却因与真凤徐有容的一纸婚约，遭..."},{"title":"斗破苍穹 年番2","src":"/demos/search/assets/posters/poster-35.webp","ranking":"4","hot_score":"8673","desc":"萧炎横扫云岚宗成功复仇，谁知药老的灵魂却被魂殿掳走。为抓萧炎，魂殿暗借小医仙之手，命毒宗围剿萧炎的炎..."},{"title":"择日飞升","src":"/demos/search/assets/posters/poster-36.webp","ranking":"5","hot_score":"7970","desc":"乱世之下，妖祟横生，奸佞当道。又值幽界入侵，人、幽两界势力荼毒人间，捕蛇者许应因看不惯为幽界卖命的草..."},{"title":"沧元图","src":"/demos/search/assets/posters/poster-34.webp","ranking":"6","hot_score":"5531","desc":"沧元界妖邪作乱，人族饱受摧残，主角孟川自小立下为母复仇的誓言，以镜湖道院为起点，凭借坚毅无畏的心志与..."},{"title":"吞噬星空 第5季","src":"/demos/search/assets/posters/poster-37.webp","ranking":"7","hot_score":"4520","desc":""},{"title":"灵笼","src":"/demos/search/assets/posters/poster-38.webp","ranking":"8","hot_score":"3054","desc":"不久的未来，人类的世界早已拥挤不堪，迈向星河、寻找新家园的行动迫在眉捷。正当一切有条不紊的推进之时，..."},{"title":"凡人修仙传：风起天南","src":"/demos/search/assets/posters/poster-40.webp","ranking":"9","hot_score":"2621","desc":"平凡少年韩立出生贫困，为了让家人过上更好的生活，自愿前去七玄门参加入门考核，最终被墨大夫收入门下。"},{"title":"仙武传 第二季","src":"/demos/search/assets/posters/poster-41.webp","ranking":"10","hot_score":"2333","desc":"门派废徒叶辰，被赶出宗门，无以为家，机缘巧合之下偶得真火，再踏仙武之路。"}]},"综艺":{"code":200,"message":"获取成功","data":[{"title":"半熟恋人 第五季","src":"/demos/search/assets/posters/poster-39.webp","ranking":"1","hot_score":"59436","desc":"命定指引，赤诚相爱。第五季将讲述十二位素人嘉宾的恋爱故事，他们历经命运选择、心动拉扯与现实抉择，在真..."},{"title":"喜欢你我也是 第六季","src":"/demos/search/assets/posters/poster-42.webp","ranking":"2","hot_score":"55360","desc":"#2026爱桃综快乐不重样# #2026爱奇艺新生片单# #喜欢你我也是# 第六季暖心回归！恋综IP..."},{"title":"忙忙碌碌寻宝藏2","src":"/demos/search/assets/posters/poster-43.webp","ranking":"3","hot_score":"31238","desc":"寻宝小队再集结，宝藏烟火气下饭脑综再度上桌，第二季全面升维！从“单人寻宝”升级“双人寻宝模式”，换乘..."},{"title":"中餐厅 第十季","src":"/demos/search/assets/posters/poster-44.webp","ranking":"4","hot_score":"22962","desc":"跨越山海，寻味南洋；以美食为桥，联结中泰温情。"},{"title":"你好，星期六","src":"/demos/search/assets/posters/poster-45.webp","ranking":"5","hot_score":"17664","desc":"节目重点围绕艺人艺能的全面深度挖掘、精品表演秀的创意呈现、最具热点的社会性话题输出等方面进行设计，开..."},{"title":"说唱巅峰对决2026","src":"/demos/search/assets/posters/poster-46.webp","ranking":"6","hot_score":"17358","desc":"#2026爱桃综快乐不重样# #说唱十周年巅峰对决#全新升级归来，这次不止比技术，更要玩灵魂共振！最..."},{"title":"怦然心动20岁：冬季","src":"/demos/search/assets/posters/poster-50.webp","ranking":"7","hot_score":"10504","desc":"带领大人边缘的少年们开启一个热闹非凡的寒假。带他们去往冷风过境的山野间追逐日光，冲进白雪覆盖的森林里..."},{"title":"奔跑吧 第十季","src":"/demos/search/assets/posters/poster-49.webp","ranking":"8","hot_score":"10424","desc":"本季以“整·活了”为核心，串联活态、活力、焕活、活人四大概念焕新策划，深度挖掘当地非遗技艺、特色美食..."},{"title":"脱口秀和Ta的朋友们 第三季","src":"/demos/search/assets/posters/poster-48.webp","ranking":"9","hot_score":"8333","desc":"第三季集结54组脱口秀演员，聚集资深老人和新锐潜力新人，阵容多元丰富。本季节目首次引入“竞演+合宿”..."},{"title":"喜剧之王单口季 第三季","src":"/demos/search/assets/posters/poster-47.webp","ranking":"10","hot_score":"7856","desc":"节目将延续从小人物到喜剧之王的故事，汇聚来自全国各地脱口秀俱乐部的优秀单口喜剧演员和漫才组合。每一位..."}]}},"webResults":[{"title":"仙逆 4K 完整合集","result_token":"demo-quark-01","is_type":0,"desc":"更新至最新集"},{"title":"仙逆 动画年番","result_token":"demo-uc-02","is_type":3,"desc":"高清收藏版"},{"title":"凡人修仙传 年番","result_token":"demo-baidu-03","is_type":2,"desc":"持续更新"},{"title":"吞噬星空 第五季","result_token":"demo-ali-04","is_type":1,"desc":"国语中字"},{"title":"斗破苍穹 年番","result_token":"demo-xunlei-05","is_type":4,"desc":"1080P 合集"}]};</script><script defer src="/demos/search/front-runtime.js"></script>
+<script data-cfasync="false">
+    var app;
+    var appBootFallbackNode = null;
+    window.__appReady = false;
+    window.__appReadyQueue = [];
+    window.__appBooted = false;
+    window.__appBootFailed = false;
+    window.__appBootAttempts = 0;
+    window.__appBootTimer = null;
+    window.__appBootFailureTimer = null;
+
+    const APP_BOOT_LOADING_TIMEOUT = 2500;
+    const APP_BOOT_FAILURE_TIMEOUT = 15000;
+
+    const initialKeyword = "";
+    const initialCategoryId = "";
+    const shareAppName = "Panbox Search";
+    const initialPcType = "0";
+
+    window.onAppReady = function (callback) {
+        if (window.__appReady && app) {
+            try {
+                callback();
+            } catch (error) {
+                console.error('Panbox onAppReady callback failed:', error);
+            }
+            return;
+        }
+
+        window.__appReadyQueue.push(callback);
+    };
+
+    window.scheduleIdleTask = function (callback, fallbackDelay) {
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(callback, { timeout: 1500 });
+            return;
+        }
+
+        setTimeout(callback, fallbackDelay || 400);
+    };
+
+    function flushAppReadyQueue() {
+        var queue = window.__appReadyQueue.splice(0, window.__appReadyQueue.length);
+        for (var i = 0; i < queue.length; i++) {
+            try {
+                queue[i]();
+            } catch (error) {
+                console.error('Panbox onAppReady callback failed:', error);
+            }
+        }
+    }
+
+    function reportAppBootFailure(message, error) {
+        if (error) {
+            console.error(message, error);
+            return;
+        }
+
+        console.error(message);
+    }
+
+    function markAppBootFailed(logMessage, fallbackMessage, error) {
+        if (window.__appReady || window.__appBootFailed) {
+            return;
+        }
+
+        window.__appBootFailed = true;
+        clearTimeout(window.__appBootTimer);
+        clearTimeout(window.__appBootFailureTimer);
+        reportAppBootFailure(logMessage, error);
+        showAppBootFallback(fallbackMessage || '页面加载失败，请刷新后重试');
+    }
+
+    function showAppBootFallback(message) {
+        if (!document.body) {
+            return;
+        }
+
+        document.body.classList.add('app-boot-fallback');
+
+        if (!appBootFallbackNode) {
+            appBootFallbackNode = document.createElement('div');
+            appBootFallbackNode.setAttribute('data-app-boot-fallback', 'true');
+            appBootFallbackNode.setAttribute('role', 'status');
+            appBootFallbackNode.setAttribute('aria-live', 'polite');
+            appBootFallbackNode.style.cssText = 'position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:24px;background:#f8fafc;color:#475569;font-size:14px;line-height:1.7;text-align:center;';
+            document.body.appendChild(appBootFallbackNode);
+        }
+
+        appBootFallbackNode.textContent = message || '页面加载中，请稍候...';
+    }
+
+    function clearAppBootFallback() {
+        if (document.body) {
+            document.body.classList.remove('app-boot-fallback');
+        }
+
+        if (appBootFallbackNode && appBootFallbackNode.parentNode) {
+            appBootFallbackNode.parentNode.removeChild(appBootFallbackNode);
+        }
+
+        appBootFallbackNode = null;
+    }
+
+    function markAppReady() {
+        window.__appReady = true;
+        clearTimeout(window.__appBootTimer);
+        clearTimeout(window.__appBootFailureTimer);
+        clearAppBootFallback();
+        flushAppReadyQueue();
+    }
+
+    function scheduleBootRetry(delay) {
+        if (window.__appReady || window.__appBooted || window.__appBootFailed) {
+            return;
+        }
+
+        clearTimeout(window.__appBootTimer);
+        window.__appBootTimer = setTimeout(bootApp, delay || 120);
+    }
+
+    function bootApp() {
+        if (window.__appReady || window.__appBooted || window.__appBootFailed) {
+            return;
+        }
+
+        var appRoot = document.getElementById('app');
+        if (!appRoot) {
+            return;
+        }
+
+        if (typeof window.Vue === 'undefined' || typeof window.axios === 'undefined') {
+            window.__appBootAttempts += 1;
+            showAppBootFallback('页面加载中，请稍候...');
+            scheduleBootRetry(window.__appBootAttempts < 5 ? 80 : 160);
+            return;
+        }
+
+        window.__appBooted = true;
+
+        try {
+            const { createApp, ref, onMounted, onUnmounted } = Vue;
+            const hasElementPlus = typeof window.ElementPlus !== 'undefined';
+            const ElMessage = hasElementPlus && ElementPlus.ElMessage ? ElementPlus.ElMessage : null;
+
+            app = createApp({
+                setup() {
+                    const elementOpacity = ref(0);
+                    const scrollThreshold = ref(150);
+                    const keyword = ref(initialKeyword);
+                    const qcodeVisible = ref(false);
+                    const layerVisible = ref(false);
+                    const content = ref('');
+                    const load = ref(false);
+                    const drawer = ref(false);
+                    const rankList = ref([]);
+                    const rankDj = ref([]);
+                    const is_m = ref(0);
+                    const newList = ref([]);
+                    const QList = ref([]);
+                    const QLoading = ref(false);
+                    const total_result = ref(0);
+                    const currentSource = ref(0);
+                    const line_id = ref(0);
+                    const currentLineName = ref('');
+                    const dialogUrl = ref(false);
+                    const dialogLoading = ref(false);
+                    const dialogItem = ref({});
+                    const is_type = ref(0);
+                    const pc_type = ref(0);
+                    const getInitialLang = function () {
+                        const match = document.cookie.match(/(?:^|; )think_lang=([^;]*)/);
+                        const cookieLang = match ? decodeURIComponent(match[1]) : '';
+                        const queryLang = new URLSearchParams(window.location.search).get('lang') || '';
+                        const lang = (queryLang || cookieLang || 'zh-cn').toLowerCase();
+                        return lang === 'en-us' ? 'en-us' : 'zh-cn';
+                    };
+                    const currentLang = ref(getInitialLang());
+                    const langDropdownVisible = ref(false);
+                    const moreDropdownVisible = ref(false);
+                    const desktopMoreDropdownVisible = ref(false);
+                    const hotBottomTab = ref('rank');
+                    const setHotBottomTab = function (tab) {
+                        hotBottomTab.value = tab;
+                    };
+                    const toggleLangDropdown = function () {
+                        langDropdownVisible.value = !langDropdownVisible.value;
+                        moreDropdownVisible.value = false;
+                        desktopMoreDropdownVisible.value = false;
+                    };
+                    const closeLangDropdown = function () {
+                        langDropdownVisible.value = false;
+                    };
+                    const toggleMoreDropdown = function () {
+                        moreDropdownVisible.value = !moreDropdownVisible.value;
+                        langDropdownVisible.value = false;
+                        desktopMoreDropdownVisible.value = false;
+                    };
+                    const closeMoreDropdown = function () {
+                        moreDropdownVisible.value = false;
+                    };
+                    const toggleDesktopMoreDropdown = function () {
+                        desktopMoreDropdownVisible.value = !desktopMoreDropdownVisible.value;
+                        langDropdownVisible.value = false;
+                        moreDropdownVisible.value = false;
+                    };
+                    const closeDesktopMoreDropdown = function () {
+                        desktopMoreDropdownVisible.value = false;
+                    };
+                    const switchLanguage = function (lang) {
+                        currentLang.value = lang === 'en-us' ? 'en-us' : 'zh-cn';
+                        document.cookie = 'think_lang=' + encodeURIComponent(currentLang.value) + '; path=/; max-age=31536000';
+                        const targetUrl = new URL(window.location.href);
+                        targetUrl.searchParams.set('lang', currentLang.value);
+                        window.location.href = targetUrl.toString();
+                    };
+                    const handleDocumentClick = function () {
+                        closeLangDropdown();
+                        closeMoreDropdown();
+                        closeDesktopMoreDropdown();
+                    };
+
+                    const showMessage = function (message, type) {
+                        if (type === void 0) {
+                            type = 'info';
+                        }
+
+                        if (ElMessage) {
+                            ElMessage({
+                                message: message,
+                                type: type,
+                                plain: true,
+                            });
+                            return;
+                        }
+
+                        window.alert(message);
+                    };
+                    window.showMessage = showMessage;
+
+                    const handleScroll = function () {
+                        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                        elementOpacity.value = scrollTop >= scrollThreshold.value
+                            ? Math.min((scrollTop - scrollThreshold.value) / 100, 1)
+                            : Math.max(1 - (scrollThreshold.value - scrollTop) / 100, 0);
+
+                        const boxElement = document.querySelector('.listBox .screen .fixed .box');
+                        if (boxElement && boxElement.style.display === 'block' && is_m.value) {
+                            boxElement.style.display = 'none';
+                        }
+                    };
+
+                    const normalizeKeyword = function () {
+                        const searchKeyword = (keyword.value || '').replace(/[\s　]+/g, '');
+                        keyword.value = searchKeyword;
+                        return searchKeyword;
+                    };
+
+                    const searchBtn = function () {
+                        const searchKeyword = normalizeKeyword();
+                        if (!searchKeyword) {
+                            return showMessage('请输入你要搜索的内容~', 'error');
+                        }
+                        const currentUrl = window.location.href;
+                        const targetUrl = '/demos/search/search.html?q=' + encodeURIComponent(searchKeyword);
+                        if (currentUrl.includes('/s/') || currentUrl.includes('/d/')) {
+                            window.location.href = targetUrl;
+                        } else {
+                            window.location.href = targetUrl;
+                        }
+                    };
+
+                    const saveBtn = async function () {
+                        if (!content.value) {
+                            return showMessage('请输入你想看的资源信息~', 'error');
+                        }
+                        if (load.value) {
+                            return;
+                        }
+
+                        load.value = true;
+                        try {
+                            const response = await axios.post('/api/tool/feedback', { content: content.value });
+                            showMessage(response.data.message, response.data.code === 200 ? 'success' : 'error');
+                            if (response.data.code === 200) {
+                                layerVisible.value = false;
+                                content.value = '';
+                            }
+                        } finally {
+                            load.value = false;
+                        }
+                    };
+
+                    const setnum = function (num) {
+                        return (num / 10000).toFixed(2) + 'W';
+                    };
+
+                    const goLink = function (event, id) {
+                        event.preventDefault();
+                        window.location.href = '/demos/search/detail.html';
+                    };
+
+                    const changeBtn = function (e) {
+                        const searchKeyword = normalizeKeyword();
+                        if (initialCategoryId) {
+                            window.location.href = '/demos/search/search.html?q=' + encodeURIComponent(searchKeyword);
+                        } else {
+                            window.location.href = '/demos/search/search.html?q=' + encodeURIComponent(searchKeyword);
+                        }
+                    };
+
+                    const copyText = async function (event) {
+                        event.preventDefault();
+                        const currentTarget = event.currentTarget || event.target;
+                        const shareUrl = currentTarget.dataset.shareUrl === 'current' ? window.location.href : (currentTarget.dataset.url || '');
+                        var text = '标题：' + (currentTarget.dataset.title || '') + '\n链接：' + shareUrl;
+                        if (currentTarget.dataset.shareUrl !== 'current' && currentTarget.dataset.code) {
+                            text += '\n提取码：' + currentTarget.dataset.code;
+                        }
+                        text += '\n由【' + shareAppName + '】提供网盘分享链接';
+
+                        try {
+                            await navigator.clipboard.writeText(text);
+                            showMessage('复制成功', 'success');
+                        } catch (err) {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = text;
+                            textArea.style.position = 'fixed';
+                            textArea.style.opacity = 0;
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+
+                            try {
+                                const successful = document.execCommand('copy');
+                                if (successful) {
+                                    showMessage('复制成功', 'success');
+                                } else {
+                                    throw new Error('复制失败');
+                                }
+                            } catch (error) {
+                                showMessage('复制失败，请手动复制', 'error');
+                            }
+
+                            document.body.removeChild(textArea);
+                        }
+                    };
+
+                    const selectBtn = function () {
+                        if (!is_m.value) {
+                            return;
+                        }
+                        const boxElement = document.querySelector('.listBox .screen .fixed .box');
+                        if (!boxElement) {
+                            return;
+                        }
+                        if (boxElement.style.display === 'none' || boxElement.style.display === '') {
+                            boxElement.style.display = 'block';
+                        } else {
+                            boxElement.style.display = '';
+                        }
+                    };
+
+                    const handleDeviceType = function () {
+                        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                        if (isMobile) {
+                            is_m.value = 1;
+                            pc_type.value = 1;
+                        } else {
+                            is_m.value = 0;
+                            pc_type.value = initialPcType;
+                        }
+                    };
+
+                    const callPageFunction = function (name) {
+                        return function () {
+                            if (typeof window[name] !== 'function') {
+                                return;
+                            }
+
+                            return window[name].apply(window, arguments);
+                        };
+                    };
+
+                    const getUrlBtn = callPageFunction('getUrlBtn');
+                    const switchSource = callPageFunction('switchSource');
+                    const setType = callPageFunction('setType');
+                    const linkBtn = callPageFunction('linkBtn');
+                    const panName = callPageFunction('panName');
+                    const copyQuanResourceLink = callPageFunction('copyQuanResourceLink');
+                    const scanQuanResourceLink = callPageFunction('scanQuanResourceLink');
+
+                    onMounted(function () {
+                        handleDeviceType();
+                        handleScroll();
+
+                        window.addEventListener('scroll', handleScroll);
+                        window.addEventListener('resize', handleDeviceType);
+                        document.addEventListener('click', handleDocumentClick);
+                    });
+
+                    onUnmounted(function () {
+                        window.removeEventListener('scroll', handleScroll);
+                        window.removeEventListener('resize', handleDeviceType);
+                        document.removeEventListener('click', handleDocumentClick);
+                    });
+
+                    return { elementOpacity, scrollThreshold, keyword, searchBtn, rankList, newList, setnum, qcodeVisible, layerVisible, content, saveBtn, rankDj, goLink, changeBtn, copyText, drawer, selectBtn, is_m, QList, QLoading, total_result, currentSource, line_id, currentLineName, dialogUrl, dialogLoading, dialogItem, is_type, pc_type, currentLang, langDropdownVisible, moreDropdownVisible, desktopMoreDropdownVisible, hotBottomTab, toggleLangDropdown, toggleMoreDropdown, toggleDesktopMoreDropdown, setHotBottomTab, switchLanguage, getUrlBtn, switchSource, setType, linkBtn, panName, copyQuanResourceLink, scanQuanResourceLink, showMessage };
+                }
+            });
+
+            if (hasElementPlus) {
+                app.use(ElementPlus);
+            }
+
+            app = app.mount('#app');
+            markAppReady();
+        } catch (error) {
+            window.__appBooted = false;
+            window.__appBootAttempts += 1;
+
+            if (window.__appBootAttempts <= 10) {
+                reportAppBootFailure('Panbox app boot retrying after init error:', error);
+                scheduleBootRetry(200);
+                return;
+            }
+
+            markAppBootFailed('Panbox app boot failed during initialization', '页面初始化失败，请刷新后重试', error);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootApp, { once: true });
+    } else {
+        scheduleBootRetry(0);
+    }
+
+    window.addEventListener('load', bootApp, { once: true });
+    scheduleBootRetry(1200);
+    setTimeout(function () {
+        if (!window.__appReady && !window.__appBootFailed) {
+            console.warn('Panbox app boot is still loading after ' + APP_BOOT_LOADING_TIMEOUT + 'ms');
+            showAppBootFallback('页面加载中，请稍候...');
+        }
+    }, APP_BOOT_LOADING_TIMEOUT);
+    window.__appBootFailureTimer = setTimeout(function () {
+        if (!window.__appReady && !window.__appBootFailed) {
+            markAppBootFailed('Panbox app boot timed out after ' + APP_BOOT_FAILURE_TIMEOUT + 'ms');
+        }
+    }, APP_BOOT_FAILURE_TIMEOUT);
+</script>
+
+</body>
+
+</html>

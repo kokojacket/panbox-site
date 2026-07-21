@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>资源分类</title>
+    <style>
+        .category-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .category-tip {
+            margin-bottom: 12px;
+            color: #909399;
+            font-size: 13px;
+        }
+        .drag-handle {
+            cursor: move;
+            color: #909399;
+            font-size: 18px;
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-118'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" class="is-active" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-118'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" class="is-active" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--source-category">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>分类管理</h1>
+                                                    </header>
+                        
+    <div class="category-toolbar">
+        <el-radio-group v-model="categoryMode" size="small" @change="changeCategoryMode">
+            <el-radio-button label="local">本地资源分类</el-radio-button>
+            <el-radio-button label="hot">在线热门分类</el-radio-button>
+        </el-radio-group>
+        <div v-if="categoryMode == 'local'">
+            <el-button icon="el-icon-plus" size="small" @click="clickAdd" plain>添加</el-button>
+            <el-button icon="el-icon-delete" size="small" @click="postMultDelete" plain>批量删除</el-button>
+        </div>
+    </div>
+    <div v-if="categoryMode == 'hot'" class="category-tip">在线热门分类为固定夸克热榜频道，仅可调整展示状态、排序和图标，不影响本地资源分类。</div>
+    <el-table :data="dataList" @selection-change="changeSelection" :row-key="rowKey" v-loading="loading">
+        <el-table-column v-if="categoryMode == 'local'" type="selection" width="50">
+        </el-table-column>
+        <el-table-column label="排序" width="70" align="center">
+            <template slot-scope="scope">
+                <i class="el-icon-rank drag-handle" title="拖拽调整排序"></i>
+            </template>
+        </el-table-column>
+        <el-table-column :label="categoryMode == 'hot' ? '分类名称 / Channel' : '分类名称'">
+            <template slot-scope="scope">
+                <img :src="scope.row.image" style="width: 30px;height:30px;vertical-align: middle;object-fit: contain;"
+                    v-if="scope.row.image" />
+                <span style="vertical-align: middle;margin-left: 5px">{{scope.row.name}}</span>
+            </template>
+        </el-table-column>
+        <el-table-column label="是否前台展示" width="150" align="center">
+            <template slot-scope="scope">
+                <el-switch v-model="scope.row.status==1?false:true" @change="clickStatus(scope.row)">
+                </el-switch>
+            </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200">
+            <template slot-scope="scope">
+                <el-link type="primary" @click="clickEdit(scope.row)"
+                    :underline="false">{{categoryMode == 'hot' ? '编辑图标' : '编辑'}}</el-link>
+                <template v-if="categoryMode == 'local'">
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <el-link type="danger" @click="clickDelete(scope.row)" :underline="false">删除</el-link>
+                </template>
+            </template>
+        </el-table-column>
+    </el-table>
+
+
+    <!-- 添加框 -->
+    <el-dialog title="添加资源分类名称" :visible.sync="dialogFormAdd" width="500px" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal='false'>
+        <el-form :model="formAdd" :rules="rules" ref="formAdd">
+
+            <el-form-item prop="name" label="分类名称" :label-width="formLabelWidth">
+                <el-input size="medium" autocomplete="off" v-model="formAdd.name"></el-input>
+            </el-form-item>
+
+            <el-form-item prop="image" label="图标" :label-width="formLabelWidth">
+                <Single v-model="formAdd.image"></Single>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="postAdd()">确认添加</el-button>
+        </div>
+    </el-dialog>
+    <!-- 修改框 -->
+    <el-dialog :title="categoryMode == 'hot' ? '编辑在线热门分类' : '修改资源分类信息'" :visible.sync="dialogFormEdit" width="500px" :modal-append-to-body='false'
+        append-to-body :close-on-click-modal='false'>
+        <el-form :model="formEdit" :rules="editRules" ref="formEdit">
+            <el-form-item prop="name" label="分类名称" :label-width="formLabelWidth">
+                <el-input size="medium" autocomplete="off" v-model="formEdit.name" :disabled="categoryMode == 'hot'"></el-input>
+            </el-form-item>
+            <el-form-item prop="image" label="图标" :label-width="formLabelWidth">
+                <Single v-model="formEdit.image"></Single>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="postEdit()">确认修改</el-button>
+        </div>
+    </el-dialog>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"allShow":false,"categoryMode":"local","dataList":[{"create_time":"2024-08-31 22:26:16","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"短剧","sort":999,"source_category_id":1,"status":0,"update_time":"2024-09-14 15:33:35"},{"create_time":"2024-08-31 22:26:27","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"电影","sort":998,"source_category_id":2,"status":0,"update_time":"2024-09-14 16:39:17"},{"create_time":"2024-08-31 22:26:33","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"电视剧","sort":997,"source_category_id":3,"status":0,"update_time":"2024-09-14 16:39:18"},{"create_time":"2024-08-31 22:26:40","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"动漫","sort":996,"source_category_id":4,"status":0,"update_time":"2024-09-14 16:39:19"},{"create_time":"2024-08-31 22:26:48","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"综艺","sort":995,"source_category_id":5,"status":0,"update_time":"2024-09-14 16:39:20"}],"dayShow":false,"dialogFormAdd":false,"dialogFormEdit":false,"domain":"http://127.0.0.1:8009","formAdd":{"image":""},"formEdit":{},"formLabelWidth":"80px","headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"loading":false,"rules":{"name":[{"message":"请输入分类名称","required":true,"trigger":"blur"}]},"selectList":[],"sortChanged":false,"sortSaving":false},"responses":[{"data":{"code":200,"data":[{"create_time":"2024-08-31 22:26:16","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"短剧","sort":999,"source_category_id":1,"status":0,"update_time":"2024-09-14 15:33:35"},{"create_time":"2024-08-31 22:26:27","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"电影","sort":998,"source_category_id":2,"status":0,"update_time":"2024-09-14 16:39:17"},{"create_time":"2024-08-31 22:26:33","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"电视剧","sort":997,"source_category_id":3,"status":0,"update_time":"2024-09-14 16:39:18"},{"create_time":"2024-08-31 22:26:40","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"动漫","sort":996,"source_category_id":4,"status":0,"update_time":"2024-09-14 16:39:19"},{"create_time":"2024-08-31 22:26:48","image":"","is_sys":0,"is_type":0,"is_update":1,"name":"综艺","sort":995,"source_category_id":5,"status":0,"update_time":"2024-09-14 16:39:20"}],"message":"数据获取成功"},"method":"post","url":"/admin/source_category/getList"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                this.getList();
+                return {
+                    formLabelWidth: '80px',
+                    categoryMode: 'local',
+                    dialogFormAdd: false,
+                    dialogFormEdit: false,
+                    loading: true,
+                    dataList: [],
+                    selectList: [],
+                    formAdd: {
+                        image: ''
+                    },
+                    sortChanged: false,
+                    sortSaving: false,
+                    sortableInstance: null,
+                    formEdit: {
+                    },
+                    rules: {
+                        name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
+                    },
+
+                    allShow: false,
+                    dayShow: false,
+                    domain: window.location.protocol + '//' + window.location.host
+                }
+            },
+            computed: {
+                idKey() {
+                    return this.categoryMode == 'hot' ? 'hot_resource_category_id' : 'source_category_id';
+                },
+                rowKey() {
+                    return this.idKey;
+                },
+                editRules() {
+                    return this.categoryMode == 'hot' ? {} : this.rules;
+                }
+            },
+            beforeDestroy() {
+                if (this.sortableInstance) {
+                    this.sortableInstance.destroy();
+                }
+            },
+            methods: {
+                changeCategoryMode() {
+                    this.dialogFormAdd = false;
+                    this.dialogFormEdit = false;
+                    this.selectList = [];
+                    this.getList();
+                },
+                apiPath(action) {
+                    return this.categoryMode == 'hot' ? '/admin/hot_resource_category/' + action : '/admin/source_category/' + action;
+                },
+                changeSelection(list) {
+                    var that = this;
+                    that.selectList = [];
+                    if (that.categoryMode != 'local') {
+                        return;
+                    }
+                    for (var index in list) {
+                        that.selectList.push(list[index].source_category_id);
+                    }
+                },
+                postEdit() {
+                    var that = this;
+                    that.$refs["formEdit"].validate((valid) => {
+                        if (valid) {
+                            axios.post(that.apiPath('update'), Object.assign({}, PostBase, that.formEdit))
+                                .then(function (response) {
+                                    that.getList();
+                                    if (response.data.code == CODE_SUCCESS) {
+                                        that.$message({
+                                            message: response.data.message,
+                                            type: 'success'
+                                        });
+                                        that.dialogFormEdit = false;
+                                    } else {
+                                        that.$message.error(response.data.message);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    that.$message.error('服务器内部错误');
+                                    console.log(error);
+                                });
+                        }
+                    });
+                },
+                postAdd() {
+                    var that = this;
+                    if (that.categoryMode != 'local') {
+                        return;
+                    }
+                    that.$refs['formAdd'].validate((valid) => {
+                        if (valid) {
+                            axios.post('/admin/source_category/add', Object.assign({}, PostBase, that.formAdd))
+                                .then(function (response) {
+                                    that.getList();
+                                    if (response.data.code == CODE_SUCCESS) {
+                                        that.$message({
+                                            message: response.data.message,
+                                            type: 'success'
+                                        });
+                                        that.dialogFormAdd = false;
+                                    } else {
+                                        that.$message.error(response.data.message);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    that.$message.error('服务器内部错误');
+                                    console.log(error);
+                                });
+                        }
+                    });
+                },
+                clickAdd() {
+                    var that = this;
+                    that.formAdd = { image: '' };
+                    that.dialogFormAdd = true;
+                },
+                postMultDelete() {
+                    var that = this;
+                    if (that.categoryMode != 'local') {
+                        return;
+                    }
+                    if (that.selectList.length == 0) {
+                        that.$message.error('请选择需要删除的分类');
+                        return;
+                    }
+                    this.$confirm('即将删除选中的分类, 是否确认?', '批量删除', {
+                        confirmButtonText: '删除',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        axios.post('/admin/source_category/delete', Object.assign({}, PostBase, {
+                            source_category_id: that.selectList.join(',')
+                        }))
+                            .then(function (response) {
+                                that.getList();
+                                if (response.data.code == CODE_SUCCESS) {
+                                    that.$message({
+                                        message: response.data.message,
+                                        type: 'success'
+                                    });
+                                } else {
+                                    that.$message.error(response.data.message);
+                                }
+                            })
+                            .catch(function (error) {
+                                that.$message.error('服务器内部错误');
+                                console.log(error);
+                            });
+                    }).catch(() => {
+                    });
+                },
+                clickDelete(row) {
+                    var that = this;
+                    if (that.categoryMode != 'local') {
+                        return;
+                    }
+                    this.$confirm('即将删除这个分类, 是否确认?', '删除提醒', {
+                        confirmButtonText: '删除',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        axios.post('/admin/source_category/delete', Object.assign({}, PostBase, {
+                            source_category_id: row.source_category_id
+                        }))
+                            .then(function (response) {
+                                that.getList();
+                                if (response.data.code == CODE_SUCCESS) {
+                                    that.$message({
+                                        message: response.data.message,
+                                        type: 'success'
+                                    });
+                                } else {
+                                    that.$message.error(response.data.message);
+                                }
+                            })
+                            .catch(function (error) {
+                                that.$message.error('服务器内部错误');
+                                console.log(error);
+                            });
+                    }).catch(() => {
+                    });
+                },
+                clickStatus(row) {
+                    var that = this;
+                    var data = that.categoryMode == 'hot' ? {
+                        hot_resource_category_id: row.hot_resource_category_id,
+                        status: row.status
+                    } : {
+                        source_category_id: row.source_category_id,
+                        type: 'status',
+                        status: row.status
+                    };
+                    axios.post(that.apiPath('setStatus'), Object.assign({}, PostBase, data))
+                        .then(function (response) {
+                            that.getList();
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.$message({
+                                    message: response.data.message,
+                                    type: 'success'
+                                });
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        });
+                },
+                clickEdit(row) {
+                    var that = this;
+                    that.formEdit = row;
+                    var data = that.categoryMode == 'hot' ? {
+                        hot_resource_category_id: row.hot_resource_category_id
+                    } : {
+                        source_category_id: row.source_category_id
+                    };
+                    axios.post(that.apiPath('detail'), Object.assign({}, PostBase, data))
+                        .then(function (response) {
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.formEdit = response.data.data;
+                                that.formEdit.image = that.formEdit.image || ''
+                                that.dialogFormEdit = true;
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        });
+
+                },
+                getList() {
+                    var that = this;
+                    that.loading = true;
+                    axios.post(that.apiPath('getList'), Object.assign({}, PostBase))
+                        .then(function (response) {
+                            that.loading = false;
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.dataList = response.data.data;
+                                that.sortChanged = false;
+                                that.$nextTick(function () {
+                                    that.initSortable();
+                                });
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.loading = false;
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        });
+                },
+                initSortable() {
+                    var that = this;
+                    var tbody = document.querySelector('.el-table__body-wrapper tbody');
+                    if (!tbody || typeof Sortable === 'undefined') {
+                        return;
+                    }
+                    if (that.sortableInstance) {
+                        that.sortableInstance.destroy();
+                    }
+                    that.sortableInstance = Sortable.create(tbody, {
+                        handle: '.drag-handle',
+                        animation: 150,
+                        onEnd: function (evt) {
+                            if (evt.oldIndex === evt.newIndex) {
+                                return;
+                            }
+                            var moved = that.dataList.splice(evt.oldIndex, 1)[0];
+                            that.dataList.splice(evt.newIndex, 0, moved);
+                            that.sortChanged = true;
+                            that.saveSort();
+                        }
+                    });
+                },
+                saveSort() {
+                    var that = this;
+                    if (!that.sortChanged || that.sortSaving) {
+                        return;
+                    }
+                    that.sortSaving = true;
+                    if (that.sortableInstance) {
+                        that.sortableInstance.option('disabled', true);
+                    }
+                    var data = that.categoryMode == 'hot' ? {
+                        ids: that.dataList.map(function (item) {
+                            return item.hot_resource_category_id;
+                        })
+                    } : {
+                        source_category_ids: that.dataList.map(function (item) {
+                            return item.source_category_id;
+                        })
+                    };
+                    axios.post(that.apiPath('sort'), Object.assign({}, PostBase, data))
+                        .then(function (response) {
+                            that.sortSaving = false;
+                            if (that.sortableInstance) {
+                                that.sortableInstance.option('disabled', false);
+                            }
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.sortChanged = false;
+                                that.$message({
+                                    message: response.data.message,
+                                    type: 'success'
+                                });
+                                that.getList();
+                            } else {
+                                that.$message.error(response.data.message);
+                                that.getList();
+                            }
+                        })
+                        .catch(function (error) {
+                            that.sortSaving = false;
+                            if (that.sortableInstance) {
+                                that.sortableInstance.option('disabled', false);
+                            }
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                            that.getList();
+                        });
+                },
+            }
+        })
+    </script>
+
+
+</html>

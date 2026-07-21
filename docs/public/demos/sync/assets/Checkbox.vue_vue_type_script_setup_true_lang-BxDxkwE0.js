@@ -1,0 +1,6 @@
+import{S as i,k as n,c as d,l}from"./Label.vue_vue_type_script_setup_true_lang-Dud-mCxx.js";import{c as p}from"./createLucideIcon-BhQj-ilL.js";import{d as f,s as u,o as m,w as a,a as t,b as e,K as h}from"./index-CsIU4Bnl.js";/**
+ * @license lucide-vue-next v0.556.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const k=p("check",[["path",{d:"M20 6 9 17l-5-5",key:"1gmf2c"}]]),B=f({__name:"Checkbox",props:{defaultChecked:{type:Boolean},checked:{type:[Boolean,String]},disabled:{type:Boolean},required:{type:Boolean},name:{},value:{},id:{},asChild:{type:Boolean},as:{},class:{}},emits:["update:checked"],setup(o,{emit:r}){const s=o,c=i(s,r);return(g,y)=>(m(),u(e(l),h(e(c),{class:e(d)("peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",s.class)}),{default:a(()=>[t(e(n),{class:"flex items-center justify-center text-current"},{default:a(()=>[t(e(k),{class:"h-4 w-4"})]),_:1})]),_:1},16,["class"]))}});export{B as _};

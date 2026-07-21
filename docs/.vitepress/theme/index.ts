@@ -1,7 +1,7 @@
 import { useRoute } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { h, onMounted, watch } from 'vue'
-import ProductAsideNav from './components/ProductAsideNav.vue'
+import HomeDemoGrid from './components/HomeDemoGrid.vue'
 import HomeProductGrid from './components/HomeProductGrid.vue'
 import HomeHeroShowcase from './components/HomeHeroShowcase.vue'
 import HoverPreviewImage from './components/HoverPreviewImage.vue'
@@ -205,14 +205,13 @@ function syncHomeContentBounds(): void {
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app, router, siteData }) {
-    DefaultTheme.enhanceApp?.({ app, router, siteData })
+  enhanceApp({ app }) {
     app.component('HomeProductGrid', HomeProductGrid)
     app.component('HoverPreviewImage', HoverPreviewImage)
   },
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
-      'aside-outline-before': () => h(ProductAsideNav),
+      'home-features-before': () => h(HomeDemoGrid),
       'home-hero-image': () => h(HomeHeroShowcase)
     })
   },

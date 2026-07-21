@@ -1,0 +1,6 @@
+import{c as d}from"./createLucideIcon-BhQj-ilL.js";import{c,b as i}from"./Label.vue_vue_type_script_setup_true_lang-Dud-mCxx.js";import{d as l,l as u,c as f,o as p,K as g,b as a,B as m}from"./index-CsIU4Bnl.js";/**
+ * @license lucide-vue-next v0.556.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const _=d("folder",[["path",{d:"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z",key:"1kt360"}]]),k=l({__name:"Badge",props:{variant:{default:"default"},class:{}},setup(e){const r=e,n=u(()=>{const{class:t,variant:o,...s}=r;return s});return(t,o)=>(p(),f("div",g(n.value,{class:a(c)(a(v)({variant:e.variant}),r.class)}),[m(t.$slots,"default")],16))}}),v=i("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",{variants:{variant:{default:"border-transparent bg-primary text-primary-foreground",secondary:"border-transparent bg-secondary text-secondary-foreground",destructive:"border-transparent bg-destructive text-destructive-foreground",outline:"text-foreground"}},defaultVariants:{variant:"default"}});export{_ as F,k as _};

@@ -32,19 +32,21 @@ PanBox Sync 的核心是流水线并发处理：
 
 ## 关于“转码”说明
 
-文档与实现中常把处理中间阶段称为“转码”，但实际效果可能只是轻量处理，例如：
+产品界面沿用“转码”这一名称，但当前实现主要修改视频文件指纹：
 
-- 追加随机字节
-- 改变文件指纹 / MD5
+- 优先使用 FFmpeg stream copy 重新封装并写入随机元数据，不重新编码音视频流
+- 重新封装失败时，回退为追加随机字节
+- 非视频文件跳过这一处理阶段
 
-这**不等同于**媒体重新编码（re-encode）。正式使用前，建议先在小范围验证兼容性与完整性。
+这些处理会改变文件指纹或 MD5，但**不等同于**媒体重新编码（re-encode）。正式使用前，建议先在小范围验证兼容性与完整性。
 
 ## Docker 部署关键点
 
 - 镜像：`kokojacket/panbox-sync:latest`
 - 后端端口：默认 `8000`（可通过 `.env` 调整）
 - 可选内置 OpenList 端口：`5244`
-- 数据目录：Compose 将 `./data` 挂载到容器内 `/app/backend/data`
+- 数据目录：Compose 将宿主机 `./data` 统一挂载到容器内 `/data`
+- 容器管理：服务器版挂载 Docker Socket，用于管理内置 OpenList 和 SmartDNS；应按[安全基线](/risk/security-baseline)限制服务器访问
 
 ## 与其他产品的关系
 
@@ -60,5 +62,5 @@ Sync 更偏资源治理层，通常在已有资源库存之后发挥作用，用
 
 ## 下一步
 
-- [查看快速开始](/products/sync/quickstart)
-- [查看使用说明](/products/sync/usage)
+- [下载桌面版](/desktop-download)
+- [查看脚本部署教程](/products/sync/quickstart)

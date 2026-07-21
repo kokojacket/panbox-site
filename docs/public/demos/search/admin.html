@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>Panbox Search 管理后台</title>
+    <link rel="stylesheet" href="/demos/search/assets/admin/css/dashboard-overview.css?v=3.137">
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'1'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <div class="qfadmin-desktop-brand-shell">
+    <a class="qfadmin-desktop-brand" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+</div>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" :collapse="false"
+        default-active="'1'">
+                <el-menu-item index="mobile-top-1"
+            onclick="location.href='/demos/search/admin.html';"
+            >
+            <i class="el-icon-house"></i> 概况        </el-menu-item>
+                                <el-menu-item index="mobile-top-108"
+            onclick="location.href='/demos/search/admin/source/index.html';"
+            >
+            <i class="el-icon-files"></i> 资源        </el-menu-item>
+                        <el-menu-item index="mobile-top-3"
+            onclick="location.href='/demos/search/admin/conf/base.html';"
+            >
+            <i class="el-icon-data-board"></i> 系统        </el-menu-item>
+                                    </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--index-index">
+                        
+
+    <div class="dashboard-overview">
+        <section class="dashboard-overview__head">
+            <div>
+                <h1 class="dashboard-overview__title">数据看板</h1>
+                <p class="dashboard-overview__desc">观察访客增长、搜索需求和站内热门内容，数据实时来自访问与搜索日志。</p>
+            </div>
+            <div class="dashboard-overview__tabs" role="group" aria-label="数据范围">
+                <button type="button" :class="{active: range === 'today'}" :aria-pressed="range === 'today'" @click="changeRange('today')">今日</button>
+                <button type="button" :class="{active: range === '7d'}" :aria-pressed="range === '7d'" @click="changeRange('7d')">近 7 日</button>
+                <button type="button" :class="{active: range === '30d'}" :aria-pressed="range === '30d'" @click="changeRange('30d')">近 30 日</button>
+            </div>
+        </section>
+
+        <section class="dashboard-overview__metric-grid">
+            <div class="dashboard-overview__metric" v-for="metric in metrics" :key="metric.key">
+                <div class="dashboard-overview__metric-label" v-text="metric.label"></div>
+                <div class="dashboard-overview__metric-value" v-text="formatNumber(metric.value)"></div>
+                <div class="dashboard-overview__metric-foot">
+                    <span :class="metric.rate >= 0 ? 'dashboard-overview__up' : 'dashboard-overview__down'" v-text="formatRate(metric.rate)"></span>
+                    <span v-text="metric.desc"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-overview__content-grid">
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head dashboard-overview__trend-head">
+                    <div>
+                        <h2 class="dashboard-overview__panel-title" v-text="rangeText + '访问与搜索趋势'"></h2>
+                        <span class="dashboard-overview__panel-sub">访问量 / 访客数 / 搜索次数</span>
+                    </div>
+                    <div class="dashboard-overview__trend-actions">
+                        <button type="button" :class="['dashboard-overview__chart-switch', {active: chartType === 'line'}]" :aria-pressed="chartType === 'line'" @click="chartType = 'line'">折线图</button>
+                        <button type="button" :class="['dashboard-overview__chart-switch', {active: chartType === 'bar'}]" :aria-pressed="chartType === 'bar'" @click="chartType = 'bar'">柱状图</button>
+                    </div>
+                </div>
+                <div class="dashboard-overview__trend-toolbar">
+                    <label class="dashboard-overview__metric-toggle" v-for="metric in trendMetrics" :key="metric.key">
+                        <input type="checkbox" v-model="metric.enabled">
+                        <span class="dashboard-overview__dot" :style="{background: metric.color}"></span>
+                        <span v-text="metric.label"></span>
+                    </label>
+                </div>
+                <div class="dashboard-overview__trend-chart">
+                    <div v-if="loading.trend" class="dashboard-overview__chart-empty">加载中...</div>
+                    <div v-else-if="trendList.length === 0" class="dashboard-overview__chart-empty">暂无趋势数据</div>
+                    <div v-else-if="selectedTrendMetrics.length === 0" class="dashboard-overview__chart-empty">请至少选择一个指标</div>
+                    <svg v-else class="dashboard-overview__chart-svg" viewBox="0 0 720 280" preserveAspectRatio="none">
+                        <line v-for="(tick, tickIndex) in chartTicks" :key="'grid-' + tickIndex" x1="44" x2="700" :y1="chartY(tick)" :y2="chartY(tick)" class="dashboard-overview__chart-grid"></line>
+                        <text v-for="(tick, tickIndex) in chartTicks" :key="'label-' + tickIndex" x="36" :y="chartY(tick) + 4" text-anchor="end" class="dashboard-overview__chart-axis" v-text="formatChartTick(tick)"></text>
+                        <g v-if="chartType === 'line'">
+                            <polyline v-for="metric in selectedTrendMetrics" :key="metric.key" :points="linePoints(metric.key)" fill="none" :stroke="metric.color" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                            <g v-for="metric in selectedTrendMetrics" :key="metric.key + '-dots'">
+                                <circle v-for="(item, index) in trendList" :key="metric.key + index" :cx="chartX(index)" :cy="chartY(item[metric.key])" r="4" :fill="metric.color"></circle>
+                            </g>
+                        </g>
+                        <g v-else>
+                            <g v-for="(item, index) in trendList" :key="item.date">
+                                <rect v-for="(metric, metricIndex) in selectedTrendMetrics" :key="metric.key" :x="barX(index, metricIndex)" :y="chartY(item[metric.key])" :width="barWidth" :height="chartBottom - chartY(item[metric.key])" rx="3" :fill="metric.color"></rect>
+                            </g>
+                        </g>
+                        <text v-for="(item, index) in trendList" v-if="index % chartLabelStep === 0 || index === trendList.length - 1" :key="'date-' + item.date" :x="chartX(index)" y="268" text-anchor="middle" class="dashboard-overview__chart-axis" v-text="formatChartDate(item.date)"></text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head">
+                    <h2 class="dashboard-overview__panel-title" v-text="rangeText + '来源统计'"></h2>
+                    <span class="dashboard-overview__panel-sub">Top 5</span>
+                </div>
+                <div v-if="loading.source" class="dashboard-overview__source-item">
+                    <span class="dashboard-overview__muted">加载中...</span>
+                </div>
+                <div v-else-if="sourceList.length === 0" class="dashboard-overview__source-item">
+                    <span class="dashboard-overview__muted">暂无来源数据</span>
+                </div>
+                <div v-else>
+                    <div class="dashboard-overview__source-item" v-for="item in sourceList" :key="item.source + item.referer">
+                        <span class="dashboard-overview__source-name" v-text="item.source || '未知来源'"></span>
+                        <div class="dashboard-overview__bar"><span :style="{width: sourcePercent(item) + '%'}"></span></div>
+                        <span class="dashboard-overview__source-count" v-text="formatNumber(item.visit_count)"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-overview__bottom-grid">
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head">
+                    <h2 class="dashboard-overview__panel-title" v-text="rangeText + '搜索关键词排行'"></h2>
+                    <span class="dashboard-overview__panel-sub">按搜索次数排序</span>
+                </div>
+                <div class="dashboard-overview__scroll-table dashboard-overview__rank-table" role="region" aria-label="搜索关键词排行表格" tabindex="0">
+                    <table>
+                        <thead><tr><th>排名</th><th>关键词</th><th>搜索次数</th><th>访客数</th></tr></thead>
+                        <tbody v-if="loading.searchRank">
+                            <tr><td colspan="4" class="dashboard-overview__muted">加载中...</td></tr>
+                        </tbody>
+                        <tbody v-else-if="searchRankList.length === 0">
+                            <tr><td colspan="4" class="dashboard-overview__muted">暂无搜索排行数据</td></tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr v-for="(item, index) in searchRankList" :key="item.keyword">
+                                <td><span class="dashboard-overview__rank" :class="{'dashboard-overview__rank-hot': index < 3}" v-text="index + 1"></span></td>
+                                <td><span class="dashboard-overview__keyword dashboard-overview__keyword-ellipsis" :title="item.keyword || '-'" v-text="item.keyword || '-'"></span></td>
+                                <td v-text="formatNumber(item.search_count)"></td>
+                                <td v-text="formatNumber(item.visitor_count)"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head dashboard-overview__panel-head--actions">
+                    <h2 class="dashboard-overview__panel-title">无结果记录</h2>
+                    <div class="dashboard-overview__panel-actions">
+                        <div class="dashboard-overview__source-tabs" role="group" aria-label="无结果记录来源">
+                            <button type="button" :class="{active: zeroSourceGroup === 'all'}" :aria-pressed="zeroSourceGroup === 'all'" @click="changeProblemSource('zero', 'all')">全部</button>
+                            <button type="button" :class="{active: zeroSourceGroup === 'web'}" :aria-pressed="zeroSourceGroup === 'web'" @click="changeProblemSource('zero', 'web')">网页</button>
+                            <button type="button" :class="{active: zeroSourceGroup === 'robot'}" :aria-pressed="zeroSourceGroup === 'robot'" @click="changeProblemSource('zero', 'robot')">机器人</button>
+                        </div>
+                        <button class="dashboard-overview__clear-all" type="button" :disabled="loading.zeroClear" @click="clearZeroResults" v-text="loading.zeroClear ? '清空中...' : '清空当前' "></button>
+                    </div>
+                </div>
+                <div class="dashboard-overview__scroll-table dashboard-overview__zero-table" role="region" aria-label="无结果记录表格" tabindex="0">
+                    <table>
+                        <thead><tr><th>关键词</th><th>来源</th><th>次数</th><th>最近搜索</th><th>操作</th></tr></thead>
+                        <tbody v-if="loading.zeroRank">
+                            <tr><td colspan="5" class="dashboard-overview__muted">加载中...</td></tr>
+                        </tbody>
+                        <tbody v-else-if="zeroRankList.length === 0">
+                            <tr><td colspan="5" class="dashboard-overview__muted">暂无无结果记录</td></tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr v-for="item in zeroRankList" :key="item.keyword">
+                                <td><button class="dashboard-overview__keyword dashboard-overview__keyword-ellipsis dashboard-overview__keyword-button" type="button" :title="item.keyword || '-'" @click="showKeyword(item.keyword)" v-text="item.keyword || '-'"></button></td>
+                                <td v-text="item.source_group || '-'"></td>
+                                <td v-text="formatNumber(item.search_count)"></td>
+                                <td class="dashboard-overview__muted" v-text="formatTime(item.last_search_time)"></td>
+                                <td><button class="dashboard-overview__link-action" type="button" @click="clearZeroKeyword(item)">删除</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head">
+                    <h2 class="dashboard-overview__panel-title" v-text="rangeText + '热门访问路径'"></h2>
+                    <span class="dashboard-overview__panel-sub">Top 5</span>
+                </div>
+                <div class="dashboard-overview__scroll-table dashboard-overview__path-table" role="region" aria-label="热门访问路径表格" tabindex="0">
+                    <table>
+                        <thead><tr><th>路径</th><th>访问量</th><th>访客数</th></tr></thead>
+                        <tbody v-if="loading.hotPath">
+                            <tr><td colspan="3" class="dashboard-overview__muted">加载中...</td></tr>
+                        </tbody>
+                        <tbody v-else-if="hotPathList.length === 0">
+                            <tr><td colspan="3" class="dashboard-overview__muted">暂无热门路径数据</td></tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr v-for="item in hotPathList" :key="item.path">
+                                <td><div class="dashboard-overview__path" v-text="item.path || '-'"></div></td>
+                                <td v-text="formatNumber(item.visit_count)"></td>
+                                <td v-text="formatNumber(item.visitor_count)"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head dashboard-overview__panel-head--actions">
+                    <h2 class="dashboard-overview__panel-title">无效链接记录</h2>
+                    <div class="dashboard-overview__panel-actions">
+                        <div class="dashboard-overview__source-tabs" role="group" aria-label="无效链接记录来源">
+                            <button type="button" :class="{active: invalidSourceGroup === 'all'}" :aria-pressed="invalidSourceGroup === 'all'" @click="changeProblemSource('invalid', 'all')">全部</button>
+                            <button type="button" :class="{active: invalidSourceGroup === 'web'}" :aria-pressed="invalidSourceGroup === 'web'" @click="changeProblemSource('invalid', 'web')">网页</button>
+                            <button type="button" :class="{active: invalidSourceGroup === 'robot'}" :aria-pressed="invalidSourceGroup === 'robot'" @click="changeProblemSource('invalid', 'robot')">机器人</button>
+                        </div>
+                        <button class="dashboard-overview__clear-all" type="button" :disabled="loading.invalidClear" @click="clearInvalidLinks" v-text="loading.invalidClear ? '清空中...' : '清空当前'"></button>
+                    </div>
+                </div>
+                <div class="dashboard-overview__scroll-table dashboard-overview__invalid-table" role="region" aria-label="无效链接记录表格" tabindex="0">
+                    <table>
+                        <thead><tr><th>资源标题</th><th>网盘</th><th>来源</th><th>检测说明</th><th>检测时间</th><th>操作</th></tr></thead>
+                        <tbody v-if="loading.invalidLinks">
+                            <tr><td colspan="6" class="dashboard-overview__muted">加载中...</td></tr>
+                        </tbody>
+                        <tbody v-else-if="invalidLinkList.length === 0">
+                            <tr><td colspan="6" class="dashboard-overview__muted">暂无无效链接记录</td></tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr v-for="item in invalidLinkList" :key="item.detect_cache_id">
+                                <td><button class="dashboard-overview__keyword dashboard-overview__keyword-ellipsis dashboard-overview__keyword-button" type="button" :title="item.url || item.title || '-'" @click="showKeyword(item.url || item.title)" v-text="item.title || item.url || '-'"></button></td>
+                                <td v-text="item.pan_name || '-'"></td>
+                                <td v-text="item.source_group || '-'"></td>
+                                <td><span class="dashboard-overview__keyword-ellipsis" :title="item.message || '-'" v-text="item.message || '-'"></span></td>
+                                <td class="dashboard-overview__muted" v-text="formatTime(item.checked_at)"></td>
+                                <td><button class="dashboard-overview__link-action" type="button" @click="clearInvalidLink(item)">删除</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-overview__panel">
+                <div class="dashboard-overview__panel-head">
+                    <h2 class="dashboard-overview__panel-title">最近搜索记录</h2>
+                    <span class="dashboard-overview__panel-sub">实时动态</span>
+                </div>
+                <div class="dashboard-overview__scroll-table dashboard-overview__recent-table" role="region" aria-label="最近搜索记录表格" tabindex="0">
+                    <table>
+                        <thead><tr><th>时间</th><th>关键词</th><th>资源数量</th><th>来源</th></tr></thead>
+                        <tbody v-if="loading.recentSearch">
+                            <tr><td colspan="4" class="dashboard-overview__muted">加载中...</td></tr>
+                        </tbody>
+                        <tbody v-else-if="recentSearchList.length === 0">
+                            <tr><td colspan="4" class="dashboard-overview__muted">暂无最近搜索记录</td></tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr v-for="item in recentSearchList" :key="item.create_time + item.keyword">
+                                <td class="dashboard-overview__muted" v-text="formatTime(item.create_time)"></td>
+                                <td><span class="dashboard-overview__keyword" v-text="item.keyword || '-'"></span></td>
+                                <td v-text="formatNumber(item.result_count)"></td>
+                                <td v-text="formatSource(item.source)"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"chartType":"line","headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"hotPathList":[{"path":"/","visit_count":4821,"visitor_count":2684},{"path":"/s/仙逆.html","visit_count":1532,"visitor_count":926},{"path":"/d/29.html","visit_count":986,"visitor_count":641}],"instanceOwnerUnbinding":false,"invalidLinkList":[{"detect_cache_id":2,"title":"[DEMO] 迅雷永久资源 010","pan_name":"迅雷网盘","source_group":"web","message":"分享链接已失效","checked_at":"2026-07-20 20:12:00"},{"detect_cache_id":1,"title":"[DEMO] 百度永久资源 023","pan_name":"百度网盘","source_group":"robot","message":"提取码校验失败","checked_at":"2026-07-20 19:48:00"}],"invalidSourceGroup":"all","loading":{"hotPath":false,"invalidClear":false,"invalidLinks":false,"recentSearch":false,"searchRank":false,"source":false,"summary":false,"trend":false,"zeroClear":false,"zeroRank":false},"range":"7d","recentSearchList":[{"keyword":"仙逆","result_count":8,"source":"web","create_time":"2026-07-20 16:10:00"},{"keyword":"凡人修仙传","result_count":7,"source":"robot","create_time":"2026-07-20 17:11:00"},{"keyword":"吞噬星空","result_count":6,"source":"web","create_time":"2026-07-20 18:12:00"},{"keyword":"短剧合集","result_count":5,"source":"robot","create_time":"2026-07-20 19:13:00"},{"keyword":"庆余年","result_count":4,"source":"web","create_time":"2026-07-20 20:14:00"}],"searchRankList":[{"keyword":"仙逆","search_count":682,"visitor_count":418},{"keyword":"凡人修仙传","search_count":514,"visitor_count":336},{"keyword":"吞噬星空","search_count":437,"visitor_count":285},{"keyword":"短剧合集","search_count":356,"visitor_count":219},{"keyword":"庆余年","search_count":291,"visitor_count":176}],"sourceList":[{"source":"直接访问","visit_count":4256},{"source":"搜索引擎","visit_count":3189},{"source":"公众号","visit_count":2064},{"source":"社群分享","visit_count":1337}],"summary":{"range":"7d","visits":{"value":12846,"rate":18.6},"visitors":{"value":7264,"rate":12.3},"new_visitors":{"value":2189,"rate":9.8},"searches":{"value":9431,"rate":21.4}},"trendList":[{"date":"2026-07-14","visit_count":1320,"visitor_count":780,"search_count":910},{"date":"2026-07-15","visit_count":1490,"visitor_count":875,"search_count":1040},{"date":"2026-07-16","visit_count":1660,"visitor_count":970,"search_count":1170},{"date":"2026-07-17","visit_count":1830,"visitor_count":1065,"search_count":1300},{"date":"2026-07-18","visit_count":2000,"visitor_count":1160,"search_count":1430},{"date":"2026-07-19","visit_count":2170,"visitor_count":1255,"search_count":1560},{"date":"2026-07-20","visit_count":2340,"visitor_count":1350,"search_count":1690}],"trendMetrics":[{"color":"#2563eb","enabled":true,"key":"visit_count","label":"访问量"},{"color":"#16a34a","enabled":true,"key":"visitor_count","label":"访客数"},{"color":"#f59e0b","enabled":true,"key":"search_count","label":"搜索次数"}],"zeroRankList":[{"keyword":"新上映电影合集","source_group":"web","search_count":28,"last_search_time":"2026-07-20 20:05:00"},{"keyword":"经典港剧修复版","source_group":"robot","search_count":19,"last_search_time":"2026-07-20 19:42:00"}],"zeroSourceGroup":"all"},"responses":[{"data":{"code":200,"message":"数据获取成功","data":{"range":"7d","visits":{"value":12846,"rate":18.6},"visitors":{"value":7264,"rate":12.3},"new_visitors":{"value":2189,"rate":9.8},"searches":{"value":9431,"rate":21.4}}},"method":"post","url":"/admin/index/dashboardSummary"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"7d","list":[{"date":"2026-07-14","visit_count":1320,"visitor_count":780,"search_count":910},{"date":"2026-07-15","visit_count":1490,"visitor_count":875,"search_count":1040},{"date":"2026-07-16","visit_count":1660,"visitor_count":970,"search_count":1170},{"date":"2026-07-17","visit_count":1830,"visitor_count":1065,"search_count":1300},{"date":"2026-07-18","visit_count":2000,"visitor_count":1160,"search_count":1430},{"date":"2026-07-19","visit_count":2170,"visitor_count":1255,"search_count":1560},{"date":"2026-07-20","visit_count":2340,"visitor_count":1350,"search_count":1690}]}},"method":"post","url":"/admin/index/dashboardTrend"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"7d","list":[{"source":"直接访问","visit_count":4256},{"source":"搜索引擎","visit_count":3189},{"source":"公众号","visit_count":2064},{"source":"社群分享","visit_count":1337}]}},"method":"post","url":"/admin/index/sourceRank"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"7d","list":[{"keyword":"仙逆","search_count":682,"visitor_count":418},{"keyword":"凡人修仙传","search_count":514,"visitor_count":336},{"keyword":"吞噬星空","search_count":437,"visitor_count":285},{"keyword":"短剧合集","search_count":356,"visitor_count":219},{"keyword":"庆余年","search_count":291,"visitor_count":176}]}},"method":"post","url":"/admin/index/searchRank"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"all","source_group":"all","list":[{"keyword":"新上映电影合集","source_group":"web","search_count":28,"last_search_time":"2026-07-20 20:05:00"},{"keyword":"经典港剧修复版","source_group":"robot","search_count":19,"last_search_time":"2026-07-20 19:42:00"}]}},"method":"post","url":"/admin/index/zeroResultRank"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"all","source_group":"all","list":[{"detect_cache_id":2,"title":"[DEMO] 迅雷永久资源 010","pan_name":"迅雷网盘","source_group":"web","message":"分享链接已失效","checked_at":"2026-07-20 20:12:00"},{"detect_cache_id":1,"title":"[DEMO] 百度永久资源 023","pan_name":"百度网盘","source_group":"robot","message":"提取码校验失败","checked_at":"2026-07-20 19:48:00"}]}},"method":"post","url":"/admin/index/invalidLinkRank"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"7d","list":[{"path":"/","visit_count":4821,"visitor_count":2684},{"path":"/s/仙逆.html","visit_count":1532,"visitor_count":926},{"path":"/d/29.html","visit_count":986,"visitor_count":641}]}},"method":"post","url":"/admin/index/hotPath"},{"data":{"code":200,"message":"数据获取成功","data":{"range":"all","list":[{"keyword":"仙逆","result_count":8,"source":"web","create_time":"2026-07-20 16:10:00"},{"keyword":"凡人修仙传","result_count":7,"source":"robot","create_time":"2026-07-20 17:11:00"},{"keyword":"吞噬星空","result_count":6,"source":"web","create_time":"2026-07-20 18:12:00"},{"keyword":"短剧合集","result_count":5,"source":"robot","create_time":"2026-07-20 19:13:00"},{"keyword":"庆余年","result_count":4,"source":"web","create_time":"2026-07-20 20:14:00"}]}},"method":"post","url":"/admin/index/recentSearch"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    range: '7d',
+                    chartType: 'line',
+                    trendMetrics: [
+                        {key: 'visit_count', label: '访问量', color: '#2563eb', enabled: true},
+                        {key: 'visitor_count', label: '访客数', color: '#16a34a', enabled: true},
+                        {key: 'search_count', label: '搜索次数', color: '#f59e0b', enabled: true}
+                    ],
+                    summary: {},
+                    trendList: [],
+                    sourceList: [],
+                    searchRankList: [],
+                    zeroRankList: [],
+                    invalidLinkList: [],
+                    zeroSourceGroup: 'all',
+                    invalidSourceGroup: 'all',
+                    hotPathList: [],
+                    recentSearchList: [],
+                    loading: {
+                        summary: false,
+                        trend: false,
+                        source: false,
+                        searchRank: false,
+                        zeroRank: false,
+                        invalidLinks: false,
+                        hotPath: false,
+                        recentSearch: false,
+                        zeroClear: false,
+                        invalidClear: false
+                    }
+                }
+            },
+            computed: {
+                rangeText: function () {
+                    var texts = {today: '今日', '7d': '近 7 日', '30d': '近 30 日'};
+                    return texts[this.range] || '近 7 日';
+                },
+                metrics: function () {
+                    var visits = this.summary.visits || {};
+                    var visitors = this.summary.visitors || {};
+                    var newVisitors = this.summary.new_visitors || {};
+                    var searches = this.summary.searches || {};
+                    var compareText = this.range === 'today' ? '较昨日' : (this.range === '30d' ? '较前 30 日' : '较前 7 日');
+                    return [
+                        {key: 'visits', label: this.rangeText + '访问量', value: visits.value || this.summary.today_visits || 0, rate: this.pickRate(visits.rate, this.summary.today_visits_rate), desc: compareText},
+                        {key: 'visitors', label: this.rangeText + '访客数', value: visitors.value || this.summary.today_visitors || 0, rate: this.pickRate(visitors.rate, this.summary.today_visitors_rate), desc: compareText},
+                        {key: 'new_visitors', label: this.rangeText + '新访客', value: newVisitors.value || this.summary.today_new_visitors || 0, rate: this.pickRate(newVisitors.rate, this.summary.today_new_visitors_rate), desc: compareText},
+                        {key: 'searches', label: this.rangeText + '搜索次数', value: searches.value || this.summary.today_searches || 0, rate: this.pickRate(searches.rate, this.summary.today_searches_rate), desc: compareText}
+                    ];
+                },
+                maxSourceVisits: function () {
+                    var max = 0;
+                    this.sourceList.forEach(function (item) {
+                        max = Math.max(max, Number(item.visit_count) || 0);
+                    });
+                    return max || 1;
+                },
+                selectedTrendMetrics: function () {
+                    return this.trendMetrics.filter(function (metric) {
+                        return metric.enabled;
+                    });
+                },
+                chartValues: function () {
+                    var values = [];
+                    var that = this;
+                    this.trendList.forEach(function (item) {
+                        that.selectedTrendMetrics.forEach(function (metric) {
+                            values.push(Number(item[metric.key]) || 0);
+                        });
+                    });
+                    return values.length ? values : [0];
+                },
+                chartRawMax: function () {
+                    var max = 0;
+                    this.chartValues.forEach(function (value) {
+                        max = Math.max(max, value);
+                    });
+                    return max;
+                },
+                chartMaxStep: function () {
+                    return Math.max(1, Math.ceil(this.chartRawMax / 4));
+                },
+                chartMax: function () {
+                    return this.chartMaxStep * 4;
+                },
+                chartBarGroupWidth: function () {
+                    return 656 / Math.max(this.trendList.length, 1);
+                },
+                barWidth: function () {
+                    var selected = Math.max(this.selectedTrendMetrics.length, 1);
+                    return Math.max(4, Math.min(18, (this.chartBarGroupWidth - 10) / selected));
+                },
+                chartLabelStep: function () {
+                    return Math.max(Math.ceil(this.trendList.length / 8), 1);
+                },
+                chartTicks: function () {
+                    var ticks = [];
+                    var step = this.chartMaxStep;
+                    for (var i = 4; i >= 0; i--) {
+                        ticks.push(step * i);
+                    }
+                    return ticks;
+                },
+                chartBottom: function () {
+                    return 248;
+                }
+            },
+            created() {
+                this.fetchSummary();
+                this.fetchRangeData();
+            },
+            methods: {
+                changeRange: function (range) {
+                    if (this.range === range) {
+                        return;
+                    }
+                    this.range = range;
+                    this.fetchSummary();
+                    this.fetchRangeData();
+                },
+                fetchSummary: function () {
+                    this.fetchDashboard('dashboardSummary', {range: this.range}, 'summary', function (data) {
+                        this.summary = data || {};
+                    });
+                },
+                fetchRangeData: function () {
+                    var params = {range: this.range, limit: 5};
+                    this.fetchDashboard('dashboardTrend', {range: this.range}, 'trend', function (data) {
+                        this.trendList = this.pickList(data);
+                    });
+                    this.fetchDashboard('sourceRank', params, 'source', function (data) {
+                        this.sourceList = this.pickList(data);
+                    });
+                    this.fetchDashboard('searchRank', params, 'searchRank', function (data) {
+                        this.searchRankList = this.pickList(data);
+                    });
+                    this.fetchDashboard('zeroResultRank', {source_group: this.zeroSourceGroup, limit: 20}, 'zeroRank', function (data) {
+                        this.zeroRankList = this.pickList(data);
+                    });
+                    this.fetchDashboard('invalidLinkRank', {source_group: this.invalidSourceGroup, limit: 20}, 'invalidLinks', function (data) {
+                        this.invalidLinkList = this.pickList(data);
+                    });
+                    this.fetchDashboard('hotPath', params, 'hotPath', function (data) {
+                        this.hotPathList = this.pickList(data);
+                    });
+                    this.fetchDashboard('recentSearch', {limit: 5}, 'recentSearch', function (data) {
+                        this.recentSearchList = this.pickList(data);
+                    });
+                },
+                fetchDashboard: function (action, params, loadingKey, done) {
+                    var that = this;
+                    this.loading[loadingKey] = true;
+                    axios.post('/admin/index/' + action, Object.assign({}, PostBase, params || {})).then(function (res) {
+                        var body = res.data || {};
+                        var successCode = typeof CODE_SUCCESS === 'undefined' ? 200 : CODE_SUCCESS;
+                        if (body.code === successCode || body.code === 200) {
+                            done.call(that, body.data || {});
+                            return;
+                        }
+                        that.$message.error(body.message || '数据看板加载失败');
+                        done.call(that, {});
+                    }).catch(function (error) {
+                        var message = error && error.response && error.response.data && error.response.data.message
+                            ? error.response.data.message
+                            : '数据看板加载失败';
+                        that.$message.error(message);
+                        done.call(that, {});
+                    }).finally(function () {
+                        that.loading[loadingKey] = false;
+                    });
+                },
+                pickList: function (data) {
+                    if (Array.isArray(data)) {
+                        return data;
+                    }
+                    if (data && Array.isArray(data.list)) {
+                        return data.list;
+                    }
+                    return [];
+                },
+                pickRate: function (value, fallback) {
+                    var rate = value;
+                    if (rate === undefined || rate === null || rate === '') {
+                        rate = fallback;
+                    }
+                    rate = Number(rate);
+                    return isNaN(rate) ? 0 : rate;
+                },
+                formatNumber: function (value) {
+                    value = Number(value) || 0;
+                    return value.toLocaleString('zh-CN');
+                },
+                formatRate: function (value) {
+                    value = this.pickRate(value, 0);
+                    var sign = value > 0 ? '+' : '';
+                    return sign + value.toFixed(1) + '%';
+                },
+                formatTime: function (value) {
+                    value = Number(value) || 0;
+                    if (!value) {
+                        return '-';
+                    }
+                    var date = new Date(value * 1000);
+                    var month = this.pad(date.getMonth() + 1);
+                    var day = this.pad(date.getDate());
+                    var hour = this.pad(date.getHours());
+                    var minute = this.pad(date.getMinutes());
+                    return month + '-' + day + ' ' + hour + ':' + minute;
+                },
+                formatSource: function (value) {
+                    var sources = {local: '本地搜索', web: '全网搜'};
+                    return sources[value] || value || '-';
+                },
+                formatChartTick: function (value) {
+                    return this.formatNumber(value);
+                },
+                formatChartDate: function (value) {
+                    return value ? value.slice(5) : '-';
+                },
+                chartX: function (index) {
+                    if (this.trendList.length <= 1) {
+                        return 360;
+                    }
+                    return 44 + index * (656 / (this.trendList.length - 1));
+                },
+                chartY: function (value) {
+                    var max = this.chartMax;
+                    var height = 208;
+                    var bottom = this.chartBottom;
+                    value = Number(value) || 0;
+                    return bottom - Math.round((value / max) * height);
+                },
+                linePoints: function (key) {
+                    var that = this;
+                    return this.trendList.map(function (item, index) {
+                        return that.chartX(index) + ',' + that.chartY(item[key]);
+                    }).join(' ');
+                },
+                barX: function (index, metricIndex) {
+                    var groupWidth = this.chartBarGroupWidth;
+                    var totalWidth = this.barWidth * this.selectedTrendMetrics.length;
+                    var offset = Math.max(0, (groupWidth - totalWidth) / 2);
+                    return 44 + index * groupWidth + offset + metricIndex * this.barWidth;
+                },
+                sourcePercent: function (item) {
+                    var value = Number(item.visit_count) || 0;
+                    return Math.max(6, Math.round(value / this.maxSourceVisits * 100));
+                },
+                showKeyword: function (keyword) {
+                    if (!keyword) {
+                        return;
+                    }
+                    this.$prompt('可在下方查看并复制完整内容', '完整内容', {
+                        inputValue: keyword,
+                        inputType: 'textarea',
+                        showCancelButton: false,
+                        confirmButtonText: '关闭',
+                        closeOnClickModal: true,
+                        customClass: 'dashboard-overview__content-dialog'
+                    }).catch(function () {});
+                },
+                changeProblemSource: function (type, group) {
+                    if (type === 'zero') {
+                        this.zeroSourceGroup = group;
+                        this.fetchDashboard('zeroResultRank', {source_group: group, limit: 20}, 'zeroRank', function (data) {
+                            this.zeroRankList = this.pickList(data);
+                        });
+                        return;
+                    }
+                    this.invalidSourceGroup = group;
+                    this.fetchDashboard('invalidLinkRank', {source_group: group, limit: 20}, 'invalidLinks', function (data) {
+                        this.invalidLinkList = this.pickList(data);
+                    });
+                },
+                clearZeroKeyword: function (item) {
+                    var that = this;
+                    if (!item || !item.keyword) {
+                        return;
+                    }
+                    this.$confirm('确认删除该无结果关键词记录吗？', '删除记录', {
+                        confirmButtonText: '删除',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        return axios.post('/admin/index/clearZeroResultKeyword', Object.assign({}, PostBase, {
+                            keyword: item.keyword,
+                            source_group: that.zeroSourceGroup
+                        }));
+                    }).then(function () {
+                        that.changeProblemSource('zero', that.zeroSourceGroup);
+                    }).catch(function () {});
+                },
+                clearZeroResults: function () {
+                    var that = this;
+                    if (this.loading.zeroClear) {
+                        return;
+                    }
+                    this.$confirm('确认清空当前筛选下的无结果记录吗？', '清空无结果记录', {
+                        confirmButtonText: '确认清空',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        that.loading.zeroClear = true;
+                        return axios.post('/admin/index/clearZeroResultRank', Object.assign({}, PostBase, {source_group: that.zeroSourceGroup}));
+                    }).then(function (res) {
+                        var body = res.data || {};
+                        var successCode = typeof CODE_SUCCESS === 'undefined' ? 200 : CODE_SUCCESS;
+                        if (body.code === successCode || body.code === 200) {
+                            that.changeProblemSource('zero', that.zeroSourceGroup);
+                        }
+                    }).catch(function () {
+                    }).finally(function () {
+                        that.loading.zeroClear = false;
+                    });
+                },
+                clearInvalidLink: function (item) {
+                    var that = this;
+                    if (!item || !item.detect_cache_id) {
+                        return;
+                    }
+                    this.$confirm('确认删除该无效链接记录吗？', '删除记录', {
+                        confirmButtonText: '删除',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        return axios.post('/admin/index/clearInvalidLinkRecord', Object.assign({}, PostBase, {
+                            detect_cache_id: item.detect_cache_id
+                        }));
+                    }).then(function () {
+                        that.changeProblemSource('invalid', that.invalidSourceGroup);
+                    }).catch(function () {});
+                },
+                clearInvalidLinks: function () {
+                    var that = this;
+                    if (this.loading.invalidClear) {
+                        return;
+                    }
+                    this.$confirm('确认清空当前筛选下的无效链接记录吗？', '清空无效链接记录', {
+                        confirmButtonText: '确认清空',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        that.loading.invalidClear = true;
+                        return axios.post('/admin/index/clearInvalidLinkRank', Object.assign({}, PostBase, {source_group: that.invalidSourceGroup}));
+                    }).then(function () {
+                        that.changeProblemSource('invalid', that.invalidSourceGroup);
+                    }).catch(function () {
+                    }).finally(function () {
+                        that.loading.invalidClear = false;
+                    });
+                },
+                pad: function (value) {
+                    value = String(value);
+                    return value.length < 2 ? '0' + value : value;
+                }
+            }
+        });
+    </script>
+</html>

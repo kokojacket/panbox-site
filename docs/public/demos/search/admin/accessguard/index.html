@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>防护规则</title>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'3'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'3-126'"
+        :collapse="false" :default-openeds="['3']">
+                <el-menu-item index="107"
+            onclick="location.href='/demos/search/admin/conf/base.html';" >
+            <i class="el-icon-s-operation" ></i>
+            站点配置        </el-menu-item>
+                                <el-menu-item index="120"
+            onclick="location.href='/demos/search/admin/accesslog/index.html';" >
+            <i class="el-icon-view" ></i>
+            访问日志        </el-menu-item>
+                                <el-menu-item index="125"
+            onclick="location.href='/demos/search/admin/searchlog/index.html';" >
+            <i class="el-icon-search" ></i>
+            搜索日志        </el-menu-item>
+                                <el-menu-item index="121"
+            onclick="location.href='/demos/search/admin/diagnosticlog/index.html';" >
+            <i class="el-icon-warning-outline" ></i>
+            诊断日志        </el-menu-item>
+                                <el-menu-item index="126"
+            onclick="location.href='/demos/search/admin/accessguard/index.html';" class="is-active" >
+            <i class="el-icon-lock" ></i>
+            防护规则        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'3-126'"
+        :collapse="false" :default-openeds="['3']">
+                <el-menu-item index="mobile-107"
+            onclick="location.href='/demos/search/admin/conf/base.html';" >
+            <i class="el-icon-s-operation" ></i>
+            站点配置        </el-menu-item>
+                                <el-menu-item index="mobile-120"
+            onclick="location.href='/demos/search/admin/accesslog/index.html';" >
+            <i class="el-icon-view" ></i>
+            访问日志        </el-menu-item>
+                                <el-menu-item index="mobile-125"
+            onclick="location.href='/demos/search/admin/searchlog/index.html';" >
+            <i class="el-icon-search" ></i>
+            搜索日志        </el-menu-item>
+                                <el-menu-item index="mobile-121"
+            onclick="location.href='/demos/search/admin/diagnosticlog/index.html';" >
+            <i class="el-icon-warning-outline" ></i>
+            诊断日志        </el-menu-item>
+                                <el-menu-item index="mobile-126"
+            onclick="location.href='/demos/search/admin/accessguard/index.html';" class="is-active" >
+            <i class="el-icon-lock" ></i>
+            防护规则        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--accessguard-index">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>防护规则</h1>
+                                                    </header>
+                        
+
+    <el-alert title="规则说明" type="info" :closable="false" show-icon style="margin-bottom:16px;">
+        <div style="line-height:1.8;color:#606266;">
+            <div>全站防护作用于所有前台访问：手动封禁命中返回 403，爬虫限流命中返回 429，不写入黑名单。</div>
+            <div>搜索防护只作用于本地搜索和全网搜，优先进入缓存模式，保护数据库和外部搜索线路。</div>
+        </div>
+    </el-alert>
+
+    <el-form :model="suspiciousConfig" label-width="200px" size="small">
+        <el-tabs type="border-card">
+            <el-tab-pane label="观测规则">
+                <el-form-item label="IP 统计窗口(分钟)">
+                    <el-input-number v-model="suspiciousConfig.ip_window_minutes" :min="1" :max="10080"></el-input-number>
+                </el-form-item>
+                <el-form-item label="IP 搜索阈值">
+                    <el-input-number v-model="suspiciousConfig.ip_search_threshold" :min="1" :max="100000"></el-input-number>
+                </el-form-item>
+                <el-form-item label="UA 统计窗口(分钟)">
+                    <el-input-number v-model="suspiciousConfig.ua_window_minutes" :min="1" :max="10080"></el-input-number>
+                </el-form-item>
+                <el-form-item label="UA 搜索阈值">
+                    <el-input-number v-model="suspiciousConfig.ua_search_threshold" :min="1" :max="100000"></el-input-number>
+                </el-form-item>
+                <el-form-item label="UA 可疑关键词">
+                    <el-input type="textarea" :rows="6" v-model="suspiciousConfig.ua_keywords" placeholder="一行一个关键词"></el-input>
+                </el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="全站防护">
+                <el-alert title="全站手动封禁命中后返回 403；爬虫限流命中后返回 429，只降速不写黑名单。" type="warning" :closable="false" show-icon style="margin-bottom:14px;"></el-alert>
+                <el-form-item label="开启爬虫限流"><el-switch v-model="suspiciousConfig.crawler_guard_enabled" :active-value="1" :inactive-value="0"></el-switch></el-form-item>
+                <el-form-item label="同 IP+UA 每分钟上限"><el-input-number v-model="suspiciousConfig.crawler_guard_ip_ua_per_minute" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="同类爬虫 UA 每分钟上限"><el-input-number v-model="suspiciousConfig.crawler_guard_ua_per_minute" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="爬虫 UA 关键词"><el-input type="textarea" :rows="6" v-model="suspiciousConfig.crawler_guard_ua_keywords" placeholder="一行一个关键词，如 googlebot / bingbot"></el-input></el-form-item>
+                <el-form-item label="全站禁止 IP"><el-input type="textarea" :rows="5" v-model="suspiciousConfig.blocked_ips" placeholder="一行一个 IP / CIDR，命中后全站返回 403"></el-input></el-form-item>
+                <el-form-item label="全站禁止 User-Agent"><el-input type="textarea" :rows="5" v-model="suspiciousConfig.blocked_user_agents" placeholder="一行一个 UA 关键词，命中后全站返回 403"></el-input></el-form-item>
+                <el-form-item label="禁止访问提示"><el-input v-model="suspiciousConfig.blocked_access_message" maxlength="200" show-word-limit placeholder="访问已被禁止"></el-input></el-form-item>
+                <el-form-item label="robots.txt"><el-input type="textarea" :rows="9" v-model="suspiciousConfig.robots_txt" placeholder="保存后同步写入 public/robots.txt"></el-input></el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="搜索防护">
+                <el-alert title="搜索限流超过阈值后优先进入缓存模式：有缓存返回缓存，无缓存才提示请求频繁。" type="info" :closable="false" show-icon style="margin-bottom:14px;"></el-alert>
+                <el-form-item label="开启搜索缓存"><el-switch v-model="suspiciousConfig.search_guard_cache_enabled" :active-value="1" :inactive-value="0"></el-switch></el-form-item>
+                <el-form-item label="开启搜索限流"><el-switch v-model="suspiciousConfig.search_guard_rate_enabled" :active-value="1" :inactive-value="0"></el-switch></el-form-item>
+                <el-form-item label="缓存命中记录搜索日志"><el-switch v-model="suspiciousConfig.search_guard_log_cache_hit" :active-value="1" :inactive-value="0"></el-switch></el-form-item>
+                <el-form-item label="本地搜索缓存时间(秒)"><el-input-number v-model="suspiciousConfig.search_guard_cache_ttl" :min="1" :max="86400"></el-input-number></el-form-item>
+                <el-form-item label="零结果缓存时间(秒)"><el-input-number v-model="suspiciousConfig.search_guard_empty_cache_ttl" :min="1" :max="86400"></el-input-number></el-form-item>
+                <el-form-item label="全网搜缓存时间(秒)"><el-input-number v-model="suspiciousConfig.search_guard_web_cache_ttl" :min="1" :max="86400"></el-input-number></el-form-item>
+                <el-form-item label="同浏览器每分钟缓存阈值"><el-input-number v-model="suspiciousConfig.search_guard_visitor_per_minute" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="同 IP 每分钟缓存阈值"><el-input-number v-model="suspiciousConfig.search_guard_ip_per_minute" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="IP + 关键词 30秒阈值"><el-input-number v-model="suspiciousConfig.search_guard_ip_keyword_30s" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="空身份每分钟缓存阈值"><el-input-number v-model="suspiciousConfig.search_guard_empty_identity_per_minute" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="空身份每分钟拒绝阈值"><el-input-number v-model="suspiciousConfig.search_guard_empty_identity_reject_per_minute" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="限流 HTTP 状态码"><el-input-number v-model="suspiciousConfig.search_guard_rate_status_code" :min="400" :max="599"></el-input-number></el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="搜索高级">
+                <el-alert title="搜索专用名单仅影响本地搜索和全网搜；全站封禁请使用“全站防护”。自动封禁默认关闭。" type="warning" :closable="false" show-icon style="margin-bottom:14px;"></el-alert>
+                <el-form-item label="开启搜索自动封禁"><el-switch v-model="suspiciousConfig.search_guard_auto_block_enabled" :active-value="1" :inactive-value="0"></el-switch></el-form-item>
+                <el-form-item label="IP 1分钟封禁阈值"><el-input-number v-model="suspiciousConfig.search_guard_block_ip_1m_count" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="IP 10分钟拒绝阈值"><el-input-number v-model="suspiciousConfig.search_guard_block_ip_10m_count" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="IP 10分钟关键词阈值"><el-input-number v-model="suspiciousConfig.search_guard_block_ip_10m_keyword_count" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="零结果率阈值(%)"><el-input-number v-model="suspiciousConfig.search_guard_block_zero_result_rate" :min="0" :max="100"></el-input-number></el-form-item>
+                <el-form-item label="IP + 关键词 1分钟阈值"><el-input-number v-model="suspiciousConfig.search_guard_block_ip_keyword_1m_count" :min="1" :max="100000"></el-input-number></el-form-item>
+                <el-form-item label="普通封禁时间(秒)"><el-input-number v-model="suspiciousConfig.search_guard_block_ttl" :min="1" :max="2592000"></el-input-number></el-form-item>
+                <el-form-item label="严重封禁时间(秒)"><el-input-number v-model="suspiciousConfig.search_guard_block_heavy_ttl" :min="1" :max="2592000"></el-input-number></el-form-item>
+                <el-form-item label="搜索 IP 白名单"><el-input type="textarea" :rows="4" v-model="suspiciousConfig.search_guard_ip_whitelist" placeholder="仅搜索生效，一行一个 IP / CIDR"></el-input></el-form-item>
+                <el-form-item label="搜索 IP 黑名单"><el-input type="textarea" :rows="4" v-model="suspiciousConfig.search_guard_ip_blacklist" placeholder="仅搜索生效，一行一个 IP / CIDR"></el-input></el-form-item>
+                <el-form-item label="搜索 UA 白名单"><el-input type="textarea" :rows="4" v-model="suspiciousConfig.search_guard_ua_whitelist" placeholder="仅搜索生效，一行一个关键词"></el-input></el-form-item>
+                <el-form-item label="搜索 UA 黑名单"><el-input type="textarea" :rows="4" v-model="suspiciousConfig.search_guard_ua_blacklist" placeholder="仅搜索生效，一行一个关键词"></el-input></el-form-item>
+                <el-form-item label="搜索 Referer 白名单"><el-input type="textarea" :rows="4" v-model="suspiciousConfig.search_guard_referer_whitelist" placeholder="仅搜索生效，一行一个域名"></el-input></el-form-item>
+            </el-tab-pane>
+        </el-tabs>
+        <div style="margin-top:16px;text-align:right;">
+            <el-button icon="el-icon-refresh" @click="getSuspiciousRuleConfig">刷新</el-button>
+            <el-button type="primary" icon="el-icon-check" @click="saveSuspiciousRuleConfig">保存</el-button>
+        </div>
+    </el-form>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"suspiciousConfig":{"blocked_access_message":"访问已被禁止","blocked_ips":"","blocked_user_agents":"","crawler_guard_enabled":1,"crawler_guard_ip_ua_per_minute":30,"crawler_guard_ua_keywords":"googlebot\nbingbot\nbaiduspider\nbytespider\nyisouspider\n360spider\nsogou\nslurp\nspider\ncrawler\nbot","crawler_guard_ua_per_minute":300,"ip_search_threshold":60,"ip_window_minutes":60,"robots_txt":"User-agent: *\nDisallow: /s/\nDisallow: /w/\nDisallow: /wd/\nDisallow: /api/\nDisallow: /admin/\nDisallow: /qfadmin/\nDisallow: /install/\nDisallow: /uploads/\nAllow: /d/\nSitemap: /sitemap.xml\n","search_guard_auto_block_enabled":0,"search_guard_block_heavy_ttl":86400,"search_guard_block_ip_10m_count":500,"search_guard_block_ip_10m_keyword_count":200,"search_guard_block_ip_1m_count":180,"search_guard_block_ip_keyword_1m_count":50,"search_guard_block_ttl":1800,"search_guard_block_zero_result_rate":95,"search_guard_cache_enabled":1,"search_guard_cache_ttl":180,"search_guard_empty_cache_ttl":60,"search_guard_empty_identity_per_minute":30,"search_guard_empty_identity_reject_per_minute":80,"search_guard_ip_blacklist":"","search_guard_ip_keyword_30s":20,"search_guard_ip_per_minute":120,"search_guard_ip_whitelist":"","search_guard_log_cache_hit":1,"search_guard_rate_enabled":1,"search_guard_rate_status_code":429,"search_guard_referer_whitelist":"","search_guard_score_attack_keyword":10,"search_guard_score_block_threshold":20,"search_guard_score_bot_ua":2,"search_guard_score_empty_referer":1,"search_guard_score_empty_result":1,"search_guard_score_empty_visitor":2,"search_guard_score_enabled":0,"search_guard_score_high_frequency":3,"search_guard_score_reject_threshold":10,"search_guard_score_repeat_keyword":2,"search_guard_score_slowdown_threshold":6,"search_guard_ua_blacklist":"","search_guard_ua_whitelist":"","search_guard_visitor_per_minute":10,"search_guard_web_cache_ttl":120,"ua_keywords":"curl\npython\npython-requests\nGo-http-client\nJava\nokhttp\naxios\nhttpclient\nscrapy\nspider\nbot\ncrawler\nwget","ua_search_threshold":60,"ua_window_minutes":60}},"responses":[{"data":{"code":200,"data":{"blocked_access_message":"访问已被禁止","blocked_ips":"","blocked_user_agents":"","crawler_guard_enabled":1,"crawler_guard_ip_ua_per_minute":30,"crawler_guard_ua_keywords":"googlebot\nbingbot\nbaiduspider\nbytespider\nyisouspider\n360spider\nsogou\nslurp\nspider\ncrawler\nbot","crawler_guard_ua_per_minute":300,"ip_search_threshold":60,"ip_window_minutes":60,"robots_txt":"User-agent: *\nDisallow: /s/\nDisallow: /w/\nDisallow: /wd/\nDisallow: /api/\nDisallow: /admin/\nDisallow: /qfadmin/\nDisallow: /install/\nDisallow: /uploads/\nAllow: /d/\nSitemap: /sitemap.xml\n","search_guard_auto_block_enabled":0,"search_guard_block_heavy_ttl":86400,"search_guard_block_ip_10m_count":500,"search_guard_block_ip_10m_keyword_count":200,"search_guard_block_ip_1m_count":180,"search_guard_block_ip_keyword_1m_count":50,"search_guard_block_ttl":1800,"search_guard_block_zero_result_rate":95,"search_guard_cache_enabled":1,"search_guard_cache_ttl":180,"search_guard_empty_cache_ttl":60,"search_guard_empty_identity_per_minute":30,"search_guard_empty_identity_reject_per_minute":80,"search_guard_ip_blacklist":"","search_guard_ip_keyword_30s":20,"search_guard_ip_per_minute":120,"search_guard_ip_whitelist":"","search_guard_log_cache_hit":1,"search_guard_rate_enabled":1,"search_guard_rate_status_code":429,"search_guard_referer_whitelist":"","search_guard_score_attack_keyword":10,"search_guard_score_block_threshold":20,"search_guard_score_bot_ua":2,"search_guard_score_empty_referer":1,"search_guard_score_empty_result":1,"search_guard_score_empty_visitor":2,"search_guard_score_enabled":0,"search_guard_score_high_frequency":3,"search_guard_score_reject_threshold":10,"search_guard_score_repeat_keyword":2,"search_guard_score_slowdown_threshold":6,"search_guard_ua_blacklist":"","search_guard_ua_whitelist":"","search_guard_visitor_per_minute":10,"search_guard_web_cache_ttl":120,"ua_keywords":"curl\npython\npython-requests\nGo-http-client\nJava\nokhttp\naxios\nhttpclient\nscrapy\nspider\nbot\ncrawler\nwget","ua_search_threshold":60,"ua_window_minutes":60},"message":"数据获取成功"},"method":"post","url":"/admin/access_log/getSuspiciousRuleConfig"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    suspiciousConfig: {
+                        ip_window_minutes: 60,
+                        ip_search_threshold: 60,
+                        ua_window_minutes: 60,
+                        ua_search_threshold: 60,
+                        ua_keywords: '',
+                        robots_txt: 'User-agent: *\nDisallow: /s/\nDisallow: /w/\nDisallow: /wd/\nDisallow: /api/\nDisallow: /admin/\nDisallow: /demos/search/admin.html/\nDisallow: /install/\nDisallow: /uploads/\nAllow: /d/\nSitemap: /sitemap.xml\n',
+                        blocked_user_agents: '',
+                        blocked_ips: '',
+                        blocked_access_message: '访问已被禁止',
+                        crawler_guard_enabled: 1,
+                        crawler_guard_ua_keywords: 'googlebot\nbingbot\nbaiduspider\nbytespider\nyisouspider\n360spider\nsogou\nslurp\nspider\ncrawler\nbot',
+                        crawler_guard_ip_ua_per_minute: 30,
+                        crawler_guard_ua_per_minute: 300,
+                        search_guard_cache_enabled: 1,
+                        search_guard_cache_ttl: 180,
+                        search_guard_empty_cache_ttl: 60,
+                        search_guard_web_cache_ttl: 120,
+                        search_guard_log_cache_hit: 1,
+                        search_guard_rate_enabled: 1,
+                        search_guard_ip_per_minute: 120,
+                        search_guard_visitor_per_minute: 10,
+                        search_guard_ip_keyword_30s: 20,
+                        search_guard_empty_identity_per_minute: 30,
+                        search_guard_empty_identity_reject_per_minute: 80,
+                        search_guard_rate_status_code: 429,
+                        search_guard_auto_block_enabled: 0,
+                        search_guard_block_ip_1m_count: 180,
+                        search_guard_block_ip_10m_count: 500,
+                        search_guard_block_ip_10m_keyword_count: 200,
+                        search_guard_block_zero_result_rate: 95,
+                        search_guard_block_ip_keyword_1m_count: 50,
+                        search_guard_block_ttl: 1800,
+                        search_guard_block_heavy_ttl: 86400,
+                        search_guard_ip_whitelist: '',
+                        search_guard_ip_blacklist: '',
+                        search_guard_ua_whitelist: '',
+                        search_guard_ua_blacklist: '',
+                        search_guard_referer_whitelist: ''
+                    },
+                }
+            },
+            created() {
+                this.getSuspiciousRuleConfig();
+            },
+            methods: {
+                getSuspiciousRuleConfig() {
+                    var that = this;
+                    axios.post('/admin/access_log/getSuspiciousRuleConfig', Object.assign({}, PostBase))
+                        .then(function (response) {
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.suspiciousConfig = Object.assign({}, that.suspiciousConfig, response.data.data);
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function () {
+                            that.$message.error('服务器内部错误');
+                        });
+                },
+                saveSuspiciousRuleConfig() {
+                    var that = this;
+                    axios.post('/admin/access_log/updateSuspiciousRuleConfig', Object.assign({}, PostBase, that.suspiciousConfig))
+                        .then(function (response) {
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.suspiciousConfig = Object.assign({}, that.suspiciousConfig, response.data.data);
+                                that.$message.success(response.data.message);
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function () {
+                            that.$message.error('服务器内部错误');
+                        });
+                },
+            }
+        })
+    </script>
+
+
+</html>

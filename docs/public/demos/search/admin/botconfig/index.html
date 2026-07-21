@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>元器机器人</title>
+        <style>
+        .bot-page { min-width: 0; }
+        .bot-page .tip     { color: #909399; font-size: 12px; line-height: 1.6; margin: 0 0 16px; }
+        .bot-page .fp      { max-width: 780px; }
+        .bot-page .ihelp   { color: #909399; font-size: 12px; margin-left: 8px; }
+        .bot-page .tmask   { font-family: monospace; color: #606266; letter-spacing: .04em; word-break: break-all; }
+        .bot-page .code    { background: #f5f7fa; border: 1px solid #ebeef5; border-radius: 4px;
+                             padding: 12px 16px; font-family: monospace; font-size: 13px;
+                             white-space: pre; overflow-x: auto; line-height: 1.6; }
+        .bot-page .api-hero { display:flex; align-items:flex-start; justify-content:space-between; gap:18px;
+                              padding:20px 22px; margin-bottom:18px; border:1px solid #d9ecff;
+                              border-radius:10px; background:linear-gradient(135deg,#f2f8ff 0%,#fbfdff 58%,#f7fbff 100%); }
+        .bot-page .api-hero-title { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:16px;
+                                    font-weight:600; color:#303133; }
+        .bot-page .api-hero-icon { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px;
+                                  border-radius:10px; color:#409eff; background:#ecf5ff; font-size:18px; }
+        .bot-page .api-hero-desc { margin:0; color:#606266; font-size:13px; line-height:1.7; }
+        .bot-page .api-hero-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
+        .bot-page .token-card { border:1px solid #ebeef5; border-radius:10px; padding:16px 18px; margin-bottom:20px;
+                                background:#fff; box-shadow:0 6px 18px rgba(64,158,255,.06); }
+        .bot-page .token-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+        .bot-page .token-title { display:flex; align-items:center; gap:8px; color:#303133; font-weight:600; }
+        .bot-page .token-status { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#909399; }
+        .bot-page .token-dot { width:8px; height:8px; border-radius:50%; background:#c0c4cc; }
+        .bot-page .token-dot.on { background:#67c23a; box-shadow:0 0 0 4px rgba(103,194,58,.14); }
+        .bot-page .token-body { display:flex; align-items:stretch; gap:12px; flex-wrap:wrap; }
+        .bot-page .token-value { box-sizing:border-box; flex:1; min-width:260px; padding:11px 12px; border:1px dashed #c6e2ff; border-radius:8px;
+                                 background:#f8fbff; font-family:monospace; color:#303133; letter-spacing:.04em; line-height:1.6;
+                                 word-break:break-all; }
+        .bot-page .token-empty { color:#c0c4cc; letter-spacing:0; }
+        .bot-page .token-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .bot-page .request-title { display:flex; align-items:center; gap:8px; margin-bottom:8px; color:#303133; font-weight:600; }
+        .bot-page input[type=number]::-webkit-inner-spin-button,
+        .bot-page input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .bot-page input[type=number] { -moz-appearance: textfield; }
+        .bot-page .bot-rule-card { border:1px solid #ebeef5; border-radius:8px; padding:12px 14px; margin-bottom:10px; background:#fafafa; max-width:600px; }
+        .bot-page .bot-rule-row { display:flex; gap:8px; }
+        .bot-page .bot-rule-row--trigger { align-items:center; margin-bottom:10px; }
+        .bot-page .bot-rule-row--filters { align-items:flex-start; }
+        .bot-page .bot-filter-list { min-width:0; }
+        .bot-page .bot-filter-item { display:inline-flex; align-items:center; gap:4px; margin:0 6px 6px 0; }
+
+        @media (max-width: 767px) {
+            .bot-page .api-hero { padding:16px; }
+            .bot-page .token-card { padding:14px; }
+            .bot-page .token-head,
+            .bot-page .token-body,
+            .bot-page .bot-rule-row { align-items:stretch; flex-direction:column; }
+            .bot-page .token-value { width:100%; min-width:0; }
+            .bot-page .token-actions { width:100%; }
+            .bot-page .token-actions .el-button { flex:1 1 auto; margin-left:0; }
+            .bot-page .fp { max-width:none; }
+            .bot-page .ihelp { display:block; margin:6px 0 0; }
+            .bot-page .el-checkbox-group { display:flex; flex-wrap:wrap; gap:8px 16px; }
+            .bot-page .el-checkbox + .el-checkbox { margin-left:0; }
+            .bot-page .bot-rule-card { box-sizing:border-box; max-width:100%; }
+            .bot-page .bot-filter-item { display:grid; grid-template-columns:minmax(82px, 1fr) 58px auto 30px; width:100%; margin-right:0; }
+            .bot-page .bot-filter-item .el-select,
+            .bot-page .bot-filter-item .el-input { width:100% !important; }
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-129'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" class="is-active" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-129'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" class="is-active" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--botconfig-index">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>元器机器人</h1>
+                                                    </header>
+                        
+
+    <el-card class="box-card bot-page" shadow="never" v-loading="loading">
+        <p class="tip">本页配置仅作用于元器机器人 API 搜索，不会影响微信机器人。</p>
+        <el-tabs v-model="activeTab">
+
+            <!-- ① API 接入 -->
+            <el-tab-pane label="API 接入" name="token">
+                <div class="api-hero">
+                    <div>
+                        <div class="api-hero-title">
+                            <span class="api-hero-icon"><i class="el-icon-connection"></i></span>
+                            <span>元器机器人 API 接入</span>
+                        </div>
+                        <p class="api-hero-desc">用于元器平台调用本站搜索能力。Token 可停用、重新生成，重新生成后旧 Token 会立即失效。</p>
+                    </div>
+                    <div class="api-hero-actions">
+                        <el-switch v-model="form.token_enabled" :active-value="1" :inactive-value="0"
+                                   active-text="启用接口" inactive-text="停用接口" @change="toggleToken"></el-switch>
+                        <el-tag :type="form.token_enabled ? 'success' : 'info'" effect="plain">
+                            {{ form.token_enabled ? '接口已启用' : '接口已停用' }}
+                        </el-tag>
+                    </div>
+                </div>
+                <!-- Token 状态行 -->
+                <div class="token-card">
+                    <div class="token-head">
+                        <div class="token-title"><i class="el-icon-key"></i><span>访问 Token</span></div>
+                        <span class="token-status"><i class="token-dot" :class="{on: form.token_enabled}"></i>{{ form.token_enabled ? '已启用' : '已停用' }}</span>
+                    </div>
+                    <div class="token-body">
+                        <div class="token-value" :class="{'token-empty': !form.token}">{{ form.token || '尚未生成 Token' }}</div>
+                        <div class="token-actions">
+                            <el-button v-if="form.token" size="small" icon="el-icon-document-copy" @click="copyToken(form.token)">复制</el-button>
+                            <el-button size="small" type="primary" :loading="tokenLoading" @click="generateToken">
+                                {{ form.token ? '重新生成' : '生成 Token' }}
+                            </el-button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 请求示例 -->
+                <div class="request-title"><i class="el-icon-document"></i><span>请求示例</span></div>
+                <p class="tip">使用以下格式调用搜索接口：</p>
+                <div class="code">{{ requestExample }}</div>
+            </el-tab-pane>
+
+            <!-- ② 搜索配置 -->
+            <el-tab-pane label="搜索配置" name="search">
+                <el-form class="fp" label-width="110px">
+                    <el-form-item label="本地返回条数">
+                        <el-input-number v-model="form.result_count" :min="1" :max="50" controls-position="right"></el-input-number>
+                        <span class="ihelp">默认 5，最多 50</span>
+                    </el-form-item>
+                    <el-form-item label="全网搜条数">
+                        <el-input-number v-model="form.remote_result_count" :min="1" :max="50" controls-position="right"></el-input-number>
+                        <span class="ihelp">默认 10，最多 50</span>
+                    </el-form-item>
+                    <el-form-item label="允许网盘类型">
+                        <el-checkbox-group v-model="form.allowed_pan_types">
+                            <el-checkbox :label="0">夸克</el-checkbox>
+                            <el-checkbox :label="1">阿里</el-checkbox>
+                            <el-checkbox :label="2">百度</el-checkbox>
+                            <el-checkbox :label="3">UC</el-checkbox>
+                            <el-checkbox :label="4">迅雷</el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+                    <el-form-item label="全网搜线路">
+                        <el-select v-model="form.remote_api_ids" multiple placeholder="不选则使用全部可用线路" style="max-width:420px;">
+                            <el-option v-for="(line, index) in apiLines" :key="line.id" :label="(index + 1) + '. ' + line.name" :value="line.id"></el-option>
+                        </el-select>
+                        <span class="ihelp">触发全网搜命令时使用</span>
+                    </el-form-item>
+                    <el-form-item label="网盘优先级">
+                        <el-select v-model="form.pan_priority" multiple style="max-width:420px;">
+                            <el-option label="夸克" :value="0"></el-option>
+                            <el-option label="UC" :value="3"></el-option>
+                            <el-option label="百度" :value="2"></el-option>
+                            <el-option label="迅雷" :value="4"></el-option>
+                            <el-option label="阿里" :value="1"></el-option>
+                        </el-select>
+                        <span class="ihelp">选中顺序即为优先级，默认夸克→UC→百度→迅雷→阿里</span>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" :loading="savingConfig" @click="saveConfig">保存</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+
+            <!-- ③ 回复样式 -->
+            <el-tab-pane label="回复样式" name="reply">
+                <el-form class="fp" label-width="110px">
+                    <el-form-item label="回复前缀">
+                        <el-input v-model="form.reply_prefix" type="textarea" :rows="2"
+                                  placeholder="每条搜索结果前附加的固定文案，留空不添加" style="max-width:460px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="回复后缀">
+                        <el-input v-model="form.reply_suffix" type="textarea" :rows="2"
+                                  placeholder="每条搜索结果后附加的固定文案，留空不添加" style="max-width:460px;"></el-input>
+                    </el-form-item>
+                    <el-divider content-position="left"><span style="font-size:12px;color:#909399;">消息模板（{keyword} 为搜索词）</span></el-divider>
+                    <el-form-item label="无结果提示">
+                        <el-input v-model="form.tpl_no_result" placeholder="没有找到『{keyword}』相关资源" style="max-width:460px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="错误提示">
+                        <el-input v-model="form.tpl_error" placeholder="搜索过程中出现错误，请稍后重试" style="max-width:460px;"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" :loading="savingConfig" @click="saveConfig">保存</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+
+            <!-- ④ 触发规则 -->
+            <el-tab-pane label="触发规则" name="rules">
+                <!-- 全网搜命令 -->
+                <div style="margin-bottom:28px;">
+                    <div style="font-weight:600;margin-bottom:6px;">全网搜触发命令</div>
+                    <p class="tip">用户发送精确匹配的触发词时，以上一次搜索的关键词调用全网搜。网盘筛选为空则按搜索配置走。</p>
+
+                    <div v-for="(cmd, ci) in customCommands" :key="ci" class="bot-rule-card">
+                        <!-- 触发词行 -->
+                        <div class="bot-rule-row bot-rule-row--trigger">
+                            <span style="font-size:12px;color:#909399;white-space:nowrap;">触发词</span>
+                            <el-input v-model="cmd.trigger" size="small" placeholder="如：全网搜" style="flex:1;"></el-input>
+                            <el-button type="text" size="mini" icon="el-icon-delete"
+                                       style="color:#f56c6c;" @click="customCommands.splice(ci,1)"></el-button>
+                        </div>
+                        <!-- 网盘筛选行 -->
+                        <div class="bot-rule-row bot-rule-row--filters">
+                            <span style="font-size:12px;color:#909399;white-space:nowrap;padding-top:6px;">网盘筛选</span>
+                            <div class="bot-filter-list">
+                                <div v-if="!cmd.pan_filters || cmd.pan_filters.length === 0"
+                                     style="font-size:12px;color:#c0c4cc;padding-top:6px;">
+                                    不限（按搜索配置）
+                                </div>
+                                <div v-for="(f, fi) in cmd.pan_filters" :key="fi" class="bot-filter-item">
+                                    <el-select v-model="f.type" size="mini" style="width:80px;">
+                                        <el-option label="夸克" :value="0" :disabled="panTypeDisabled(cmd, f.type, 0)"></el-option>
+                                        <el-option label="阿里" :value="1" :disabled="panTypeDisabled(cmd, f.type, 1)"></el-option>
+                                        <el-option label="百度" :value="2" :disabled="panTypeDisabled(cmd, f.type, 2)"></el-option>
+                                        <el-option label="UC"   :value="3" :disabled="panTypeDisabled(cmd, f.type, 3)"></el-option>
+                                        <el-option label="迅雷" :value="4" :disabled="panTypeDisabled(cmd, f.type, 4)"></el-option>
+                                    </el-select>
+                                    <el-input v-model.number="f.count" size="mini"
+                                              style="width:54px;" placeholder="条数"></el-input>
+                                    <span style="font-size:12px;color:#909399;">条</span>
+                                    <el-button type="text" size="mini" icon="el-icon-close"
+                                               @click="cmd.pan_filters.splice(fi,1)"></el-button>
+                                </div>
+                                <el-button type="text" size="mini" @click="addPanFilter(cmd)">+ 添加网盘</el-button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <el-button size="small" icon="el-icon-plus"
+                               @click="customCommands.push({ trigger: '', pan_filters: [] })">添加命令</el-button>
+                    <el-button type="primary" size="small" :loading="savingCommands"
+                               @click="saveCommands" style="margin-left:8px;">保存</el-button>
+                </div>
+
+                <!-- 关键词配置 -->
+                <div>
+                    <div style="font-weight:600;margin-bottom:6px;">关键词配置</div>
+                    <p class="tip">精确匹配触发词后，根据类型执行：回复模式直接返回固定内容；删除模式从搜索词中移除该触发词再搜索。</p>
+                    <el-table :data="keywords" border stripe size="small" style="margin-bottom:10px;">
+                        <el-table-column label="触发词" width="180">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.trigger" size="small" placeholder="触发词"></el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="类型" width="120">
+                            <template slot-scope="scope">
+                                <el-select v-model="scope.row.type" size="small" style="width:100%;">
+                                    <el-option label="固定回复" value="reply"></el-option>
+                                    <el-option label="关键词删除" value="remove"></el-option>
+                                </el-select>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="回复内容（删除模式留空）">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.content" size="small" placeholder="回复内容"
+                                          :disabled="scope.row.type === 'remove'"></el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="" width="60" align="center">
+                            <template slot-scope="scope">
+                                <el-button type="text" size="mini" icon="el-icon-delete"
+                                           style="color:#f56c6c;" @click="keywords.splice(scope.$index,1)"></el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <el-button size="small" icon="el-icon-plus"
+                               @click="keywords.push({ trigger: '', type: 'reply', content: '' })">添加</el-button>
+                    <el-button type="primary" size="small" :loading="savingKeywords"
+                               @click="saveKeywords" style="margin-left:8px;">保存</el-button>
+                </div>
+            </el-tab-pane>
+
+        </el-tabs>
+
+        <!-- Token 弹窗 -->
+        <el-dialog title="Token 已生成" :visible.sync="tokenDialogVisible" width="500px"
+                   append-to-body :close-on-click-modal="false">
+            <el-alert type="warning" title="此 Token 只展示一次，请妥善保存"
+                      :closable="false" show-icon style="margin-bottom:16px;"></el-alert>
+            <el-input v-model="newToken" readonly>
+                <el-button slot="append" icon="el-icon-document-copy" @click="copyToken">复制</el-button>
+            </el-input>
+            <span slot="footer">
+                <el-button type="primary" @click="tokenDialogVisible = false">我已保存</el-button>
+            </span>
+        </el-dialog>
+    </el-card>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"activeTab":"token","apiLines":[{"id":1,"name":"主搜索线路","enabled":1}],"customCommands":[],"form":{"allowed_pan_types":[0,1,2,3,4],"pan_priority":[0,3,2,4,1],"remote_api_ids":[],"remote_result_count":10,"reply_prefix":"🎬 为您找到「{keyword}」相关资源：","reply_suffix":"💡 温馨提示：点击链接即可直接访问资源","result_count":5,"token":"pb_demo_2026_read_only","token_enabled":1,"token_masked":"pb_demo_********_only","tpl_error":"搜索过程中出现错误，请稍后重试","tpl_no_result":"没有找到『{keyword}』相关资源"},"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"keywords":[{"keyword":"帮助","reply":"请输入影视名称开始搜索"}],"loading":false,"newToken":"","requestExample":"POST /api/bot/search\nAuthorization: Bearer sk-xxxx\nContent-Type: application/json\n\n{\n  \"keyword\": \"搜索关键词\",\n  \"userid\": \"用户唯一标识\"\n}","savingCommands":false,"savingConfig":false,"savingKeywords":false,"tokenDialogVisible":false,"tokenLoading":""},"responses":[{"data":{"code":200,"data":{"allowed_pan_types_array":[0,1,2,3,4],"custom_commands":[],"keywords":[],"pan_priority":"0,3,2,4,1","remote_api_ids":"","remote_result_count":10,"reply_prefix":"🎬 为您找到「{keyword}」相关资源：","reply_suffix":"💡 温馨提示：点击链接即可直接访问资源","result_count":5,"token":"pb_demo_2026_read_only","token_enabled":1,"token_masked":"pb_demo_********_only","tpl_error":"搜索过程中出现错误，请稍后重试","tpl_no_result":"没有找到『{keyword}』相关资源"},"message":"获取成功"},"method":"post","url":"/admin/bot_config/getConfig"},{"data":{"code":200,"data":[],"message":"获取成功"},"method":"post","url":"/admin/bot_config/getApiLines"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: function () {
+                return {
+                    loading: false,
+                    activeTab: 'token',
+                    tokenLoading: false,
+                    savingConfig: false,
+                    savingCommands: false,
+                    savingKeywords: false,
+                    tokenDialogVisible: false,
+                    newToken: '',
+                    apiLines: [],
+                    form: {
+                        token: '',
+                        token_masked: '',
+                        token_enabled: 0,
+                        result_count: 5,
+                        remote_result_count: 10,
+                        allowed_pan_types: [0, 1, 2, 3, 4],
+                        reply_prefix: '',
+                        reply_suffix: '',
+                        remote_api_ids: [],
+                        pan_priority: [0, 3, 2, 4, 1],
+                        tpl_no_result: '',
+                        tpl_error: ''
+                    },
+                    customCommands: [],
+                    keywords: [],
+                    requestExample: 'POST /api/bot/search\nAuthorization: Bearer sk-xxxx\nContent-Type: application/json\n\n{\n  "keyword": "搜索关键词",\n  "userid": "用户唯一标识"\n}'
+                };
+            },
+            created: function () {
+                this.getConfig();
+                this.getApiLines();
+            },
+            methods: {
+                addPanFilter: function (row) {
+                    if (!Array.isArray(row.pan_filters)) row.pan_filters = [];
+                    var used = {};
+                    row.pan_filters.forEach(function (f) { used[Number(f.type)] = true; });
+                    for (var i = 0; i <= 4; i++) {
+                        if (!used[i]) {
+                            row.pan_filters.push({ type: i, count: 3 });
+                            return;
+                        }
+                    }
+                    this.$message.warning('已添加全部网盘类型');
+                },
+                panTypeDisabled: function (row, current, type) {
+                    if (Number(current) === Number(type) || !Array.isArray(row.pan_filters)) return false;
+                    return row.pan_filters.some(function (f) { return Number(f.type) === Number(type); });
+                },
+                normalizePanFilters: function (filters) {
+                    var seen = {}, result = [];
+                    if (!Array.isArray(filters)) return result;
+                    filters.forEach(function (f) {
+                        var type = Number(f.type);
+                        if (type < 0 || type > 4 || seen[type]) return;
+                        seen[type] = true;
+                        result.push({ type: type, count: Math.max(1, Math.min(20, Number(f.count) || 1)) });
+                    });
+                    return result;
+                },
+                normalizeCustomCommands: function (commands) {
+                    if (!Array.isArray(commands)) return [];
+                    return commands.map(function (cmd) {
+                        return {
+                            trigger: cmd.trigger || '',
+                            pan_filters: this.normalizePanFilters(cmd.pan_filters)
+                        };
+                    }, this);
+                },
+                getApiLines: function () {
+                    var that = this;
+                    axios.post('/admin/bot_config/getApiLines', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) that.apiLines = res.data.data || [];
+                        });
+                },
+                getConfig: function () {
+                    var that = this;
+                    that.loading = true;
+                    axios.post('/admin/bot_config/getConfig', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                var d = res.data.data || {};
+                                that.form.token         = d.token || '';
+                                that.form.token_masked  = d.token_masked || '';
+                                that.form.token_enabled = Number(d.token_enabled) || 0;
+                                that.form.result_count  = Number(d.result_count) || 5;
+                                that.form.remote_result_count = Number(d.remote_result_count) || 10;
+                                var types = d.allowed_pan_types_array;
+                                that.form.allowed_pan_types = Array.isArray(types) ? types.map(Number) : [0,1,2,3,4];
+                                that.form.reply_prefix  = d.reply_prefix || '';
+                                that.form.reply_suffix  = d.reply_suffix || '';
+                                var ids = d.remote_api_ids || '';
+                                that.form.remote_api_ids = ids ? ids.split(',').map(Number).filter(function(v){ return v > 0; }) : [];
+                                var pp = d.pan_priority || '0,3,2,4,1';
+                                that.form.pan_priority = pp.split(',').map(Number);
+                                that.form.tpl_no_result  = d.tpl_no_result  || '';
+                                that.form.tpl_error      = d.tpl_error      || '';
+                                that.customCommands = that.normalizeCustomCommands(d.custom_commands);
+                                that.keywords       = Array.isArray(d.keywords)       ? d.keywords       : [];
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function () { that.$message.error('服务器内部错误'); })
+                        .then(function () { that.loading = false; });
+                },
+                saveConfig: function () {
+                    var that = this;
+                    that.savingConfig = true;
+                    axios.post('/admin/bot_config/saveConfig', Object.assign({}, PostBase, {
+                        result_count:     that.form.result_count,
+                        remote_result_count: that.form.remote_result_count,
+                        allowed_pan_types: that.form.allowed_pan_types.join(','),
+                        reply_prefix:     that.form.reply_prefix,
+                        reply_suffix:     that.form.reply_suffix,
+                        remote_api_ids:   that.form.remote_api_ids.join(','),
+                        pan_priority:     that.form.pan_priority.join(','),
+                        tpl_no_result:    that.form.tpl_no_result,
+                        tpl_error:        that.form.tpl_error
+                    }))
+                        .then(function (res) {
+                            res.data.code == 200 ? that.$message.success('保存成功') : that.$message.error(res.data.message);
+                        })
+                        .catch(function () { that.$message.error('服务器内部错误'); })
+                        .then(function () { that.savingConfig = false; });
+                },
+                saveCommands: function () {
+                    var that = this;
+                    that.savingCommands = true;
+                    axios.post('/admin/bot_config/saveConfig', Object.assign({}, PostBase, {
+                        custom_commands: JSON.stringify(that.normalizeCustomCommands(that.customCommands))
+                    }))
+                        .then(function (res) {
+                            res.data.code == 200 ? that.$message.success('保存成功') : that.$message.error(res.data.message);
+                        })
+                        .catch(function () { that.$message.error('服务器内部错误'); })
+                        .then(function () { that.savingCommands = false; });
+                },
+                saveKeywords: function () {
+                    var that = this;
+                    that.savingKeywords = true;
+                    axios.post('/admin/bot_config/saveConfig', Object.assign({}, PostBase, {
+                        keywords: JSON.stringify(that.keywords)
+                    }))
+                        .then(function (res) {
+                            res.data.code == 200 ? that.$message.success('保存成功') : that.$message.error(res.data.message);
+                        })
+                        .catch(function () { that.$message.error('服务器内部错误'); })
+                        .then(function () { that.savingKeywords = false; });
+                },
+                generateToken: function () {
+                    var that = this;
+                    var msg = that.form.token ? '重新生成将使旧 Token 立即失效，是否继续？' : '确认生成 Token？';
+                    that.$confirm(msg, '确认', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
+                        .then(function () {
+                            that.tokenLoading = true;
+                            axios.post('/admin/bot_config/generateToken', Object.assign({}, PostBase))
+                                .then(function (res) {
+                                    if (res.data.code == 200) {
+                                        that.newToken = (res.data.data && res.data.data.token) || '';
+                                        that.tokenDialogVisible = true;
+                                        that.getConfig();
+                                    } else {
+                                        that.$message.error(res.data.message);
+                                    }
+                                })
+                                .catch(function () { that.$message.error('服务器内部错误'); })
+                                .then(function () { that.tokenLoading = false; });
+                        }).catch(function () {});
+                },
+                toggleToken: function (val) {
+                    var that = this;
+                    axios.post('/admin/bot_config/toggleToken', Object.assign({}, PostBase, { enabled: val }))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.$message.success(val ? '已启用' : '已停用');
+                            } else {
+                                that.$message.error(res.data.message);
+                                that.form.token_enabled = val ? 0 : 1;
+                            }
+                        })
+                        .catch(function () {
+                            that.$message.error('服务器内部错误');
+                            that.form.token_enabled = val ? 0 : 1;
+                        });
+                },
+                copyToken: function (token) {
+                    token = token || this.newToken;
+                    if (!token) return;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(token);
+                        this.$message.success('已复制');
+                        return;
+                    }
+                    var el = document.createElement('input');
+                    el.value = token;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    this.$message.success('已复制');
+                },
+            }
+        });
+    </script>
+</head>
+</html>

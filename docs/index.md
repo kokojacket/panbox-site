@@ -7,22 +7,12 @@ hero:
   tagline: 还在为网盘资源频繁被屏蔽、限流、失效发愁吗？还在因为资源不稳定，导致粉丝流失、推广收益下降吗？PanBox 把搜索、自动转存、跨网盘同步与转码保活串成一条链路，让资源分发更稳、更久，也更适合长期运营。
   actions:
     - theme: brand
-      text: 查看 Sync 总览
-      link: /products/sync/overview
+      text: 下载桌面版
+      link: /desktop-download
     - theme: alt
-      text: 查看完整产品矩阵
+      text: 我该用哪个产品？
       link: /getting-started
 
-features:
-  - title: PanBox Search - 网盘搜索站
-    details: 搭一个统一的网盘搜索入口，先把用户流量接住，再把稳定资源持续分发出去。
-    link: /products/search/overview
-  - title: PanBox Autosave - 自动转存系统
-    details: 把分享链接自动转存成你自己的网盘库存，减少手动补链、重复搬运和资源流失。
-    link: /products/autosave/overview
-  - title: PanBox Sync - 跨网盘同步自动转码系统
-    details: 负责跨盘同步、文件处理与转码保活，适配多网盘协同分发，降低屏蔽与失效带来的波动。
-    link: /products/sync/overview
 ---
 
 <div class="pb-marquee" aria-label="PanBox 核心卖点">
@@ -134,7 +124,7 @@ features:
     <p>让你从“天天补链接、天天被限流”，慢慢变成资源稳定、收益稳定、粉丝稳定的长期运营状态。</p>
   </div>
   <div class="pb-cta-actions">
-    <a class="VPButton brand" href="/products/sync/overview">查看 Sync 总览</a>
+    <a class="VPButton brand" href="/desktop-download">下载桌面版</a>
     <a class="VPButton alt" href="/getting-started">查看接入路径</a>
   </div>
 </div>
@@ -171,7 +161,7 @@ features:
         <li>还在比较工具方案，想先验证资源稳定性和整体流程的人</li>
         <li>希望先试用，再决定是否正式接入日常运营的人</li>
       </ul>
-      <a class="VPButton alt" href="#pb-contact">立即试用</a>
+      <a class="VPButton alt" href="/desktop-download">下载试用版</a>
     </div>
     <div class="pb-price-card pb-price-card-lite">
       <div class="pb-price-head">
@@ -253,5 +243,5 @@ features:
 </div>
 
 <div class="pb-section pb-risk">
-  <p><a href="/risk/disclaimer">进入统一免责声明 →</a></p>
+  <p><a href="/risk/disclaimer">查看使用边界与免责声明 →</a></p>
 </div>

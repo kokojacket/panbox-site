@@ -86,7 +86,17 @@ onBeforeUnmount(() => {
         :aria-label="`查看 ${item.title} 界面大图`"
         @click="openPreview(item)"
       >
-        <img class="pb-hero-shot-image" :src="item.image" :alt="`${item.title} 界面截图`" loading="lazy" />
+        <div class="pb-mock-window-header">
+          <div class="pb-mock-dots">
+            <span class="pb-mock-dot pb-mock-dot--red"></span>
+            <span class="pb-mock-dot pb-mock-dot--yellow"></span>
+            <span class="pb-mock-dot pb-mock-dot--green"></span>
+          </div>
+          <span class="pb-mock-window-title">{{ item.title }}</span>
+        </div>
+        <div class="pb-hero-shot-img-wrap">
+          <img class="pb-hero-shot-image" :src="item.image" :alt="`${item.title} 界面截图`" loading="lazy" />
+        </div>
       </button>
     </div>
 

@@ -1,143 +1,89 @@
-# 域名购买和指向服务器教程（阿里云服务器示例）
+# 域名购买与解析（阿里云示例）
 
-本教程目标：
+本页用于购买域名，并把根域名、`www` 和通配符子域名解析到 PanBox 服务器。教程以阿里云域名控制台为例，腾讯云或其他 DNS 服务商的记录配置方式相同。
 
-1. 购买域名（推荐海外注册商）
-2. 把域名解析到你的阿里云服务器
-3. 完成基础的站点访问与 HTTPS 配置
+## 1. 购买域名
 
-## 一、域名购买推荐
+可选择以下平台：
 
-推荐平台：<http://spaceship.com/>
+- 阿里云万网：<https://wanwang.aliyun.com/>
+- 腾讯云域名注册：<https://buy.cloud.tencent.com/domain/>
+- Spaceship：<http://spaceship.com/zh>
 
-推荐理由（适合本项目场景）：
+在阿里云或腾讯云购买时，按平台要求完成域名实名认证。购买后进入该域名的 DNS 解析页面。
 
-- 海外注册流程简单，价格透明。
-- 如果你的服务部署在中国大陆以外节点，通常不涉及中国大陆 ICP 备案流程。
+### 相关视频
 
-> 注意：是否需要备案，核心取决于**服务实际部署位置**（是否在中国大陆机房），而不是域名在哪里买。
+- [阿里云如何购买域名：实操全流程演示](https://www.bilibili.com/video/BV1E9eWzPENq)
+- [什么是域名，域名和网址有什么区别？](https://www.bilibili.com/video/BV176cazuExr)
+- [域名带 www 和不带 www 有什么区别？](https://www.bilibili.com/video/BV1TAcYzWEpW)
 
-## 二、购买域名（Spaceship）
+## 2. 准备解析信息
 
-1. 打开 `spaceship.com`，搜索你要的域名。
-2. 选择可注册后缀（如 `.com` / `.net`）并下单。
-3. 开启域名隐私保护（WHOIS Privacy，如可选）。
-4. 购买完成后进入该域名的 DNS 管理页。
+开始前准备：
 
-## 三、准备阿里云服务器信息
+- 已购买并完成实名认证的域名。
+- [服务器购买教程](/server-purchase)中记录的公网 IPv4 地址。
+- 需要使用的主机名，例如根域名、`www` 或 `search`。
 
-在阿里云 ECS 控制台确认：
+本文截图中的域名和 IP 仅为示例，请替换成自己的信息。
 
-- 实例有公网 IP（IPv4）
-- 安全组已放行：`80`、`443`（以及 `22`）
+## 3. 进入阿里云解析页面
 
-你将用到：
+打开[阿里云域名列表](https://dc.console.aliyun.com/next/index#/domain-list/all)，找到已购买的域名，然后点击右侧“解析”。
 
-- 服务器公网 IP（例如 `47.x.x.x`）
-- 你希望绑定的域名（例如 `example.com`）
+![在阿里云域名列表中进入解析设置](/img/deployment/step-042.png)
 
-## 四、配置域名解析到阿里云 ECS
+## 4. 添加 A 记录
 
-你可以二选一：
+可以使用阿里云“新手引导”一次添加多条记录，也可以逐条添加。教程中配置了以下 A 记录：
 
-### 方案 A：继续使用 Spaceship 的 DNS（最省事）
+| 主机记录 | 记录类型 | 记录值 |
+| --- | --- | --- |
+| `@` | `A` | `<服务器公网IP>` |
+| `www` | `A` | `<服务器公网IP>` |
+| `*` | `A` | `<服务器公网IP>` |
 
-在 Spaceship 的 DNS 里新增记录：
+- `@` 表示根域名，例如 `example.com`。
+- `www` 表示 `www.example.com`。
+- `*` 表示未单独配置的所有一级子域名，便于后续为 Search、Autosave 等服务分配子域名。
 
-- `A` 记录：`@` → `你的阿里云公网IP`
-- `A` 记录：`www` → `你的阿里云公网IP`
+![在阿里云新手引导中填写主机记录和服务器公网 IP](/img/deployment/step-044.png)
 
-如果只想用子域名（例如 `search.example.com`）：
+提交后确认三条记录均处于启用状态。
 
-- `A` 记录：`search` → `你的阿里云公网IP`
+![阿里云 DNS 解析记录配置结果](/img/deployment/step-046.png)
 
-### 方案 B：切换到阿里云 DNS 托管（你需要的新增方案）
+## 5. 验证解析
 
-适合你已经在阿里云管理服务器，希望 DNS 也统一在阿里云管理的场景。
-
-1. 在阿里云控制台打开 **云解析 DNS**，添加你的域名。
-2. 阿里云会给出 2 条 Nameserver（NS）地址。
-3. 回到 Spaceship 域名管理页，把域名 NS 改为阿里云提供的 NS。
-4. 等待 NS 生效后（通常几分钟到数小时），在阿里云 DNS 新增解析记录：
-   - `A` 记录：`@` → `你的阿里云公网IP`
-   - `A` 记录：`www` → `你的阿里云公网IP`
-
-> 提示：NS 切换后，最终以阿里云 DNS 中的记录为准；Spaceship 原 DNS 记录不再生效。
-
-TTL 使用默认值即可。
-
-## 五、等待生效并验证
-
-DNS 生效时间通常几分钟到数十分钟（有时更久）。
-
-可在本地执行：
+DNS 通常需要几分钟生效，最长时间取决于记录 TTL 和本地缓存。可在本地执行：
 
 ```bash
 nslookup example.com
 nslookup www.example.com
+nslookup search.example.com
 ```
 
-返回 IP 与你的阿里云公网 IP 一致，说明解析已生效。
+返回结果与服务器公网 IP 一致，说明 A 记录已生效。
 
-## 六、在阿里云服务器上配置站点（Nginx 示例）
+## 6. 预留证书验证记录
 
-先安装 Nginx：
+在 NginxWebUI 中使用 DNS 方式申请通配符证书时，还需要按页面提示添加一条 `_acme-challenge` CNAME 记录。不要提前猜测记录值，应以 NginxWebUI 实际生成的值为准。
 
-```bash
-apt update
-apt -y install nginx
-systemctl enable nginx
-systemctl start nginx
-```
+## 下一步
 
-创建站点配置（以 `example.com` 为例，反代到本机 `127.0.0.1:1888`，请按你的实际端口改）：
+先安装至少一个 PanBox 产品，并保存脚本输出的内网访问地址：
 
-```nginx
-server {
-  listen 80;
-  server_name example.com www.example.com;
+- [安装 PanBox Search](/products/search/quickstart)
+- [安装 PanBox Autosave](/products/autosave/quickstart)
+- [安装 PanBox Sync](/products/sync/quickstart)
 
-  location / {
-    proxy_pass http://127.0.0.1:1888;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-  }
-}
-```
+产品安装完成后，再[配置 NginxWebUI、HTTPS 与反向代理](/nginxwebui-reverse-proxy)。
 
-保存到：`/etc/nginx/sites-available/panbox.conf`，并启用：
+## 故障排查
 
-```bash
-ln -sf /etc/nginx/sites-available/panbox.conf /etc/nginx/sites-enabled/panbox.conf
-nginx -t
-systemctl reload nginx
-```
-
-## 七、配置 HTTPS（Let's Encrypt）
-
-安装 certbot：
-
-```bash
-apt -y install certbot python3-certbot-nginx
-```
-
-签发并自动配置证书：
-
-```bash
-certbot --nginx -d example.com -d www.example.com
-```
-
-完成后访问：
-
-- `https://example.com`
-- `https://www.example.com`
-
-## 八、故障排查
-
-- 域名无法访问：先检查 DNS 是否生效、IP 是否正确。
-- 如果使用阿里云 DNS 托管：确认域名 NS 已切到阿里云，且阿里云 DNS 里已有对应 A 记录。
-- 能 ping 通但网页打不开：检查安全组与服务器防火墙端口（80/443）。
-- HTTPS 失败：确认域名已正确解析到当前服务器，且 80 端口可从公网访问。
-- 502/504：通常是 `proxy_pass` 目标端口不对，或应用未启动。
+- 域名无法访问：先确认 A 记录已生效且记录值为当前服务器公网 IP。
+- 根域名可访问但子域名不可访问：检查对应主机记录或 `*` 记录是否存在。
+- 能解析但网页打不开：检查云防火墙、安全组和服务器防火墙的 `80`、`443` 端口。
+- HTTPS 申请失败：检查 `_acme-challenge` CNAME 记录是否完全一致，并等待 DNS 缓存刷新。
+- 反向代理返回 502/504：检查代理目标地址、端口和应用运行状态。

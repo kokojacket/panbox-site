@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>搜索日志</title>
+    <style>
+        .searchlog-viewbar {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:14px;
+            padding:12px 14px;
+            border:1px solid var(--pb-border, #e5e7eb);
+            border-radius:var(--pb-radius-card, 12px);
+            background:#fff;
+            box-shadow:var(--pb-shadow-card, 0 4px 18px rgba(15,23,42,.045));
+        }
+        .searchlog-view-controls { display:flex; align-items:center; flex-wrap:wrap; gap:10px; min-width:0; }
+        .searchlog-note { margin-bottom:14px; padding:10px 12px; border:1px solid #dbeafe; border-radius:8px; color:#606266; background:#f8fbff; font-size:13px; line-height:1.7; }
+        @media (max-width:767px) {
+            .searchlog-viewbar,
+            .searchlog-view-controls { align-items:stretch; flex-direction:column; }
+            .searchlog-view-controls .el-radio-group,
+            .searchlog-view-controls .el-select { width:100% !important; }
+            .searchlog-view-controls .el-radio-group { display:flex; }
+            .searchlog-view-controls .el-radio-button { flex:1 1 0; }
+            .searchlog-view-controls .el-radio-button__inner { box-sizing:border-box; width:100%; padding-left:8px; padding-right:8px; }
+            .searchlog-note .el-button { display:block; margin:8px 0 0 !important; }
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'3'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'3-125'"
+        :collapse="false" :default-openeds="['3']">
+                <el-menu-item index="107"
+            onclick="location.href='/demos/search/admin/conf/base.html';" >
+            <i class="el-icon-s-operation" ></i>
+            站点配置        </el-menu-item>
+                                <el-menu-item index="120"
+            onclick="location.href='/demos/search/admin/accesslog/index.html';" >
+            <i class="el-icon-view" ></i>
+            访问日志        </el-menu-item>
+                                <el-menu-item index="125"
+            onclick="location.href='/demos/search/admin/searchlog/index.html';" class="is-active" >
+            <i class="el-icon-search" ></i>
+            搜索日志        </el-menu-item>
+                                <el-menu-item index="121"
+            onclick="location.href='/demos/search/admin/diagnosticlog/index.html';" >
+            <i class="el-icon-warning-outline" ></i>
+            诊断日志        </el-menu-item>
+                                <el-menu-item index="126"
+            onclick="location.href='/demos/search/admin/accessguard/index.html';" >
+            <i class="el-icon-lock" ></i>
+            防护规则        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'3-125'"
+        :collapse="false" :default-openeds="['3']">
+                <el-menu-item index="mobile-107"
+            onclick="location.href='/demos/search/admin/conf/base.html';" >
+            <i class="el-icon-s-operation" ></i>
+            站点配置        </el-menu-item>
+                                <el-menu-item index="mobile-120"
+            onclick="location.href='/demos/search/admin/accesslog/index.html';" >
+            <i class="el-icon-view" ></i>
+            访问日志        </el-menu-item>
+                                <el-menu-item index="mobile-125"
+            onclick="location.href='/demos/search/admin/searchlog/index.html';" class="is-active" >
+            <i class="el-icon-search" ></i>
+            搜索日志        </el-menu-item>
+                                <el-menu-item index="mobile-121"
+            onclick="location.href='/demos/search/admin/diagnosticlog/index.html';" >
+            <i class="el-icon-warning-outline" ></i>
+            诊断日志        </el-menu-item>
+                                <el-menu-item index="mobile-126"
+            onclick="location.href='/demos/search/admin/accessguard/index.html';" >
+            <i class="el-icon-lock" ></i>
+            防护规则        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--searchlog-index">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>搜索日志</h1>
+                                                    </header>
+                        
+
+    <div class="searchlog-viewbar">
+        <div class="searchlog-view-controls">
+            <el-radio-group v-model="searchLogView" size="small" @change="handleSearchLogViewChange">
+                <el-radio-button label="detail">明细日志</el-radio-button>
+                <el-radio-button label="ip">可疑 IP</el-radio-button>
+                <el-radio-button label="ua">可疑 UA</el-radio-button>
+            </el-radio-group>
+            <el-select v-model="searchForm.source" size="small" placeholder="来源" style="width:120px;" @change="handleSearchLogViewChange(searchLogView)">
+                <el-option label="全部" value=""></el-option>
+                <el-option label="本地搜" value="local"></el-option>
+                <el-option label="全网搜" value="web"></el-option>
+            </el-select>
+        </div>
+    </div>
+
+    <div v-show="searchLogView === 'detail'">
+        <div style="margin-bottom: 14px;">
+            <el-form :inline="true" :model="searchForm" size="small">
+                <el-form-item label="筛选字段">
+                    <el-select v-model="searchForm.filter" placeholder="筛选字段" style="width: 140px;">
+                        <el-option label="IP" value="ip"></el-option>
+                        <el-option label="关键词" value="keyword"></el-option>
+                        <el-option label="User-Agent" value="user_agent"></el-option>
+                        <el-option label="visitor_id" value="visitor_id"></el-option>
+                        <el-option label="来源地址" value="referer"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="关键词">
+                    <el-input v-model="searchForm.keyword" placeholder="请输入关键词" clearable></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="searchSearchLog">查询</el-button>
+                    <el-button @click="resetSearchLog">重置</el-button>
+                    <el-button icon="el-icon-refresh" @click="getSearchList">刷新</el-button>
+                    <el-button type="success" icon="el-icon-download" @click="downloadSearchLog">下载日志</el-button>
+                    <el-button type="danger" icon="el-icon-delete" @click="clearSearchLog">清空搜索日志</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+
+        <el-table v-loading="searchLoading" :data="searchDataList.data" border style="width:100%;" empty-text="暂无搜索日志">
+            <el-table-column prop="create_time" label="时间" min-width="170"></el-table-column>
+            <el-table-column prop="ip" label="IP" min-width="130"></el-table-column>
+            <el-table-column prop="keyword" label="关键词" min-width="180" show-overflow-tooltip></el-table-column>
+            <el-table-column label="结果数" width="90">
+                <template slot-scope="scope">{{ searchResultCount(scope.row) }}</template>
+            </el-table-column>
+            <el-table-column label="耗时(ms)" width="100">
+                <template slot-scope="scope">{{ searchCost(scope.row) }}</template>
+            </el-table-column>
+            <el-table-column prop="user_agent" label="User-Agent" min-width="320" show-overflow-tooltip></el-table-column>
+        </el-table>
+
+        <div v-if="Number(searchDataList.total) > 0" class="page">
+            <el-pagination @size-change="handleSearchSizeChange" :page-sizes="[50, 100, 200, 500, 1000]" :page-size="searchForm.per_page"
+                layout="total, sizes, prev, pager, next, jumper" background @current-change="changeSearchCurrentPage"
+                :current-page="searchDataList.current_page" :page-count="searchDataList.last_page" :total="searchDataList.total">
+            </el-pagination>
+        </div>
+    </div>
+
+    <div v-show="searchLogView === 'ip'">
+        <div class="searchlog-note">
+            统计最近 {{ suspiciousConfig.ip_window_minutes }} 分钟内搜索次数达到 {{ suspiciousConfig.ip_search_threshold }} 次的 IP，当前来源：{{ searchForm.source || '全部' }}。
+            <el-button size="mini" icon="el-icon-refresh" @click="getSuspiciousIpList" style="margin-left:8px;">刷新</el-button>
+        </div>
+        <el-table v-loading="suspiciousIpLoading" :data="suspiciousIpData.list" border style="width:100%;" empty-text="暂无可疑 IP">
+            <el-table-column prop="ip" label="IP" min-width="140"></el-table-column>
+            <el-table-column prop="search_count" label="搜索次数" width="100"></el-table-column>
+            <el-table-column prop="keyword_count" label="关键词数" width="100"></el-table-column>
+            <el-table-column label="首次出现" min-width="170">
+                <template slot-scope="scope">{{ formatLogTime(scope.row.first_time) }}</template>
+            </el-table-column>
+            <el-table-column label="最后出现" min-width="170">
+                <template slot-scope="scope">{{ formatLogTime(scope.row.last_time) }}</template>
+            </el-table-column>
+            <el-table-column prop="sample_user_agent" label="示例 UA" min-width="320" show-overflow-tooltip></el-table-column>
+            <el-table-column label="操作" width="90" fixed="right">
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" @click="copyText(scope.row.ip)">复制 IP</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+
+    <div v-show="searchLogView === 'ua'">
+        <div class="searchlog-note">
+            统计最近 {{ suspiciousConfig.ua_window_minutes }} 分钟内搜索次数达到 {{ suspiciousConfig.ua_search_threshold }} 次，或命中可疑关键词的 UA，当前来源：{{ searchForm.source || '全部' }}。
+            <el-button size="mini" icon="el-icon-refresh" @click="getSuspiciousUaList" style="margin-left:8px;">刷新</el-button>
+        </div>
+        <el-table v-loading="suspiciousUaLoading" :data="suspiciousUaData.list" border style="width:100%;" empty-text="暂无可疑 UA">
+            <el-table-column prop="user_agent" label="User-Agent" min-width="360" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="search_count" label="搜索次数" width="100"></el-table-column>
+            <el-table-column prop="ip_count" label="IP数" width="80"></el-table-column>
+            <el-table-column prop="keyword_count" label="关键词数" width="100"></el-table-column>
+            <el-table-column prop="matched_keyword" label="命中词" min-width="110"></el-table-column>
+            <el-table-column prop="reason" label="原因" min-width="140"></el-table-column>
+            <el-table-column label="最后出现" min-width="170">
+                <template slot-scope="scope">{{ formatLogTime(scope.row.last_time) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="90" fixed="right">
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" @click="copyText(scope.row.user_agent)">复制 UA</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"searchDataList":{"current_page":1,"data":[{"search_log_id":3,"create_time":"2026-07-20 21:18:00","ip":"203.0.113.18","keyword":"仙逆","result_count":8,"result_num":8,"total":8,"search_time":126,"user_agent":"Mozilla/5.0 Demo Browser","source":"local"},{"search_log_id":2,"create_time":"2026-07-20 21:17:00","ip":"203.0.113.42","keyword":"凡人修仙传","result_count":6,"result_num":6,"total":6,"search_time":184,"user_agent":"Mozilla/5.0 Demo Mobile","source":"web"},{"search_log_id":1,"create_time":"2026-07-20 21:16:00","ip":"198.51.100.24","keyword":"短剧合集","result_count":0,"result_num":0,"total":0,"search_time":92,"user_agent":"DemoCrawler/1.0","source":"local"}],"has_more":false,"last_page":1,"per_page":100,"total":3},"searchForm":{"filter":"keyword","keyword":"","order":"search_log_id desc","page":1,"per_page":100,"source":""},"searchLoading":false,"searchLogView":"detail","suspiciousConfig":{"ip_search_threshold":60,"ip_window_minutes":60,"ua_keywords":"","ua_search_threshold":60,"ua_window_minutes":60},"suspiciousConfigLoaded":false,"suspiciousIpData":{"list":[]},"suspiciousIpLoading":false,"suspiciousUaData":{"list":[]},"suspiciousUaLoading":false},"responses":[{"data":{"code":200,"message":"数据获取成功","data":{"current_page":1,"data":[{"search_log_id":3,"create_time":"2026-07-20 21:18:00","ip":"203.0.113.18","keyword":"仙逆","result_count":8,"result_num":8,"total":8,"search_time":126,"user_agent":"Mozilla/5.0 Demo Browser","source":"local"},{"search_log_id":2,"create_time":"2026-07-20 21:17:00","ip":"203.0.113.42","keyword":"凡人修仙传","result_count":6,"result_num":6,"total":6,"search_time":184,"user_agent":"Mozilla/5.0 Demo Mobile","source":"web"},{"search_log_id":1,"create_time":"2026-07-20 21:16:00","ip":"198.51.100.24","keyword":"短剧合集","result_count":0,"result_num":0,"total":0,"search_time":92,"user_agent":"DemoCrawler/1.0","source":"local"}],"has_more":false,"last_page":1,"per_page":100,"total":3}},"method":"post","url":"/admin/access_log/getSearchList"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    searchLoading: false,
+                    searchLogView: 'detail',
+                    searchDataList: [],
+                    suspiciousIpLoading: false,
+                    suspiciousUaLoading: false,
+                    suspiciousIpData: { list: [] },
+                    suspiciousUaData: { list: [] },
+                    suspiciousConfigLoaded: false,
+                    suspiciousConfigPromise: null,
+                    suspiciousConfig: {
+                        ip_window_minutes: 60,
+                        ip_search_threshold: 60,
+                        ua_window_minutes: 60,
+                        ua_search_threshold: 60,
+                        ua_keywords: ''
+                    },
+                    searchForm: {
+                        page: 1,
+                        per_page: 100,
+                        order: 'search_log_id desc',
+                        source: '',
+                        filter: 'keyword',
+                        keyword: ''
+                    },
+                }
+            },
+            created() {
+                this.getSearchList();
+            },
+            methods: {
+                handleSearchSizeChange(per_page) {
+                    this.searchForm.per_page = per_page;
+                    this.getSearchList();
+                },
+                changeSearchCurrentPage(page) {
+                    this.searchForm.page = page;
+                    this.getSearchList();
+                },
+                searchSearchLog() {
+                    this.searchForm.page = 1;
+                    this.getSearchList();
+                },
+                resetSearchLog() {
+                    this.searchForm.source = '';
+                    this.searchForm.filter = 'keyword';
+                    this.searchForm.keyword = '';
+                    this.searchForm.page = 1;
+                    this.getSearchList();
+                },
+                handleSearchLogViewChange(value) {
+                    if (value === 'detail') {
+                        this.getSearchList();
+                        return;
+                    }
+                    this.getSuspiciousRuleConfig().then(() => {
+                        if (this.searchLogView !== value) return;
+                        if (value === 'ip') this.getSuspiciousIpList();
+                        else if (value === 'ua') this.getSuspiciousUaList();
+                    });
+                },
+                buildDownloadQuery(params) {
+                    var query = [];
+                    Object.keys(params).forEach(function (key) {
+                        if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+                            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+                        }
+                    });
+                    return query.join('&');
+                },
+                downloadSearchLog() {
+                    var params = Object.assign({}, PostBase, this.searchForm, {
+                        page: undefined,
+                        per_page: undefined,
+                        limit: 5000
+                    });
+                    window.open('/admin/access_log/downloadSearch?' + this.buildDownloadQuery(params));
+                },
+                clearSearchLog() {
+                    var that = this;
+                    this.$confirm('确认清空全部搜索日志？该操作不可恢复。', '清空搜索日志', {
+                        confirmButtonText: '确认清空',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        axios.post('/admin/access_log/clearSearch', Object.assign({}, PostBase)).then(function (response) {
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.$message.success(response.data.message);
+                                that.getSearchList();
+                                that.getSuspiciousIpList();
+                                that.getSuspiciousUaList();
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        }).catch(function () {
+                            that.$message.error('服务器内部错误');
+                        });
+                    }).catch(function () {});
+                },
+                searchResultCount(row) {
+                    return row.result_count || row.result_num || row.total || 0;
+                },
+                searchCost(row) {
+                    return row.search_time || 0;
+                },
+                formatLogTime(value) {
+                    if (!value) return '-';
+                    if (!isNaN(value)) {
+                        var date = new Date(parseInt(value, 10) * 1000);
+                        var pad = function (num) { return num < 10 ? '0' + num : '' + num; };
+                        return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+                    }
+                    return value;
+                },
+                copyText(value) {
+                    var that = this;
+                    var text = String(value || '');
+                    if (!text) return;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(function () {
+                            that.$message.success('已复制');
+                        }).catch(function () {
+                            that.copyTextFallback(text);
+                        });
+                    } else {
+                        that.copyTextFallback(text);
+                    }
+                },
+                copyTextFallback(text) {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.$message.success('已复制');
+                },
+                getSearchList() {
+                    var that = this;
+                    that.searchLoading = true;
+                    axios.post('/admin/access_log/getSearchList', Object.assign({}, PostBase, that.searchForm))
+                        .then(function (response) {
+                            that.searchLoading = false;
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.searchDataList = response.data.data;
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function () {
+                            that.searchLoading = false;
+                            that.$message.error('服务器内部错误');
+                        });
+                },
+                getSuspiciousRuleConfig() {
+                    if (this.suspiciousConfigLoaded) return Promise.resolve();
+                    if (this.suspiciousConfigPromise) return this.suspiciousConfigPromise;
+                    var that = this;
+                    this.suspiciousConfigPromise = axios.post('/admin/access_log/getSuspiciousRuleConfig', Object.assign({}, PostBase))
+                        .then(function (response) {
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.suspiciousConfig = Object.assign({}, that.suspiciousConfig, response.data.data);
+                                that.suspiciousConfigLoaded = true;
+                            }
+                        })
+                        .catch(function () {})
+                        .then(function () {
+                            that.suspiciousConfigPromise = null;
+                        });
+                    return this.suspiciousConfigPromise;
+                },
+                getSuspiciousIpList() {
+                    var that = this;
+                    that.suspiciousIpLoading = true;
+                    axios.post('/admin/access_log/getSuspiciousIpList', Object.assign({}, PostBase, {
+                        source: that.searchForm.source,
+                        window_minutes: that.suspiciousConfig.ip_window_minutes,
+                        threshold: that.suspiciousConfig.ip_search_threshold,
+                        limit: 100
+                    })).then(function (response) {
+                        that.suspiciousIpLoading = false;
+                        if (response.data.code == CODE_SUCCESS) {
+                            that.suspiciousIpData = response.data.data;
+                        } else {
+                            that.$message.error(response.data.message);
+                        }
+                    }).catch(function () {
+                        that.suspiciousIpLoading = false;
+                        that.$message.error('服务器内部错误');
+                    });
+                },
+                getSuspiciousUaList() {
+                    var that = this;
+                    that.suspiciousUaLoading = true;
+                    axios.post('/admin/access_log/getSuspiciousUaList', Object.assign({}, PostBase, {
+                        source: that.searchForm.source,
+                        window_minutes: that.suspiciousConfig.ua_window_minutes,
+                        threshold: that.suspiciousConfig.ua_search_threshold,
+                        limit: 100
+                    })).then(function (response) {
+                        that.suspiciousUaLoading = false;
+                        if (response.data.code == CODE_SUCCESS) {
+                            that.suspiciousUaData = response.data.data;
+                        } else {
+                            that.$message.error(response.data.message);
+                        }
+                    }).catch(function () {
+                        that.suspiciousUaLoading = false;
+                        that.$message.error('服务器内部错误');
+                    });
+                },
+            }
+        })
+    </script>
+
+
+</html>

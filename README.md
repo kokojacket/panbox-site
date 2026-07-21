@@ -2,8 +2,8 @@
 
 这是一个独立的静态站点（VitePress），用于承载 PanBox 系列 3 个产品的综合落地页与多页文档站。
 
-- 首页：综合落地页（产品卡片 + Quickstart 入口 + 风险提示）
-- 文档：按产品分区（search/autosave/sync）+ 通用风险/免责声明 + 安全基线
+- 首页：综合落地页（产品预览 + 静态 Demo + 下载与订阅入口）
+- 文档：从零部署 + 桌面版下载 + 产品分区（search/autosave/sync）+ 安全基线与使用边界
 - 语言：简体中文
 
 ## 本地开发
@@ -30,9 +30,14 @@ pnpm docs:preview
 
 - `docs/`：站点内容
 - `docs/index.md`：综合落地页
-- `docs/getting-started.md`：全家桶总览与快速开始
+- `docs/getting-started.md`：从零部署路线
+- `docs/desktop-download.md`：Autosave 与 Sync 桌面版下载
+- `docs/server-purchase.md`：服务器购买、远程连接与 Docker 安装
+- `docs/domain-setup.md`：域名购买与解析
+- `docs/nginxwebui-reverse-proxy.md`：NginxWebUI、HTTPS 与反向代理
+- `docs/tencent-yuanqi.md`：腾讯元器机器人与工作流导入
 - `docs/products/`：产品文档
-  - `docs/products/search/`：PanBox Search（PHP/ThinkPHP6 形态）
+  - `docs/products/search/`：PanBox Search（PHP 8.4 / ThinkPHP 8）
   - `docs/products/autosave/`：PanBox Autosave（转存追更）
   - `docs/products/sync/`：PanBox Sync（同步流水线）
 - `docs/risk/`：通用风险与安全基线

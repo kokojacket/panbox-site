@@ -1,5 +1,8 @@
-# 使用（Search）
+---
+search: false
+outline: false
+---
 
-PanBox Search - 网盘搜索站 负责前台搜索入口与结果展示，适合把分散的资源入口统一到一个站点中，减少用户流失并承接后续流量。
+# PanBox Search 使用说明
 
-详细使用说明正在补充中，后续会围绕站点访问、搜索展示和与其他产品的配合方式展开。
+本页暂不作为公开文档入口。请先查看[产品概览](/products/search/overview)或[脚本部署教程](/products/search/quickstart)。

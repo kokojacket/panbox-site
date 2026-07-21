@@ -1,5 +1,8 @@
-# 使用（Autosave）
+---
+search: false
+outline: false
+---
 
-PanBox Autosave - 自动转存系统 负责自动追更、定时转存和资源沉淀，适合把别人的分享链接慢慢变成你自己的长期库存。
+# PanBox Autosave 使用说明
 
-详细使用说明正在补充中，后续会围绕转存链路、任务管理和与 Search / Sync 的配合方式展开。
+本页暂不作为公开文档入口。请先查看[产品概览](/products/autosave/overview)或[脚本部署教程](/products/autosave/quickstart)。

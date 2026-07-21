@@ -1,5 +1,8 @@
-# 使用（Sync）
+---
+search: false
+outline: false
+---
 
-PanBox Sync - 跨网盘同步自动转码系统 负责跨网盘同步、文件处理、自动转码与资源保活，适合把资源稳定性做成长期能力。
+# PanBox Sync 使用说明
 
-详细使用说明正在补充中，后续会围绕任务流水线、处理阶段和长期分发场景展开。
+本页暂不作为公开文档入口。请先查看[产品概览](/products/sync/overview)或[脚本部署教程](/products/sync/quickstart)。

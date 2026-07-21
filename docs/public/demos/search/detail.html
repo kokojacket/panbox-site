@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <meta charset="UTF-8">
+        <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1.0">
+    <title>[DEMO] UC永久资源 029_动漫 - Panbox Search</title>
+    <meta name="keywords" content="[DEMO] UC永久资源 029_动漫," />
+    <meta name="description" content="[DEMO] UC永久资源 029_动漫 - " />
+        <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="stylesheet" href="/demos/search/assets/front/css/index.min.css">
+    <link rel="stylesheet" href="/demos/search/assets/front/css/app.css">
+    <link rel="stylesheet" href="/demos/search/assets/front/css/m.css">
+    
+        
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+
+        :root {
+            --theme-color: #3e3e3e;
+            --theme-theme: #133ab3;
+            --theme-background: #fafafa;
+            --theme-other_background: #ffffff;
+        }
+            </style>
+</head>
+
+<body>
+    <style>
+        .detail-tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .detail-tag-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #fff3e8;
+            color: #ff7a00;
+            border: 1px solid #ffd7b0;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .resource-link-list {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 10px 14px;
+            padding: 12px 14px;
+            border: 1px solid #eef0f4;
+            border-radius: 10px;
+            background: #fafbfc;
+        }
+
+        .resource-link-label {
+            color: #303133;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 34px;
+            white-space: nowrap;
+        }
+
+        .resource-link-items {
+            display: grid;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .resource-link-row {
+            display: grid;
+            grid-template-columns: minmax(120px, 170px) minmax(0, 1fr);
+            align-items: center;
+            gap: 12px;
+            min-height: 34px;
+        }
+
+        .resource-link-disk {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            color: #303133;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .resource-link-disk .icon {
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
+        }
+
+        .resource-link-disk span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .resource-link-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .resource-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 32px;
+            padding: 0 12px;
+            border: 1px solid #d7dbe3;
+            border-radius: 6px;
+            background: #fff;
+            color: #303133;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 30px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .resource-action:hover {
+            color: #1d45b8;
+            border-color: #1d45b8;
+            background: #f7faff;
+        }
+
+        .resource-action-primary {
+            color: #145cff;
+            border-color: #145cff;
+        }
+
+        @media (max-width: 768px) {
+            .resource-link-list {
+                display: block;
+                padding: 12px;
+            }
+
+            .resource-link-label {
+                display: block;
+                margin-bottom: 8px;
+                line-height: 1.4;
+            }
+
+            .resource-link-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+
+    </style>
+    <div class="headBg" style="background-image: url();"></div>
+    <div id="app" v-cloak>
+        <div class="headerBox">
+    <div class="bg" ></div>
+    <div class="box">
+        <a href="/demos/search/index.html" class="logoBox" >
+                        <div class="title">Panbox Search</div>
+                    </a>
+        <div class="search" >
+            <input type="text" v-model="keyword" placeholder="输入关键字进行搜索" @keyup.enter="searchBtn" confirm-type="search"
+                @confirm="searchBtn">
+            <div class="btn" @click="searchBtn">
+                <i class="iconfont icon-sousuo"></i>
+            </div>
+        </div>
+        <div class="navs">
+                        <div class="item" @click="layerVisible = true">提交需求</div>
+                        <div class="btns" v-html="``"></div>
+
+            <div class="iconfont icon-caidan" @click="drawer = true"></div>
+        </div>
+    </div>
+</div>
+<div class="headerKox"></div>
+
+
+<el-dialog data-app-overlay v-model="qcodeVisible" width="300">
+    <img src="" style="width: 100%" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+</el-dialog>
+
+<el-dialog data-app-overlay v-model="layerVisible" width="300">
+    <div class="layerBox">
+        <div class="vname">提交需求</div>
+        <el-input v-model="content" placeholder="请输入你想看的资源信息~" type="textarea" resize='none'></el-input>
+        <div class="vbtn" @click="saveBtn">提交</div>
+    </div>
+</el-dialog>
+
+<el-dialog data-app-overlay v-model="drawer" width="300" center>
+    <div class="drawer">
+                <div class="item" @click="layerVisible = true">提交需求</div>
+                <div class="btns" v-html="``"></div>
+    </div>
+</el-dialog>
+
+<el-dialog data-app-overlay title="" v-model="dialogUrl" class="dialogUrlBox" :close-on-click-modal="false">
+    <div v-loading="dialogLoading" class="dialogUrl" v-if="dialogUrl">
+        <div v-if="dialogItem.showUrl">
+                <div v-if="pc_type!=1 || dialogItem.forceQr">
+                <template v-if="dialogItem.is_type==0">
+                    <div class="title">请使用 <span>夸克APP</span> 扫码获取</div>
+                    <div class="tips">打开夸克APP- 点击搜索框中的相机 - 点击扫码</div>
+                </template>
+                <template v-else-if="dialogItem.is_type==3">
+                    <div class="title">请使用 <span>UC浏览器</span> 扫码获取</div>
+                    <div class="tips">打开UC浏览器- 点击搜索框中的相机 - 点击扫码</div>
+                </template>
+                <template v-else>
+                    <div class="title">请使用 <span>手机扫码</span> 获取</div>
+                    <div class="tips">打开微信APP- 点击右上角 - 选择扫一扫</div>
+                </template>
+                <div class="qrcode" id="qrcode"></div>
+            </div>
+            <div class="nav">
+                <div class="item">
+                    <span class="t">{{dialogItem.title}}</span>
+                </div>
+                <div class="item" v-show="pc_type!=2 && !dialogItem.hideUrlText">
+                    <span>资源地址：</span>
+                    <a :href="dialogItem.showUrl" target="_blank" rel="noopener noreferrer">{{dialogItem.showUrl}}</a>
+                </div>
+            </div>
+        </div>
+        <div v-else-if="!dialogLoading">
+            <div class="title">获取失败</div>
+            <div class="tips" style="color: #FF3F3D;">{{dialogItem.message}}</div>
+        </div>
+        <div class="statement">
+            <div class="content">
+                <p>🔔 声明：本站链接均由程序自动收集自公开网盘，不存储、不传播任何文件，跳转链接指向网盘官网。</p>
+                <p>文件内容请自行辨别，如发现违规请向网盘平台举报。本站仅供学习交流，无任何收费行为。</p>
+            </div>
+        </div>
+    </div>
+</el-dialog>
+
+        <div class="searchBox searchDetail">
+            <div class="search">
+                <input type="text" v-model="keyword" placeholder="输入关键字进行搜索" @keyup.enter="searchBtn"
+                    confirm-type="search" @confirm="searchBtn">
+                <div class="btn" @click="searchBtn">
+                    <i class="iconfont icon-sousuo"></i>
+                </div>
+            </div>
+        </div>
+        <div class="listBox detailBox">
+            <div class="left">
+                <h3>详情</h3>
+                <div class="box details">
+                                        <div class="title">[DEMO] UC永久资源 029</div>
+                    <div class="cat">
+                        <div class="l">资源分类</div>
+                        <div class="r">
+                                                        动漫                        </div>
+                    </div>
+                    <div class="cat">
+                        <div class="l">资源描述</div>
+                        <div class="r">
+                                                        资源管理综合演示：UC网盘，永久资源，启用状态                        </div>
+                    </div>
+                                        <div class="cat">
+                        <div class="l">资源标签</div>
+                        <div class="r">
+                            <div class="detail-tag-list">
+                                                                <span class="detail-tag-item">demo</span>
+                                                                <span class="detail-tag-item">永久资源</span>
+                                                                <span class="detail-tag-item">启用</span>
+                                                                <span class="detail-tag-item">UC</span>
+                                                            </div>
+                        </div>
+                    </div>
+                                        <div class="cat">
+                        <div class="l">资源类型</div>
+                        <div class="r">
+                            <img src="/demos/search/assets/front/images/3.png" class="icon"
+                                alt="网盘图标" />
+                                                        <span>UC网盘</span>
+                                                    </div>
+                    </div>
+                    <div class="cat" v-show="pc_type!=2">
+                        <div class="r" style="width: 100%;">
+                            <div class="resource-link-list">
+                                <div class="resource-link-label">资源地址：</div>
+                                <div class="resource-link-items">
+                                                                        <div class="resource-link-row">
+                                        <div class="resource-link-disk">
+                                            <img src="/demos/search/assets/front/images/3.png" class="icon" alt="网盘" />
+                                            <span>UC网盘</span>
+                                        </div>
+                                        <div class="resource-link-actions">
+                                            <a href="javascript:;" onclick="linkBtn(0)" class="resource-action resource-action-primary">下载</a>
+                                            <a href="javascript:;" onclick="copyResourceLink(0)" class="resource-action">复制</a>
+                                            <a href="javascript:;" onclick="scanResourceLink(0)" class="resource-action">点击扫码查看</a>
+                                        </div>
+                                    </div>
+                                                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btns">
+                        <div class="btn"
+                            data-title="[DEMO] UC永久资源 029"
+                            data-url="http://127.0.0.1:8008/d/29.html"
+                            @click.stop="copyText($event)"><i
+                                class="iconfont icon-fenxiang1"></i>复制分享</div>
+                        <a class="btn btnCol" href="javascript:;" onclick="linkBtn()"><i
+                                class="iconfont icon-yun_o"></i>立即访问</a>
+                    </div>
+                </div>
+                <h3 class="samelistNav">相关资源</h3>
+                <div class="box details samelistBox">
+                    <div class="samelist">
+                                                <a href="/demos/search/detail.html" class="item">
+                            <p>
+                                <span>1</span>
+                                [DEMO] UC永久资源 029                            </p>
+                        </a>
+                                            </div>
+                </div>
+            </div>
+            <div class="right">
+                                <div class="nav">
+                                        短剧                </div>
+                <div class="box">
+                    <div class="list">
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>1</span>
+                                双向欲臣                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>2</span>
+                                家里家外                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>3</span>
+                                花朝                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>4</span>
+                                十九万岁玄门老祖，手捏天雷讲科学                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>5</span>
+                                开局被甩，我觉醒情绪系统                            </p>
+                        </a>
+                                            </div>
+                </div>
+                                <div class="nav">
+                                        电影                </div>
+                <div class="box">
+                    <div class="list">
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>1</span>
+                                给阿嬷的情书                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>2</span>
+                                角头：斗阵欸                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>3</span>
+                                四渡                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>4</span>
+                                封神第二部：战火西岐                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>5</span>
+                                特立独行                            </p>
+                        </a>
+                                            </div>
+                </div>
+                                <div class="nav">
+                                        电视剧                </div>
+                <div class="box">
+                    <div class="list">
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>1</span>
+                                南部档案                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>2</span>
+                                唐朝诡事录                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>3</span>
+                                灿如繁星                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>4</span>
+                                雀骨                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>5</span>
+                                入戏                            </p>
+                        </a>
+                                            </div>
+                </div>
+                                <div class="nav">
+                                        动漫                </div>
+                <div class="box">
+                    <div class="list">
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>1</span>
+                                光阴之外                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>2</span>
+                                吞噬星空 第4季                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>3</span>
+                                择天记                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>4</span>
+                                斗破苍穹 年番2                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>5</span>
+                                择日飞升                            </p>
+                        </a>
+                                            </div>
+                </div>
+                                <div class="nav">
+                                        综艺                </div>
+                <div class="box">
+                    <div class="list">
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>1</span>
+                                半熟恋人 第五季                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>2</span>
+                                喜欢你我也是 第六季                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>3</span>
+                                忙忙碌碌寻宝藏2                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>4</span>
+                                中餐厅 第十季                            </p>
+                        </a>
+                                                <a href="/demos/search/search.html" class="item">
+                            <p>
+                                <span>5</span>
+                                你好，星期六                            </p>
+                        </a>
+                                            </div>
+                </div>
+                            </div>
+        </div>
+        <div class="footerBox">
+    <div class="box">
+        <p></p>
+        <p>
+                        <a href="/demos/search/index.html" target="_blank">网站地图</a>
+        </p>
+    </div>
+</div>
+    </div>
+    <script defer data-cfasync="false" src="/demos/search/assets/front/js/vue.global.min.js"></script>
+<script defer data-cfasync="false" src="/demos/search/assets/front/js/index.full.min.js"></script><script defer data-cfasync="false" src="/demos/search/assets/front/js/axios.min.js"></script><script>window.__PANBOX_DEMO_FRONT__={"ranking":{"短剧":{"code":200,"message":"获取成功","data":[{"title":"双向欲臣","src":"/demos/search/assets/posters/poster-01.webp","ranking":"1","hot_score":"8465","desc":"姜许为了缓解双向躁郁症的症状，以十万一次，“玩弄“负债的校草陆执。几年后姜家败落，姜许沦入北缅红灯区..."},{"title":"家里家外","src":"/demos/search/assets/posters/poster-02.webp","ranking":"2","hot_score":"5173","desc":"1981年，蔡晓艳和陈海清闪婚，各自带着孩子组成新家。蔡晓艳性格泼辣，陈海清却偏爱。相处中，蔡晓艳温..."},{"title":"花朝","src":"/demos/search/assets/posters/poster-03.avif","ranking":"3","hot_score":"2000","desc":"花朝女扮男装从军，封镇威大将军。拒皇帝赐婚自降为民。未婚夫秦京墨娶他人，辱花朝。西戎来访，花朝被迎回..."},{"title":"十九万岁玄门老祖，手捏天雷讲科学","src":"/demos/search/assets/posters/poster-06.png","ranking":"4","hot_score":"723","desc":"最强少年天师路世伍解散宗门下山求学，以 “科学” 为幌子化解京华大学灵异事件，揭穿蛊毒、阴阳术等阴谋..."},{"title":"开局被甩，我觉醒情绪系统","src":"/demos/search/assets/posters/poster-04.webp","ranking":"5","hot_score":"627","desc":"被前女友嫌弃\"没情绪\"的陈豪，意外觉醒情绪系统，只要让女人情绪波动，就能暴富!从此，他化身\"情绪猎人..."},{"title":"朝思暮时","src":"/demos/search/assets/posters/poster-07.png","ranking":"6","hot_score":"609","desc":"国际小提琴家时柒冷落丈夫，漠视儿子四年后，震惊发现多年恨意竟是错付，而那位她憎恨至深的丈夫顾寒深，实..."},{"title":"他不知道的秘密","src":"/demos/search/assets/posters/poster-08.png","ranking":"7","hot_score":"400","desc":"结婚十年，沈薇发现丈夫林子默出轨苏曼。林子默联手苏曼给沈薇灌下打胎药，杀死亲骨肉。沈薇发现林子默患遗..."},{"title":"闪婚后我成了大佬的掌中之物","src":"/demos/search/assets/posters/poster-05.webp","ranking":"8","hot_score":"368","desc":"宋察对救了自己的万妮一见钟情， 在万妮和胡恩的婚礼当天抢 亲，强势迎娶方妮。婚后宋察霸气护妻，万妮逐..."},{"title":"重生七年后，我竟娶了死对头校花","src":"/demos/search/assets/posters/poster-10.webp","ranking":"9","hot_score":"365","desc":"前一秒还在向白月光深情告白，下一秒竟在死对头校花的床上！宋远如遭雷击，原来他竟穿越到了七年后！更让他..."},{"title":"无双","src":"/demos/search/assets/posters/poster-09.avif","ranking":"10","hot_score":"344","desc":"该短剧主要讲述了龙王殿殿主楚青为了爱情，假装成囊废赘婿，过着普通人的生活。没想到，妻子为了金钱，不惜..."}]},"电影":{"code":200,"message":"获取成功","data":[{"title":"给阿嬷的情书","src":"/demos/search/assets/posters/poster-11.webp","ranking":"1","hot_score":"45858","desc":"潮汕阿嬷叶淑柔一直守着平淡的日子，安享晚年。孙子晓伟因债务缠身，瞒着家人远赴泰国，寻找传闻中的亿万富..."},{"title":"角头：斗阵欸","src":"/demos/search/assets/posters/poster-13.webp","ranking":"2","hot_score":"27790","desc":"因父亲挑起新旧敌对帮派的激烈地盘斗争，身为儿子的他则试图掌控腥风血雨的台湾黑社会，在兄弟情与自身处境..."},{"title":"四渡","src":"/demos/search/assets/posters/poster-12.webp","ranking":"3","hot_score":"21651","desc":"长征时期，红军身处绝境。四渡赤水堪称红军的绝地反击之战。在毛泽东（刘烨 饰）的带领下，红军一渡赤水时..."},{"title":"封神第二部：战火西岐","src":"/demos/search/assets/posters/poster-15.webp","ranking":"4","hot_score":"20328","desc":"姜子牙、姬发带队坚守西岐，家园保卫战一触即发！邓婵玉、闻仲奉商王殷寿之命，率魔家四将等殷商大军征伐西..."},{"title":"特立独行","src":"/demos/search/assets/posters/poster-14.webp","ranking":"5","hot_score":"13510","desc":"我们可不可以抛开世俗的眼光而活？一身本领的王长海（白敬亭 饰）回乡履职，初来乍到便锋芒毕露，他不顾老..."},{"title":"八仙！","src":"/demos/search/assets/posters/poster-16.webp","ranking":"6","hot_score":"13001","desc":"“八仙”在成仙和成功之间选择了“成团”，在搞钱和搞事业之间选择了“搞事情”？！吕洞宾、钟离权带队，集..."},{"title":"想你了","src":"/demos/search/assets/posters/poster-17.webp","ranking":"7","hot_score":"11212","desc":"你见过最好的友情是什么样呢？高凡（章若楠饰）和汪美丽（金靖饰）她俩一定有发言权。"},{"title":"苹果","src":"/demos/search/assets/posters/poster-18.webp","ranking":"8","hot_score":"6744","desc":"刘苹果（范冰冰饰）在北京一家洗脚城里做按摩妹，丈夫安坤（佟大为饰）是负责清洗高楼落地窗的工人，二人生..."},{"title":"10间敢死队","src":"/demos/search/assets/posters/poster-19.webp","ranking":"9","hot_score":"6045","desc":"医院走廊尽头的10号房是一个特别的存在，别看这里住着的都是重症病人，但却每天欢声笑语热闹非凡。而故事..."},{"title":"热烈","src":"/demos/search/assets/posters/poster-20.webp","ranking":"10","hot_score":"5700","desc":"街舞老炮儿丁雷（黄渤 饰），偶遇卖艺少年陈烁（王一博 饰），丁雷忽悠陈烁加入自己经营的舞团。舞团内高..."}]},"电视剧":{"code":200,"message":"获取成功","data":[{"title":"南部档案","src":"/demos/search/assets/posters/poster-21.webp","ranking":"1","hot_score":"365151","desc":"民国初年南洋地区发生的一系列诡异事件。故事以张海盐和张海虾两位南部档案馆的秘密探员为主角，他们调查一..."},{"title":"唐朝诡事录","src":"/demos/search/assets/posters/poster-22.webp","ranking":"2","hot_score":"355271","desc":"暗夜邪仙从天而降，鬼市地宫露出冰山一角，而风靡长安的诡异红茶究竟是养生之药还是害人之物？长安城里新娘..."},{"title":"灿如繁星","src":"/demos/search/assets/posters/poster-23.webp","ranking":"3","hot_score":"226801","desc":"该剧改编自晋江文学城作者长洱的同名青春热血竞技小说。"},{"title":"雀骨","src":"/demos/search/assets/posters/poster-24.webp","ranking":"4","hot_score":"115797","desc":"一纸赐婚，两段孽缘。心狠手辣的铁面将军强娶财迷机关太傅千金，从契约夫妻到人生合伙人，从猜忌争斗到相爱..."},{"title":"入戏","src":"/demos/search/assets/posters/poster-25.webp","ranking":"5","hot_score":"66559","desc":"改编自童子的小说《入戏》。"},{"title":"京城奇探","src":"/demos/search/assets/posters/poster-26.webp","ranking":"6","hot_score":"63872","desc":"京城纨绔赵少商为帮姐姐探查夫家怪事，结识了留洋归来的冷面警官元鸿。两人从针锋相对到默契搭档，一路追查..."},{"title":"千香","src":"/demos/search/assets/posters/poster-27.webp","ranking":"7","hot_score":"62469","desc":"该剧改编自十四郎的小说《千香百媚》。海陨至，建木现，得建木之实者，可御万物，仙、妖、魔三族为之陷入血..."},{"title":"这一秒过火","src":"/demos/search/assets/posters/poster-28.webp","ranking":"8","hot_score":"61925","desc":"民国沪上，军阀幼子慕容清峄（张凌赫 饰）因被抱错而受尽养父虐待，少年出逃时被任素素（王楚然 饰）所救..."},{"title":"入青云","src":"/demos/search/assets/posters/poster-29.webp","ranking":"9","hot_score":"47218","desc":"在合虚六境一年一度的“青云大会”上，罪囚出身的极星渊斗者纪伯宰（侯明昊 饰）一举击败已连胜七年的冷酷..."},{"title":"低智商犯罪","src":"/demos/search/assets/posters/poster-30.webp","ranking":"10","hot_score":"39883","desc":"脱离一线刑侦几年的警察张一昂（王骁 饰），因为省厅收到的匿名举报信，被派往三江口调查案件。张一昂到三..."}]},"动漫":{"code":200,"message":"获取成功","data":[{"title":"光阴之外","src":"/demos/search/assets/posters/poster-31.webp","ranking":"1","hot_score":"96903","desc":"天地是万物众生的客舍，光阴是古往今来的过客。苍天残面张开诡异之眼，所视之处生灵涂炭，化为永恒的禁区。..."},{"title":"吞噬星空 第4季","src":"/demos/search/assets/posters/poster-33.webp","ranking":"2","hot_score":"32041","desc":"感谢长期以来大家对《吞噬星空》动画的支持，《吞噬星空》第三季将于3月8日收官。守护之路仍在继续，对抗..."},{"title":"择天记","src":"/demos/search/assets/posters/poster-32.webp","ranking":"3","hot_score":"11015","desc":"西宁少年陈长生身患奇症活不过二十岁，为寻改命之法，前往神都参加大朝试，却因与真凤徐有容的一纸婚约，遭..."},{"title":"斗破苍穹 年番2","src":"/demos/search/assets/posters/poster-35.webp","ranking":"4","hot_score":"8673","desc":"萧炎横扫云岚宗成功复仇，谁知药老的灵魂却被魂殿掳走。为抓萧炎，魂殿暗借小医仙之手，命毒宗围剿萧炎的炎..."},{"title":"择日飞升","src":"/demos/search/assets/posters/poster-36.webp","ranking":"5","hot_score":"7970","desc":"乱世之下，妖祟横生，奸佞当道。又值幽界入侵，人、幽两界势力荼毒人间，捕蛇者许应因看不惯为幽界卖命的草..."},{"title":"沧元图","src":"/demos/search/assets/posters/poster-34.webp","ranking":"6","hot_score":"5531","desc":"沧元界妖邪作乱，人族饱受摧残，主角孟川自小立下为母复仇的誓言，以镜湖道院为起点，凭借坚毅无畏的心志与..."},{"title":"吞噬星空 第5季","src":"/demos/search/assets/posters/poster-37.webp","ranking":"7","hot_score":"4520","desc":""},{"title":"灵笼","src":"/demos/search/assets/posters/poster-38.webp","ranking":"8","hot_score":"3054","desc":"不久的未来，人类的世界早已拥挤不堪，迈向星河、寻找新家园的行动迫在眉捷。正当一切有条不紊的推进之时，..."},{"title":"凡人修仙传：风起天南","src":"/demos/search/assets/posters/poster-40.webp","ranking":"9","hot_score":"2621","desc":"平凡少年韩立出生贫困，为了让家人过上更好的生活，自愿前去七玄门参加入门考核，最终被墨大夫收入门下。"},{"title":"仙武传 第二季","src":"/demos/search/assets/posters/poster-41.webp","ranking":"10","hot_score":"2333","desc":"门派废徒叶辰，被赶出宗门，无以为家，机缘巧合之下偶得真火，再踏仙武之路。"}]},"综艺":{"code":200,"message":"获取成功","data":[{"title":"半熟恋人 第五季","src":"/demos/search/assets/posters/poster-39.webp","ranking":"1","hot_score":"59436","desc":"命定指引，赤诚相爱。第五季将讲述十二位素人嘉宾的恋爱故事，他们历经命运选择、心动拉扯与现实抉择，在真..."},{"title":"喜欢你我也是 第六季","src":"/demos/search/assets/posters/poster-42.webp","ranking":"2","hot_score":"55360","desc":"#2026爱桃综快乐不重样# #2026爱奇艺新生片单# #喜欢你我也是# 第六季暖心回归！恋综IP..."},{"title":"忙忙碌碌寻宝藏2","src":"/demos/search/assets/posters/poster-43.webp","ranking":"3","hot_score":"31238","desc":"寻宝小队再集结，宝藏烟火气下饭脑综再度上桌，第二季全面升维！从“单人寻宝”升级“双人寻宝模式”，换乘..."},{"title":"中餐厅 第十季","src":"/demos/search/assets/posters/poster-44.webp","ranking":"4","hot_score":"22962","desc":"跨越山海，寻味南洋；以美食为桥，联结中泰温情。"},{"title":"你好，星期六","src":"/demos/search/assets/posters/poster-45.webp","ranking":"5","hot_score":"17664","desc":"节目重点围绕艺人艺能的全面深度挖掘、精品表演秀的创意呈现、最具热点的社会性话题输出等方面进行设计，开..."},{"title":"说唱巅峰对决2026","src":"/demos/search/assets/posters/poster-46.webp","ranking":"6","hot_score":"17358","desc":"#2026爱桃综快乐不重样# #说唱十周年巅峰对决#全新升级归来，这次不止比技术，更要玩灵魂共振！最..."},{"title":"怦然心动20岁：冬季","src":"/demos/search/assets/posters/poster-50.webp","ranking":"7","hot_score":"10504","desc":"带领大人边缘的少年们开启一个热闹非凡的寒假。带他们去往冷风过境的山野间追逐日光，冲进白雪覆盖的森林里..."},{"title":"奔跑吧 第十季","src":"/demos/search/assets/posters/poster-49.webp","ranking":"8","hot_score":"10424","desc":"本季以“整·活了”为核心，串联活态、活力、焕活、活人四大概念焕新策划，深度挖掘当地非遗技艺、特色美食..."},{"title":"脱口秀和Ta的朋友们 第三季","src":"/demos/search/assets/posters/poster-48.webp","ranking":"9","hot_score":"8333","desc":"第三季集结54组脱口秀演员，聚集资深老人和新锐潜力新人，阵容多元丰富。本季节目首次引入“竞演+合宿”..."},{"title":"喜剧之王单口季 第三季","src":"/demos/search/assets/posters/poster-47.webp","ranking":"10","hot_score":"7856","desc":"节目将延续从小人物到喜剧之王的故事，汇聚来自全国各地脱口秀俱乐部的优秀单口喜剧演员和漫才组合。每一位..."}]}},"webResults":[{"title":"仙逆 4K 完整合集","result_token":"demo-quark-01","is_type":0,"desc":"更新至最新集"},{"title":"仙逆 动画年番","result_token":"demo-uc-02","is_type":3,"desc":"高清收藏版"},{"title":"凡人修仙传 年番","result_token":"demo-baidu-03","is_type":2,"desc":"持续更新"},{"title":"吞噬星空 第五季","result_token":"demo-ali-04","is_type":1,"desc":"国语中字"},{"title":"斗破苍穹 年番","result_token":"demo-xunlei-05","is_type":4,"desc":"1080P 合集"}]};</script><script defer src="/demos/search/front-runtime.js"></script>
+<script data-cfasync="false">
+    var app;
+    var appBootFallbackNode = null;
+    window.__appReady = false;
+    window.__appReadyQueue = [];
+    window.__appBooted = false;
+    window.__appBootFailed = false;
+    window.__appBootAttempts = 0;
+    window.__appBootTimer = null;
+    window.__appBootFailureTimer = null;
+
+    const APP_BOOT_LOADING_TIMEOUT = 2500;
+    const APP_BOOT_FAILURE_TIMEOUT = 15000;
+
+    const initialKeyword = "";
+    const initialCategoryId = "";
+    const shareAppName = "Panbox Search";
+    const initialPcType = "0";
+
+    window.onAppReady = function (callback) {
+        if (window.__appReady && app) {
+            try {
+                callback();
+            } catch (error) {
+                console.error('Panbox onAppReady callback failed:', error);
+            }
+            return;
+        }
+
+        window.__appReadyQueue.push(callback);
+    };
+
+    window.scheduleIdleTask = function (callback, fallbackDelay) {
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(callback, { timeout: 1500 });
+            return;
+        }
+
+        setTimeout(callback, fallbackDelay || 400);
+    };
+
+    function flushAppReadyQueue() {
+        var queue = window.__appReadyQueue.splice(0, window.__appReadyQueue.length);
+        for (var i = 0; i < queue.length; i++) {
+            try {
+                queue[i]();
+            } catch (error) {
+                console.error('Panbox onAppReady callback failed:', error);
+            }
+        }
+    }
+
+    function reportAppBootFailure(message, error) {
+        if (error) {
+            console.error(message, error);
+            return;
+        }
+
+        console.error(message);
+    }
+
+    function markAppBootFailed(logMessage, fallbackMessage, error) {
+        if (window.__appReady || window.__appBootFailed) {
+            return;
+        }
+
+        window.__appBootFailed = true;
+        clearTimeout(window.__appBootTimer);
+        clearTimeout(window.__appBootFailureTimer);
+        reportAppBootFailure(logMessage, error);
+        showAppBootFallback(fallbackMessage || '页面加载失败，请刷新后重试');
+    }
+
+    function showAppBootFallback(message) {
+        if (!document.body) {
+            return;
+        }
+
+        document.body.classList.add('app-boot-fallback');
+
+        if (!appBootFallbackNode) {
+            appBootFallbackNode = document.createElement('div');
+            appBootFallbackNode.setAttribute('data-app-boot-fallback', 'true');
+            appBootFallbackNode.setAttribute('role', 'status');
+            appBootFallbackNode.setAttribute('aria-live', 'polite');
+            appBootFallbackNode.style.cssText = 'position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:24px;background:#f8fafc;color:#475569;font-size:14px;line-height:1.7;text-align:center;';
+            document.body.appendChild(appBootFallbackNode);
+        }
+
+        appBootFallbackNode.textContent = message || '页面加载中，请稍候...';
+    }
+
+    function clearAppBootFallback() {
+        if (document.body) {
+            document.body.classList.remove('app-boot-fallback');
+        }
+
+        if (appBootFallbackNode && appBootFallbackNode.parentNode) {
+            appBootFallbackNode.parentNode.removeChild(appBootFallbackNode);
+        }
+
+        appBootFallbackNode = null;
+    }
+
+    function markAppReady() {
+        window.__appReady = true;
+        clearTimeout(window.__appBootTimer);
+        clearTimeout(window.__appBootFailureTimer);
+        clearAppBootFallback();
+        flushAppReadyQueue();
+    }
+
+    function scheduleBootRetry(delay) {
+        if (window.__appReady || window.__appBooted || window.__appBootFailed) {
+            return;
+        }
+
+        clearTimeout(window.__appBootTimer);
+        window.__appBootTimer = setTimeout(bootApp, delay || 120);
+    }
+
+    function bootApp() {
+        if (window.__appReady || window.__appBooted || window.__appBootFailed) {
+            return;
+        }
+
+        var appRoot = document.getElementById('app');
+        if (!appRoot) {
+            return;
+        }
+
+        if (typeof window.Vue === 'undefined' || typeof window.axios === 'undefined') {
+            window.__appBootAttempts += 1;
+            showAppBootFallback('页面加载中，请稍候...');
+            scheduleBootRetry(window.__appBootAttempts < 5 ? 80 : 160);
+            return;
+        }
+
+        window.__appBooted = true;
+
+        try {
+            const { createApp, ref, onMounted, onUnmounted } = Vue;
+            const hasElementPlus = typeof window.ElementPlus !== 'undefined';
+            const ElMessage = hasElementPlus && ElementPlus.ElMessage ? ElementPlus.ElMessage : null;
+
+            app = createApp({
+                setup() {
+                    const elementOpacity = ref(0);
+                    const scrollThreshold = ref(150);
+                    const keyword = ref(initialKeyword);
+                    const qcodeVisible = ref(false);
+                    const layerVisible = ref(false);
+                    const content = ref('');
+                    const load = ref(false);
+                    const drawer = ref(false);
+                    const rankList = ref([]);
+                    const rankDj = ref([]);
+                    const is_m = ref(0);
+                    const newList = ref([]);
+                    const QList = ref([]);
+                    const QLoading = ref(false);
+                    const total_result = ref(0);
+                    const currentSource = ref(0);
+                    const line_id = ref(0);
+                    const currentLineName = ref('');
+                    const dialogUrl = ref(false);
+                    const dialogLoading = ref(false);
+                    const dialogItem = ref({});
+                    const is_type = ref(0);
+                    const pc_type = ref(0);
+                    const getInitialLang = function () {
+                        const match = document.cookie.match(/(?:^|; )think_lang=([^;]*)/);
+                        const cookieLang = match ? decodeURIComponent(match[1]) : '';
+                        const queryLang = new URLSearchParams(window.location.search).get('lang') || '';
+                        const lang = (queryLang || cookieLang || 'zh-cn').toLowerCase();
+                        return lang === 'en-us' ? 'en-us' : 'zh-cn';
+                    };
+                    const currentLang = ref(getInitialLang());
+                    const langDropdownVisible = ref(false);
+                    const moreDropdownVisible = ref(false);
+                    const desktopMoreDropdownVisible = ref(false);
+                    const hotBottomTab = ref('rank');
+                    const setHotBottomTab = function (tab) {
+                        hotBottomTab.value = tab;
+                    };
+                    const toggleLangDropdown = function () {
+                        langDropdownVisible.value = !langDropdownVisible.value;
+                        moreDropdownVisible.value = false;
+                        desktopMoreDropdownVisible.value = false;
+                    };
+                    const closeLangDropdown = function () {
+                        langDropdownVisible.value = false;
+                    };
+                    const toggleMoreDropdown = function () {
+                        moreDropdownVisible.value = !moreDropdownVisible.value;
+                        langDropdownVisible.value = false;
+                        desktopMoreDropdownVisible.value = false;
+                    };
+                    const closeMoreDropdown = function () {
+                        moreDropdownVisible.value = false;
+                    };
+                    const toggleDesktopMoreDropdown = function () {
+                        desktopMoreDropdownVisible.value = !desktopMoreDropdownVisible.value;
+                        langDropdownVisible.value = false;
+                        moreDropdownVisible.value = false;
+                    };
+                    const closeDesktopMoreDropdown = function () {
+                        desktopMoreDropdownVisible.value = false;
+                    };
+                    const switchLanguage = function (lang) {
+                        currentLang.value = lang === 'en-us' ? 'en-us' : 'zh-cn';
+                        document.cookie = 'think_lang=' + encodeURIComponent(currentLang.value) + '; path=/; max-age=31536000';
+                        const targetUrl = new URL(window.location.href);
+                        targetUrl.searchParams.set('lang', currentLang.value);
+                        window.location.href = targetUrl.toString();
+                    };
+                    const handleDocumentClick = function () {
+                        closeLangDropdown();
+                        closeMoreDropdown();
+                        closeDesktopMoreDropdown();
+                    };
+
+                    const showMessage = function (message, type) {
+                        if (type === void 0) {
+                            type = 'info';
+                        }
+
+                        if (ElMessage) {
+                            ElMessage({
+                                message: message,
+                                type: type,
+                                plain: true,
+                            });
+                            return;
+                        }
+
+                        window.alert(message);
+                    };
+                    window.showMessage = showMessage;
+
+                    const handleScroll = function () {
+                        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                        elementOpacity.value = scrollTop >= scrollThreshold.value
+                            ? Math.min((scrollTop - scrollThreshold.value) / 100, 1)
+                            : Math.max(1 - (scrollThreshold.value - scrollTop) / 100, 0);
+
+                        const boxElement = document.querySelector('.listBox .screen .fixed .box');
+                        if (boxElement && boxElement.style.display === 'block' && is_m.value) {
+                            boxElement.style.display = 'none';
+                        }
+                    };
+
+                    const normalizeKeyword = function () {
+                        const searchKeyword = (keyword.value || '').replace(/[\s　]+/g, '');
+                        keyword.value = searchKeyword;
+                        return searchKeyword;
+                    };
+
+                    const searchBtn = function () {
+                        const searchKeyword = normalizeKeyword();
+                        if (!searchKeyword) {
+                            return showMessage('请输入你要搜索的内容~', 'error');
+                        }
+                        const currentUrl = window.location.href;
+                        const targetUrl = '/demos/search/search.html?q=' + encodeURIComponent(searchKeyword);
+                        if (currentUrl.includes('/s/') || currentUrl.includes('/d/')) {
+                            window.location.href = targetUrl;
+                        } else {
+                            window.location.href = targetUrl;
+                        }
+                    };
+
+                    const saveBtn = async function () {
+                        if (!content.value) {
+                            return showMessage('请输入你想看的资源信息~', 'error');
+                        }
+                        if (load.value) {
+                            return;
+                        }
+
+                        load.value = true;
+                        try {
+                            const response = await axios.post('/api/tool/feedback', { content: content.value });
+                            showMessage(response.data.message, response.data.code === 200 ? 'success' : 'error');
+                            if (response.data.code === 200) {
+                                layerVisible.value = false;
+                                content.value = '';
+                            }
+                        } finally {
+                            load.value = false;
+                        }
+                    };
+
+                    const setnum = function (num) {
+                        return (num / 10000).toFixed(2) + 'W';
+                    };
+
+                    const goLink = function (event, id) {
+                        event.preventDefault();
+                        window.location.href = '/demos/search/detail.html';
+                    };
+
+                    const changeBtn = function (e) {
+                        const searchKeyword = normalizeKeyword();
+                        if (initialCategoryId) {
+                            window.location.href = '/demos/search/search.html?q=' + encodeURIComponent(searchKeyword);
+                        } else {
+                            window.location.href = '/demos/search/search.html?q=' + encodeURIComponent(searchKeyword);
+                        }
+                    };
+
+                    const copyText = async function (event) {
+                        event.preventDefault();
+                        const currentTarget = event.currentTarget || event.target;
+                        const shareUrl = currentTarget.dataset.shareUrl === 'current' ? window.location.href : (currentTarget.dataset.url || '');
+                        var text = '标题：' + (currentTarget.dataset.title || '') + '\n链接：' + shareUrl;
+                        if (currentTarget.dataset.shareUrl !== 'current' && currentTarget.dataset.code) {
+                            text += '\n提取码：' + currentTarget.dataset.code;
+                        }
+                        text += '\n由【' + shareAppName + '】提供网盘分享链接';
+
+                        try {
+                            await navigator.clipboard.writeText(text);
+                            showMessage('复制成功', 'success');
+                        } catch (err) {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = text;
+                            textArea.style.position = 'fixed';
+                            textArea.style.opacity = 0;
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+
+                            try {
+                                const successful = document.execCommand('copy');
+                                if (successful) {
+                                    showMessage('复制成功', 'success');
+                                } else {
+                                    throw new Error('复制失败');
+                                }
+                            } catch (error) {
+                                showMessage('复制失败，请手动复制', 'error');
+                            }
+
+                            document.body.removeChild(textArea);
+                        }
+                    };
+
+                    const selectBtn = function () {
+                        if (!is_m.value) {
+                            return;
+                        }
+                        const boxElement = document.querySelector('.listBox .screen .fixed .box');
+                        if (!boxElement) {
+                            return;
+                        }
+                        if (boxElement.style.display === 'none' || boxElement.style.display === '') {
+                            boxElement.style.display = 'block';
+                        } else {
+                            boxElement.style.display = '';
+                        }
+                    };
+
+                    const handleDeviceType = function () {
+                        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                        if (isMobile) {
+                            is_m.value = 1;
+                            pc_type.value = 1;
+                        } else {
+                            is_m.value = 0;
+                            pc_type.value = initialPcType;
+                        }
+                    };
+
+                    const callPageFunction = function (name) {
+                        return function () {
+                            if (typeof window[name] !== 'function') {
+                                return;
+                            }
+
+                            return window[name].apply(window, arguments);
+                        };
+                    };
+
+                    const getUrlBtn = callPageFunction('getUrlBtn');
+                    const switchSource = callPageFunction('switchSource');
+                    const setType = callPageFunction('setType');
+                    const linkBtn = callPageFunction('linkBtn');
+                    const panName = callPageFunction('panName');
+                    const copyQuanResourceLink = callPageFunction('copyQuanResourceLink');
+                    const scanQuanResourceLink = callPageFunction('scanQuanResourceLink');
+
+                    onMounted(function () {
+                        handleDeviceType();
+                        handleScroll();
+
+                        window.addEventListener('scroll', handleScroll);
+                        window.addEventListener('resize', handleDeviceType);
+                        document.addEventListener('click', handleDocumentClick);
+                    });
+
+                    onUnmounted(function () {
+                        window.removeEventListener('scroll', handleScroll);
+                        window.removeEventListener('resize', handleDeviceType);
+                        document.removeEventListener('click', handleDocumentClick);
+                    });
+
+                    return { elementOpacity, scrollThreshold, keyword, searchBtn, rankList, newList, setnum, qcodeVisible, layerVisible, content, saveBtn, rankDj, goLink, changeBtn, copyText, drawer, selectBtn, is_m, QList, QLoading, total_result, currentSource, line_id, currentLineName, dialogUrl, dialogLoading, dialogItem, is_type, pc_type, currentLang, langDropdownVisible, moreDropdownVisible, desktopMoreDropdownVisible, hotBottomTab, toggleLangDropdown, toggleMoreDropdown, toggleDesktopMoreDropdown, setHotBottomTab, switchLanguage, getUrlBtn, switchSource, setType, linkBtn, panName, copyQuanResourceLink, scanQuanResourceLink, showMessage };
+                }
+            });
+
+            if (hasElementPlus) {
+                app.use(ElementPlus);
+            }
+
+            app = app.mount('#app');
+            markAppReady();
+        } catch (error) {
+            window.__appBooted = false;
+            window.__appBootAttempts += 1;
+
+            if (window.__appBootAttempts <= 10) {
+                reportAppBootFailure('Panbox app boot retrying after init error:', error);
+                scheduleBootRetry(200);
+                return;
+            }
+
+            markAppBootFailed('Panbox app boot failed during initialization', '页面初始化失败，请刷新后重试', error);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootApp, { once: true });
+    } else {
+        scheduleBootRetry(0);
+    }
+
+    window.addEventListener('load', bootApp, { once: true });
+    scheduleBootRetry(1200);
+    setTimeout(function () {
+        if (!window.__appReady && !window.__appBootFailed) {
+            console.warn('Panbox app boot is still loading after ' + APP_BOOT_LOADING_TIMEOUT + 'ms');
+            showAppBootFallback('页面加载中，请稍候...');
+        }
+    }, APP_BOOT_LOADING_TIMEOUT);
+    window.__appBootFailureTimer = setTimeout(function () {
+        if (!window.__appReady && !window.__appBootFailed) {
+            markAppBootFailed('Panbox app boot timed out after ' + APP_BOOT_FAILURE_TIMEOUT + 'ms');
+        }
+    }, APP_BOOT_FAILURE_TIMEOUT);
+</script>
+
+    <script defer data-cfasync="false" src="/demos/search/assets/front/js/qrcanvas@3.js"></script>
+    <script data-cfasync="false" type="text/javascript" charset="utf-8">
+        const rankListData = [{"hot_resource_category_id":1,"name":"短剧","image":"","id":1,"channel":"短剧","source_type":"hot","is_sys":1},{"hot_resource_category_id":2,"name":"电影","image":"","id":2,"channel":"电影","source_type":"hot","is_sys":1},{"hot_resource_category_id":3,"name":"电视剧","image":"","id":3,"channel":"电视剧","source_type":"hot","is_sys":1},{"hot_resource_category_id":4,"name":"动漫","image":"","id":4,"channel":"动漫","source_type":"hot","is_sys":1},{"hot_resource_category_id":5,"name":"综艺","image":"","id":5,"channel":"综艺","source_type":"hot","is_sys":1}];
+        const detailData = {"id":"29","title":"[DEMO] UC永久资源 029","url":"https:\/\/drive.uc.cn\/s\/demo-uc-029","code":"uc29","is_type":3,"fid":"","links":[{"id":34,"source_link_id":34,"url":"https:\/\/drive.uc.cn\/s\/demo-uc-029","code":"uc29","is_type":3,"fid":"","target_name":"UC","sort":100,"status":1,"is_delete":0}],"links_count":1,"public_id":"29","share_url":"http:\/\/127.0.0.1:8008\/d\/29.html"};
+
+        onAppReady(() => {
+            app.rankList = rankListData;
+
+            scheduleIdleTask(() => {
+                for (const item of app.rankList) {
+                    if (item.source_type && item.source_type !== 'hot') {
+                        continue;
+                    }
+                    axios.get('/api/tool/ranking', {
+                        params: {
+                            channel: item.channel || item.name
+                        }
+                    })
+                }
+            }, 500);
+        });
+
+        let qrcodeRenderTimer = null;
+
+        function linkBtn(index) {
+            var item = getDetailLinkItem(index);
+            resolveDetailLinkUrl(item, function (url) {
+                if (app.pc_type == 1) {
+                    safeJump(url);
+                } else {
+                    item.showUrl = url;
+                    item.hideUrlText = true;
+                    app.dialogUrl = true;
+                    showUrlFun(item);
+                }
+            });
+        }
+
+        function getDetailLinkItem(index) {
+            var item = Object.assign({}, detailData);
+            if (Array.isArray(detailData.links) && detailData.links[index]) {
+                item = Object.assign({}, detailData, detailData.links[index]);
+            }
+            return item;
+        }
+
+        function resolveDetailLinkUrl(item, callback) {
+            if (!item) {
+                return;
+            }
+            var url = String(item.url || '');
+            if (url.startsWith('http')) {
+                callback(url);
+                return;
+            }
+            var resultToken = item.result_token || item.token || '';
+            if (!resultToken) {
+                showMessage(item.expired ? '资源已过期，请返回全网搜重新搜索' : '资源链接不存在', 'error');
+                return;
+            }
+            app.dialogLoading = true;
+            axios.post('/api/search/save', {
+                result_token: resultToken,
+                title: item.title || detailData.title || ''
+            }).then(res => {
+                app.dialogLoading = false;
+                if (res.data.code == 200) {
+                    item.url = res.data.data.url;
+                    callback(item.url);
+                } else {
+                    showMessage(res.data.message || '资源获取失败，请稍后重试', 'error');
+                }
+            }).catch(() => {
+                app.dialogLoading = false;
+                showMessage('资源获取失败，请稍后重试', 'error');
+            });
+        }
+
+        function copyResourceLink(index) {
+            var item = getDetailLinkItem(index);
+            resolveDetailLinkUrl(item, function (url) {
+                const text = '标题：' + (detailData.title || '') + '\n链接：' + url + (item.code ? '\n提取码：' + item.code : '');
+                navigator.clipboard.writeText(text).then(() => {
+                    showMessage('复制成功', 'success');
+                }).catch(() => {
+                    showMessage('复制失败，请手动复制', 'error');
+                });
+            });
+        }
+
+        function scanResourceLink(index) {
+            var item = getDetailLinkItem(index);
+            resolveDetailLinkUrl(item, function (url) {
+                item.showUrl = url;
+                item.forceQr = true;
+                item.hideUrlText = true;
+                app.dialogUrl = true;
+                showUrlFun(item);
+            });
+        }
+
+
+        function safeJump(url, target = '_blank') {
+            const a = document.createElement('a');
+            a.href = url;
+            a.rel = 'noreferrer';
+            a.target = target;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function showUrlFun(item) {
+            app.dialogItem = item
+            if (qrcodeRenderTimer) {
+                clearTimeout(qrcodeRenderTimer)
+                qrcodeRenderTimer = null
+            }
+
+            qrcodeRenderTimer = setTimeout(() => {
+                const qrcodeElement = document.getElementById('qrcode')
+                qrcodeRenderTimer = null
+                if (!qrcodeElement) {
+                    return
+                }
+
+                qrcodeElement.innerHTML = ''
+                if (!item.showUrl) {
+                    return
+                }
+
+                const canvas = qrcanvas.qrcanvas({
+                    data: item.showUrl,
+                    size: 120
+                })
+                qrcodeElement.appendChild(canvas)
+            }, 200)
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>接口配置</title>
+    <style>
+        .autosave-panel {
+            box-sizing: border-box;
+            min-width: 0;
+            max-width: 100%;
+            margin-bottom: 16px;
+            padding: 16px;
+            border: 1px solid #ebeef5;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        .autosave-panel .el-form-item {
+            margin-bottom: 10px;
+        }
+
+        .autosave-panel .el-form--inline {
+            display: flex;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+
+        .autosave-panel .el-form--inline .el-form-item {
+            margin-right: 0;
+        }
+
+        .pan-tag {
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .line-inline-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .line-inline-row .el-form-item {
+            flex: 1 1 calc(50% - 6px);
+            min-width: 280px;
+            margin-right: 0;
+        }
+
+        .line-section-title {
+            margin: 6px 0 12px;
+            padding-left: 10px;
+            border-left: 3px solid #409eff;
+            font-size: 13px;
+            font-weight: 600;
+            color: #303133;
+        }
+
+        .line-form-block {
+            margin-bottom: 12px;
+        }
+
+        .line-form-note {
+            margin-bottom: 8px;
+            color: #909399;
+            font-size: 12px;
+        }
+
+        .apilist-page {
+            box-sizing: border-box;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .apilist-table-scroll {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .apilist-table-scroll > .el-table {
+            width: 100%;
+        }
+
+        .apilist-autosave-table > .el-table {
+            min-width: 720px;
+        }
+
+        .apilist-lines-table > .el-table {
+            min-width: 1120px;
+        }
+
+        .apilist-lines-table {
+            border: 1px solid var(--pb-border, #e5e7eb);
+            border-radius: var(--pb-radius-card, 12px);
+            background: #fff;
+            box-shadow: var(--pb-shadow-card, 0 8px 24px rgba(15, 23, 42, .06));
+        }
+
+        .el-dialog.apilist-dialog {
+            max-width: 960px !important;
+        }
+
+        .apilist-dialog .el-dialog__body {
+            max-height: calc(100vh - 190px);
+            overflow-y: auto;
+        }
+
+        .apilist-dialog .el-radio-group,
+        .apilist-dialog .el-checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+        }
+
+        .apilist-dialog .el-radio + .el-radio {
+            margin-left: 0;
+        }
+
+        @media (max-width: 767px) {
+            .autosave-panel {
+                padding: 12px;
+            }
+
+            .autosave-panel .el-form--inline {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .line-inline-row {
+                flex-direction: column;
+            }
+
+            .line-inline-row .el-form-item {
+                flex: 1 1 100%;
+                width: 100%;
+                min-width: 0;
+            }
+
+            .apilist-dialog .el-dialog__body {
+                max-height: calc(100vh - 150px);
+            }
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-119'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" class="is-active" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-119'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" class="is-active" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--source-apilist">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>接口配置</h1>
+                                                    </header>
+                        
+
+    <div class="apilist-page">
+    <div class="autosave-panel">
+        <div class="line-section-title" style="margin-top: 0;">统一超时配置</div>
+        <el-form :inline="true" :model="searchLineConfig" @submit.native.prevent>
+            <el-form-item label="统一超时">
+                <el-input-number size="small" v-model="searchLineConfig.timeout" :min="1" :max="120" controls-position="right" style="width: 120px;"></el-input-number>
+            </el-form-item>
+            <el-form-item>
+                <el-button icon="el-icon-check" size="small" type="primary" @click="saveAutosaveConfig" plain>保存超时</el-button>
+            </el-form-item>
+        </el-form>
+        <div class="line-section-title">搜索源配置</div>
+        <el-form :inline="true" :model="searchLineConfig" @submit.native.prevent>
+            <el-form-item label="Autosave 服务地址">
+                <el-input size="small" v-model="searchLineConfig.base_url" style="width: 260px;" placeholder="http://127.0.0.1:3000"></el-input>
+            </el-form-item>
+            <el-form-item label="API Token">
+                <el-input size="small" v-model="searchLineConfig.api_token" style="width: 240px;" show-password></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button icon="el-icon-check" size="small" type="primary" @click="saveAutosaveConfig" plain>保存配置</el-button>
+                <el-button icon="el-icon-refresh" size="small" @click="fetchAutosaveSources" :loading="autosaveLoading" plain>读取源</el-button>
+                <el-button icon="el-icon-connection" size="small" type="success" @click="syncAutosaveSources" :loading="autosaveLoading" plain>一键同步源</el-button>
+            </el-form-item>
+        </el-form>
+        <div v-if="autosaveSources.length>0" class="apilist-table-scroll apilist-autosave-table">
+            <el-table :data="autosaveSources" size="mini" style="margin-top: 8px;">
+                <el-table-column label="源标识" width="160">
+                    <template slot-scope="scope">{{scope.row.key || scope.row.id}}</template>
+                </el-table-column>
+                <el-table-column prop="name" label="源名称"></el-table-column>
+                <el-table-column label="支持网盘" width="260">
+                    <template slot-scope="scope">
+                        <el-tag v-for="name in scope.row.pan_type_names" :key="name" size="mini" class="pan-tag">{{name}}</el-tag>
+                        <span v-if="!scope.row.pan_type_names || scope.row.pan_type_names.length==0">未声明</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="状态" width="90">
+                    <template slot-scope="scope">
+                        <el-tag size="mini" :type="scope.row.available===false?'info':'success'">{{scope.row.available===false?'不可用':'可用'}}</el-tag>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+    </div>
+
+    <el-form :inline="true">
+        <el-form-item>
+            <el-button icon="el-icon-plus" size="small" @click="clickAdd" plain>添加线路</el-button>
+            <el-button icon="el-icon-paperclip" size="small" @click="testFirstLine" plain>测试首条启用线路</el-button>
+            <span style="color: #999; margin-left: 8px;">前台全网搜按线路名称展示；结果仍显示真实网盘类型。</span>
+        </el-form-item>
+    </el-form>
+
+    <div class="apilist-table-scroll apilist-lines-table">
+    <el-table :data="dataList" v-loading="loading">
+        <el-table-column label="" width="40" align="center">
+            <template slot-scope="scope">
+                <i class="el-icon-rank drag-handle" style="cursor:move;color:#c0c4cc;font-size:16px;" title="拖拽排序"></i>
+            </template>
+        </el-table-column>
+        <el-table-column prop="id" label="ID" width="60"></el-table-column>
+        <el-table-column label="线路名称" prop="name"></el-table-column>
+        <el-table-column label="支持网盘" width="260">
+            <template slot-scope="scope">
+                <el-tag v-for="name in scope.row.pan_type_names" :key="name" size="mini" class="pan-tag">{{name}}</el-tag>
+            </template>
+        </el-table-column>
+        <el-table-column label="来源" width="110">
+            <template slot-scope="scope">
+                <el-tag size="mini" :type="scope.row.source_provider=='autosave'?'success':'info'">{{scope.row.source_provider=='autosave'?'Autosave':'手动'}}</el-tag>
+            </template>
+        </el-table-column>
+        <el-table-column label="地址" prop="url"></el-table-column>
+        <el-table-column label="类型" width="100">
+            <template slot-scope="scope">
+                <span v-if="scope.row.type=='html'">网页</span>
+                <span v-else-if="scope.row.type=='tg'">TG频道</span>
+                <span v-else-if="scope.row.type=='autosave'">Autosave</span>
+                <span v-else>接口</span>
+            </template>
+        </el-table-column>
+        <el-table-column prop="count" label="获取资源数" width="120" align="center"></el-table-column>
+        <el-table-column label="是否开启" width="100" align="center">
+            <template slot-scope="scope">
+                <el-switch :value="scope.row.status==1" @change="clickStatus(scope.row)"></el-switch>
+            </template>
+        </el-table-column>
+        <el-table-column label="操作" width="210">
+            <template slot-scope="scope">
+                <el-link type="primary" @click="clickEdit(scope.row)" :underline="false">编辑</el-link>&nbsp;&nbsp;
+                <el-link type="success" @click="testLine(scope.row)" :underline="false">测试</el-link>&nbsp;&nbsp;
+                <el-link type="danger" @click="clickDelete(scope.row)" :underline="false">删除</el-link>
+            </template>
+        </el-table-column>
+    </el-table>
+    </div>
+
+    <el-dialog title="添加线路" :visible.sync="dialogFormAdd" width="calc(100vw - 48px)" top="4vh" custom-class="apilist-dialog" :modal-append-to-body="false" append-to-body :close-on-click-modal="false">
+        <el-form :model="formAdd" :rules="rules" ref="formAdd">
+            <el-form-item prop="pan_types" label="支持网盘" :label-width="formLabelWidth">
+                <el-checkbox-group v-model="formAdd.pan_types">
+                    <el-checkbox v-for="item in panOptions" :key="item.value" :label="item.value">{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+            </el-form-item>
+            <div class="line-section-title">基础信息</div>
+            <div class="line-inline-row line-form-block">
+                <el-form-item prop="name" label="线路名称" :label-width="formLabelWidth"><el-input size="medium" v-model="formAdd.name"></el-input></el-form-item>
+                <el-form-item prop="type" label="类型" :label-width="formLabelWidth">
+                    <el-radio-group v-model="formAdd.type">
+                        <el-radio label="api">API接口</el-radio>
+                        <el-radio label="tg">TG频道</el-radio>
+                        <el-radio label="html">网页爬虫</el-radio>
+                        <el-radio label="autosave">Autosave</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item prop="count" label="总数限制" :label-width="formLabelWidth"><el-input-number v-model="formAdd.count" :min="0" :max="999" size="medium" style="width:120px;" controls-position="right"></el-input-number></el-form-item>
+                <el-form-item prop="weight" label="排序" :label-width="formLabelWidth"><el-input-number v-model="formAdd.weight" :min="0" :max="999" size="medium" style="width:120px;" controls-position="right"></el-input-number></el-form-item>
+                <el-form-item prop="status" label="是否启用" :label-width="formLabelWidth"><el-switch v-model="formAdd.status" size="medium"></el-switch></el-form-item>
+            </div>
+            <el-form-item prop="external_source_id" label="外部源ID" :label-width="formLabelWidth" v-if="formAdd.type==='autosave'"><el-input size="medium" v-model="formAdd.external_source_id"></el-input></el-form-item>
+            <el-form-item prop="url" :label="formAdd.type==='tg'?'TG频道':formAdd.type==='html'?'目标网址':'接口地址'" :label-width="formLabelWidth" v-if="formAdd.type!=='autosave'"><el-input size="medium" v-model="formAdd.url"></el-input></el-form-item>
+            <div class="line-section-title" v-if="formAdd.type === 'api'">API 参数</div>
+            <div class="line-inline-row line-form-block" v-if="formAdd.type === 'api'">
+                <el-form-item prop="method" label="请求方式" :label-width="formLabelWidth"><el-radio-group v-model="formAdd.method"><el-radio label="GET">GET</el-radio><el-radio label="POST">POST</el-radio></el-radio-group></el-form-item>
+                <el-form-item prop="headers" label="请求头" :label-width="formLabelWidth"><el-input type="textarea" v-model="formAdd.headers" :rows="3" placeholder='{"User-Agent":"..."}'></el-input></el-form-item>
+                <el-form-item prop="fixed_params" label="接口参数" :label-width="formLabelWidth"><el-input type="textarea" v-model="formAdd.fixed_params" :rows="3" placeholder='{"search":"{keyword}"}'></el-input></el-form-item>
+                <el-form-item prop="field_map" label="字段映射" :label-width="formLabelWidth"><el-input type="textarea" v-model="formAdd.field_map" :rows="7"></el-input></el-form-item>
+            </div>
+            <div class="line-section-title" v-if="formAdd.type === 'html'">网页参数</div>
+            <div class="line-inline-row line-form-block" v-if="formAdd.type === 'html'">
+                <el-form-item prop="html_item" label="内容标签" :label-width="formLabelWidth"><el-input size="medium" v-model="formAdd.html_item"></el-input></el-form-item>
+                <el-form-item prop="html_title" label="标题标签" :label-width="formLabelWidth"><el-input size="medium" v-model="formAdd.html_title"></el-input></el-form-item>
+                <el-form-item prop="html_type" label="详情页" :label-width="formLabelWidth"><el-radio-group v-model="formAdd.html_type"><el-radio :label="0">不需要</el-radio><el-radio :label="1">需要</el-radio></el-radio-group></el-form-item>
+                <el-form-item prop="html_url" label="详情页标签" :label-width="formLabelWidth" v-if="formAdd.html_type==1"><el-input size="medium" v-model="formAdd.html_url"></el-input></el-form-item>
+                <el-form-item prop="html_url2" label="网盘链接" :label-width="formLabelWidth"><el-input size="medium" v-model="formAdd.html_url2"></el-input></el-form-item>
+            </div>
+        </el-form>
+        <div slot="footer" class="dialog-footer"><el-button type="primary" @click="postAdd">确认添加</el-button></div>
+    </el-dialog>
+
+    <el-dialog title="修改线路" :visible.sync="dialogFormEdit" width="calc(100vw - 48px)" top="4vh" custom-class="apilist-dialog" :modal-append-to-body="false" append-to-body :close-on-click-modal="false">
+        <el-form :model="formEdit" :rules="rules" ref="formEdit">
+            <el-form-item prop="pan_types" label="支持网盘" :label-width="formLabelWidth">
+                <el-checkbox-group v-model="formEdit.pan_types">
+                    <el-checkbox v-for="item in panOptions" :key="item.value" :label="item.value">{{item.label}}</el-checkbox>
+                </el-checkbox-group>
+            </el-form-item>
+            <div class="line-section-title">基础信息</div>
+            <div class="line-inline-row line-form-block">
+                <el-form-item prop="name" label="线路名称" :label-width="formLabelWidth"><el-input size="medium" v-model="formEdit.name"></el-input></el-form-item>
+                <el-form-item prop="type" label="类型" :label-width="formLabelWidth">
+                    <el-radio-group v-model="formEdit.type">
+                        <el-radio label="api">API接口</el-radio>
+                        <el-radio label="tg">TG频道</el-radio>
+                        <el-radio label="html">网页爬虫</el-radio>
+                        <el-radio label="autosave">Autosave</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item prop="count" label="总数限制" :label-width="formLabelWidth"><el-input-number v-model="formEdit.count" :min="0" :max="999" size="medium" style="width:120px;" controls-position="right"></el-input-number></el-form-item>
+                <el-form-item prop="weight" label="排序" :label-width="formLabelWidth"><el-input-number v-model="formEdit.weight" :min="0" :max="999" size="medium" style="width:120px;" controls-position="right"></el-input-number></el-form-item>
+                <el-form-item prop="status" label="是否启用" :label-width="formLabelWidth"><el-switch v-model="formEdit.status" size="medium"></el-switch></el-form-item>
+            </div>
+            <div class="line-section-title" v-if="formEdit.type === 'autosave'">Autosave 源</div>
+            <div class="line-form-note" v-if="formEdit.type === 'autosave'">Autosave 线路只需要外部源 ID，其余字段由搜索服务统一处理。</div>
+            <el-form-item prop="external_source_id" label="外部源ID" :label-width="formLabelWidth" v-if="formEdit.type==='autosave'"><el-input size="medium" v-model="formEdit.external_source_id"></el-input></el-form-item>
+            <el-form-item prop="url" :label="formEdit.type==='tg'?'TG频道':formEdit.type==='html'?'目标网址':'接口地址'" :label-width="formLabelWidth" v-if="formEdit.type!=='autosave'"><el-input size="medium" v-model="formEdit.url"></el-input></el-form-item>
+            <div class="line-section-title" v-if="formEdit.type === 'api'">API 参数</div>
+            <div class="line-inline-row line-form-block" v-if="formEdit.type === 'api'">
+                <el-form-item prop="method" label="请求方式" :label-width="formLabelWidth"><el-radio-group v-model="formEdit.method"><el-radio label="GET">GET</el-radio><el-radio label="POST">POST</el-radio></el-radio-group></el-form-item>
+                <el-form-item prop="headers" label="请求头" :label-width="formLabelWidth"><el-input type="textarea" v-model="formEdit.headers" :rows="3"></el-input></el-form-item>
+                <el-form-item prop="fixed_params" label="接口参数" :label-width="formLabelWidth"><el-input type="textarea" v-model="formEdit.fixed_params" :rows="3"></el-input></el-form-item>
+                <el-form-item prop="field_map" label="字段映射" :label-width="formLabelWidth"><el-input type="textarea" v-model="formEdit.field_map" :rows="7"></el-input></el-form-item>
+            </div>
+            <div class="line-section-title" v-if="formEdit.type === 'html'">网页参数</div>
+            <div class="line-inline-row line-form-block" v-if="formEdit.type === 'html'">
+                <el-form-item prop="html_item" label="内容标签" :label-width="formLabelWidth"><el-input size="medium" v-model="formEdit.html_item"></el-input></el-form-item>
+                <el-form-item prop="html_title" label="标题标签" :label-width="formLabelWidth"><el-input size="medium" v-model="formEdit.html_title"></el-input></el-form-item>
+                <el-form-item prop="html_type" label="详情页" :label-width="formLabelWidth"><el-radio-group v-model="formEdit.html_type"><el-radio :label="0">不需要</el-radio><el-radio :label="1">需要</el-radio></el-radio-group></el-form-item>
+                <el-form-item prop="html_url" label="详情页标签" :label-width="formLabelWidth" v-if="formEdit.html_type==1"><el-input size="medium" v-model="formEdit.html_url"></el-input></el-form-item>
+                <el-form-item prop="html_url2" label="网盘链接" :label-width="formLabelWidth"><el-input size="medium" v-model="formEdit.html_url2"></el-input></el-form-item>
+            </div>
+        </el-form>
+        <div slot="footer" class="dialog-footer"><el-button type="primary" @click="postEdit">确认修改</el-button></div>
+    </el-dialog>
+    </div>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"autosaveLoading":false,"autosaveSources":[],"dataList":[{"id":1,"key":"primary","name":"主搜索线路","pan_types":[0,1,2,3,4],"pan_type_names":["夸克","阿里","百度","UC","迅雷"],"source_provider":"local","url":"https://demo.panbox.local/search","type":1,"count":20,"status":1,"available":1},{"id":2,"key":"backup","name":"备用聚合线路","pan_types":[0,2,3],"pan_type_names":["夸克","百度","UC"],"source_provider":"autosave","url":"https://demo.panbox.local/backup","type":2,"count":10,"status":0,"available":1}],"dialogFormAdd":false,"dialogFormEdit":false,"formAdd":{},"formEdit":{},"formLabelWidth":"90px","headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"loading":false,"panOptions":[{"label":"夸克网盘","value":0},{"label":"阿里云盘","value":1},{"label":"百度网盘","value":2},{"label":"UC网盘","value":3},{"label":"迅雷云盘","value":4},{"label":"光鸭云盘","value":5}],"rules":{"name":[{"message":"请输入线路名称","required":true,"trigger":"blur"}],"pan_types":[{"message":"请选择支持网盘","required":true,"trigger":"change","type":"array"}]},"searchLineConfig":{"api_token":"","base_url":"https://demo.panbox.local","timeout":30}},"responses":[{"data":{"code":200,"message":"数据获取成功","data":[{"id":1,"key":"primary","name":"主搜索线路","pan_types":[0,1,2,3,4],"pan_type_names":["夸克","阿里","百度","UC","迅雷"],"source_provider":"local","url":"https://demo.panbox.local/search","type":1,"count":20,"status":1,"available":1},{"id":2,"key":"backup","name":"备用聚合线路","pan_types":[0,2,3],"pan_type_names":["夸克","百度","UC"],"source_provider":"autosave","url":"https://demo.panbox.local/backup","type":2,"count":10,"status":0,"available":1}]},"method":"post","url":"/admin/api_list/getList"},{"data":{"code":200,"message":"获取成功","data":{"api_token":"","base_url":"https://demo.panbox.local","timeout":30}},"method":"post","url":"/admin/api_list/getAutosaveConfig"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                this.getList();
+                this.getAutosaveConfig();
+                return {
+                    formLabelWidth: '90px',
+                    dialogFormAdd: false,
+                    dialogFormEdit: false,
+                    loading: true,
+                    autosaveLoading: false,
+                    dataList: [],
+                    autosaveSources: [],
+                    searchLineConfig: { base_url: '', api_token: '', timeout: 30 },
+                    panOptions: [
+                        { value: 0, label: '夸克网盘' },
+                        { value: 1, label: '阿里云盘' },
+                        { value: 2, label: '百度网盘' },
+                        { value: 3, label: 'UC网盘' },
+                        { value: 4, label: '迅雷云盘' },
+                        { value: 5, label: '光鸭云盘' }
+                    ],
+                    formAdd: {},
+                    formEdit: {},
+                    rules: {
+                        name: [{ required: true, message: '请输入线路名称', trigger: 'blur' }],
+                        pan_types: [{ type: 'array', required: true, message: '请选择支持网盘', trigger: 'change' }]
+                    }
+                }
+            },
+            methods: {
+                normalizePanTypes(values) {
+                    const supportedTypes = this.panOptions.map(function (item) { return item.value; });
+                    if (!Array.isArray(values)) {
+                        values = String(values || '').split(',');
+                    }
+                    return Array.from(new Set(values.map(function (item) { return Number(item); }).filter(function (item) {
+                        return supportedTypes.indexOf(item) !== -1;
+                    })));
+                },
+                normalizeForm(form) {
+                    const data = Object.assign({}, form);
+                    data.pan_types = this.normalizePanTypes(data.pan_types);
+                    data.pantype = data.pan_types.length > 0 ? data.pan_types[0] : 0;
+                    return data;
+                },
+                normalizeDetail(data) {
+                    const values = Array.isArray(data.pan_types_array) ? data.pan_types_array : String(data.pan_types || data.pantype || '0').split(',').filter(Boolean);
+                    data.pan_types = this.normalizePanTypes(values);
+                    data.status = data.status == 1 ? true : false;
+                    return data;
+                },
+                postEdit() {
+                    this.$refs.formEdit.validate((valid) => {
+                        if (!valid) return;
+                        axios.post('/admin/api_list/update', Object.assign({}, PostBase, this.normalizeForm(this.formEdit))).then((response) => {
+                            this.getList();
+                            if (response.data.code == CODE_SUCCESS) { this.$message.success(response.data.message); this.dialogFormEdit = false; }
+                            else this.$message.error(response.data.message);
+                        }).catch(() => this.$message.error('服务器内部错误'));
+                    });
+                },
+                postAdd() {
+                    this.$refs.formAdd.validate((valid) => {
+                        if (!valid) return;
+                        axios.post('/admin/api_list/add', Object.assign({}, PostBase, this.normalizeForm(this.formAdd))).then((response) => {
+                            this.getList();
+                            if (response.data.code == CODE_SUCCESS) { this.$message.success(response.data.message); this.dialogFormAdd = false; }
+                            else this.$message.error(response.data.message);
+                        }).catch(() => this.$message.error('服务器内部错误'));
+                    });
+                },
+                clickAdd() {
+                    this.formAdd = {
+                        pantype: 0,
+                        pan_types: [0],
+                        source_provider: 'manual',
+                        type: 'api',
+                        method: 'GET',
+                        weight: 0,
+                        count: 5,
+                        status: true,
+                        html_type: 0,
+                        headers: '{}',
+                        fixed_params: `{
+    "search": "{keyword}"
+}`,
+                        field_map: `{
+    "list_path": "数组字段",
+    "fields": {
+        "title": "资源名称",
+        "url": "资源地址"
+    }
+}`
+                    };
+                    this.dialogFormAdd = true;
+                },
+                clickDelete(row) {
+                    this.$confirm('即将删除这个线路, 是否确认?', '删除提醒', { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }).then(() => {
+                        axios.post('/admin/api_list/delete', Object.assign({}, PostBase, { id: row.id })).then((response) => {
+                            this.getList();
+                            if (response.data.code == CODE_SUCCESS) this.$message.success(response.data.message);
+                            else this.$message.error(response.data.message);
+                        }).catch(() => this.$message.error('服务器内部错误'));
+                    }).catch(() => {});
+                },
+                clickEdit(row) {
+                    axios.post('/admin/api_list/detail', Object.assign({}, PostBase, { id: row.id })).then((response) => {
+                        if (response.data.code == CODE_SUCCESS) { this.formEdit = this.normalizeDetail(response.data.data); this.dialogFormEdit = true; }
+                        else this.$message.error(response.data.message);
+                    }).catch(() => this.$message.error('服务器内部错误'));
+                },
+                getList() {
+                    this.loading = true;
+                    axios.post('/admin/api_list/getList', Object.assign({}, PostBase)).then((response) => {
+                        this.loading = false;
+                        if (response.data.code == CODE_SUCCESS) {
+                            this.dataList = response.data.data;
+                            this.$nextTick(() => { this.initSortable(); });
+                        } else this.$message.error(response.data.message);
+                    }).catch(() => { this.loading = false; this.$message.error('服务器内部错误'); });
+                },
+                initSortable() {
+                    const tbody = this.$el.querySelector('.el-table__body-wrapper tbody');
+                    if (!tbody) return;
+                    if (this._sortable) this._sortable.destroy();
+                    this._sortable = new Sortable(tbody, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        onEnd: (evt) => {
+                            if (evt.oldIndex === evt.newIndex) return;
+                            const moved = this.dataList.splice(evt.oldIndex, 1)[0];
+                            this.dataList.splice(evt.newIndex, 0, moved);
+                            this.saveOrder();
+                        }
+                    });
+                },
+                saveOrder() {
+                    const ids = this.dataList.map(function(item) { return item.id; });
+                    axios.post('/admin/api_list/reorder', Object.assign({}, PostBase, { ids: ids })).then((response) => {
+                        if (response.data.code == CODE_SUCCESS) this.$message.success('排序已保存');
+                        else this.$message.error(response.data.message);
+                    }).catch(() => this.$message.error('服务器内部错误'));
+                },
+                clickStatus(row) {
+                    const url = row.status == 1 ? '/admin/api_list/disable' : '/admin/api_list/enable';
+                    axios.post(url, Object.assign({}, PostBase, { id: row.id })).then((response) => {
+                        this.getList();
+                        if (response.data.code == CODE_SUCCESS) this.$message.success(response.data.message);
+                        else this.$message.error(response.data.message);
+                    }).catch(() => this.$message.error('服务器内部错误'));
+                },
+                getAutosaveConfig() {
+                    axios.post('/admin/api_list/getAutosaveConfig', Object.assign({}, PostBase)).then((response) => {
+                        if (response.data.code == CODE_SUCCESS) this.searchLineConfig = Object.assign({ timeout: 30 }, response.data.data || {});
+                    });
+                },
+                saveAutosaveConfig() {
+                    axios.post('/admin/api_list/updateAutosaveConfig', Object.assign({}, PostBase, this.searchLineConfig)).then((response) => {
+                        if (response.data.code == CODE_SUCCESS) this.$message.success(response.data.message);
+                        else this.$message.error(response.data.message);
+                    }).catch(() => this.$message.error('服务器内部错误'));
+                },
+                fetchAutosaveSources() {
+                    this.autosaveLoading = true;
+                    axios.post('/admin/api_list/fetchAutosaveSources', Object.assign({}, PostBase, this.searchLineConfig)).then((response) => {
+                        this.autosaveLoading = false;
+                        if (response.data.code == CODE_SUCCESS) { this.autosaveSources = response.data.data || []; this.$message.success('读取成功'); }
+                        else this.$message.error(response.data.message);
+                    }).catch(() => { this.autosaveLoading = false; this.$message.error('服务器内部错误'); });
+                },
+                syncAutosaveSources() {
+                    this.autosaveLoading = true;
+                    axios.post('/admin/api_list/syncAutosaveSources', Object.assign({}, PostBase, this.searchLineConfig)).then((response) => {
+                        this.autosaveLoading = false;
+                        if (response.data.code == CODE_SUCCESS) { this.$message.success('同步成功，新增 ' + response.data.data.created + ' 条，更新 ' + response.data.data.updated + ' 条'); this.getList(); }
+                        else this.$message.error(response.data.message);
+                    }).catch(() => { this.autosaveLoading = false; this.$message.error('服务器内部错误'); });
+                },
+                testLine(row) {
+                    window.open('/api/search/web?title=仙逆&is_show=1&line_id=' + row.id, '_blank');
+                },
+                testFirstLine() {
+                    const line = this.dataList.find(function (item) { return item.status == 1; });
+                    if (!line) { this.$message.warning('暂无启用线路'); return; }
+                    this.testLine(line);
+                }
+            }
+        })
+    </script>
+</html>

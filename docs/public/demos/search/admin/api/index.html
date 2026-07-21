@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>外部 API</title>
+    <style>
+        .api-page {
+            padding-bottom: 24px;
+        }
+        .api-section {
+            margin-bottom: 16px;
+        }
+        .api-key-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .api-key-row .el-input {
+            max-width: 760px;
+        }
+        .api-alert {
+            margin-top: 12px;
+        }
+        .api-endpoint-card {
+            margin-bottom: 14px;
+        }
+        .api-endpoint-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .api-path {
+            font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+            color: #303133;
+        }
+        .api-code {
+            background: #f6f8fa;
+            border: 1px solid #ebeef5;
+            border-radius: 4px;
+            color: #303133;
+            font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+            line-height: 1.6;
+            margin: 8px 0 0;
+            overflow-x: auto;
+            padding: 10px 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .api-desc {
+            color: #606266;
+            margin: 10px 0 12px;
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-122'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" class="is-active" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-122'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" class="is-active" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--api-index">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>外部 API</h1>
+                                                    </header>
+                        
+    <div class="api-page" v-loading="loading">
+        <el-card class="api-section" shadow="never">
+            <div slot="header">
+                <span>API Key</span>
+            </div>
+            <div class="api-key-row">
+                <el-input v-model="apiKey" readonly></el-input>
+                <el-button icon="el-icon-document-copy" @click="copyText(apiKey)">复制</el-button>
+                <el-button type="danger" plain icon="el-icon-refresh" :loading="regenerating" @click="regenerateApiKey">重新生成</el-button>
+            </div>
+            <el-alert class="api-alert" type="warning" show-icon :closable="false"
+                title="重新生成后，所有正在使用旧 API Key 的外部系统会立即失效。">
+            </el-alert>
+        </el-card>
+
+        <el-card class="api-endpoint-card" shadow="never" v-for="(endpoint, index) in endpoints" :key="index">
+            <div slot="header" class="api-endpoint-head">
+                <div>
+                    <strong>{{endpoint.name}}</strong>
+                    <span class="api-path">{{endpoint.path}}</span>
+                </div>
+                <el-tag size="small" type="info">{{endpoint.method}}</el-tag>
+            </div>
+            <p class="api-desc">{{endpoint.desc}}</p>
+            <el-table :data="endpoint.params" size="small" border>
+                <el-table-column prop="name" label="参数" width="180"></el-table-column>
+                <el-table-column prop="required" label="必填" width="80"></el-table-column>
+                <el-table-column prop="desc" label="说明"></el-table-column>
+            </el-table>
+            <el-divider content-position="left">示例请求</el-divider>
+            <pre class="api-code">{{endpoint.example}}</pre>
+            <el-button size="mini" icon="el-icon-document-copy" style="margin-top: 8px;" @click="copyText(endpoint.example)">复制示例</el-button>
+            <el-divider content-position="left">返回示例</el-divider>
+            <pre class="api-code">{{endpoint.response}}</pre>
+        </el-card>
+    </div>
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"apiKey":"pb_demo_2026_read_only","endpoints":[{"desc":"搜索站内资源库，适合外部系统接入本地聚合结果。","example":"/api/search?api_key=pb_demo_2026_read_only&title=仙逆&page_no=1&page_size=10","method":"GET/POST","name":"本地资源搜索","params":[{"desc":"统一外部 API Key","name":"api_key","required":"是"},{"desc":"搜索关键词","name":"title","required":"是"},{"desc":"分类 ID","name":"category_id","required":"否"},{"desc":"页码，默认 1","name":"page_no","required":"否"},{"desc":"每页数量","name":"page_size","required":"否"},{"desc":"搜索模式","name":"search_type","required":"否"}],"path":"/api/search","response":"{\"code\":200,\"message\":\"\",\"data\":{\"data\":[],\"total\":0}}"},{"desc":"调用指定的全网搜线路，外部系统使用 line_id 获取 JSON 结果。","example":"/api/search/web?api_key=pb_demo_2026_read_only&title=仙逆&line_id=1&format=json","method":"GET/POST","name":"全网搜","params":[{"desc":"统一外部 API Key","name":"api_key","required":"是"},{"desc":"搜索关键词","name":"title","required":"是"},{"desc":"指定线路 ID","name":"line_id","required":"是"},{"desc":"固定传 json","name":"format","required":"是"}],"path":"/api/search/web","response":"{\"code\":200,\"message\":\"\",\"data\":[{\"title\":\"资源标题\",\"url\":\"网盘链接\"}]}"},{"desc":"提交网盘分享链接进行转存，可选择是否写入资源库。","example":"curl -X POST '/api/open/transfer' -d 'api_key=pb_demo_2026_read_only&url=https://example.com/share&isSave=1'","method":"POST","name":"外部转存","params":[{"desc":"统一外部 API Key","name":"api_key","required":"是"},{"desc":"网盘分享链接","name":"url","required":"是"},{"desc":"提取码","name":"code","required":"否"},{"desc":"1 正式资源，2 临时资源；默认 2","name":"expired_type","required":"否"},{"desc":"网盘适配器类型，默认 0","name":"isType","required":"否"},{"desc":"是否写入资源库，1 写入","name":"isSave","required":"否"},{"desc":"写入资源库时指定分类","name":"source_category_id","required":"否"},{"desc":"写入资源库时指定标签","name":"tag_names","required":"否"}],"path":"/api/open/transfer","response":"{\"code\":200,\"message\":\"转存成功\",\"data\":{\"url\":\"转存后的资源链接\"}}"}],"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"loading":false,"regenerating":false},"responses":[{"data":{"code":200,"data":{"api_key":"pb_demo_2026_read_only","endpoints":[{"desc":"搜索站内资源库，适合外部系统接入本地聚合结果。","example":"/api/search?api_key=pb_demo_2026_read_only&title=仙逆&page_no=1&page_size=10","method":"GET/POST","name":"本地资源搜索","params":[{"desc":"统一外部 API Key","name":"api_key","required":"是"},{"desc":"搜索关键词","name":"title","required":"是"},{"desc":"分类 ID","name":"category_id","required":"否"},{"desc":"页码，默认 1","name":"page_no","required":"否"},{"desc":"每页数量","name":"page_size","required":"否"},{"desc":"搜索模式","name":"search_type","required":"否"}],"path":"/api/search","response":"{\"code\":200,\"message\":\"\",\"data\":{\"data\":[],\"total\":0}}"},{"desc":"调用指定的全网搜线路，外部系统使用 line_id 获取 JSON 结果。","example":"/api/search/web?api_key=pb_demo_2026_read_only&title=仙逆&line_id=1&format=json","method":"GET/POST","name":"全网搜","params":[{"desc":"统一外部 API Key","name":"api_key","required":"是"},{"desc":"搜索关键词","name":"title","required":"是"},{"desc":"指定线路 ID","name":"line_id","required":"是"},{"desc":"固定传 json","name":"format","required":"是"}],"path":"/api/search/web","response":"{\"code\":200,\"message\":\"\",\"data\":[{\"title\":\"资源标题\",\"url\":\"网盘链接\"}]}"},{"desc":"提交网盘分享链接进行转存，可选择是否写入资源库。","example":"curl -X POST '/api/open/transfer' -d 'api_key=pb_demo_2026_read_only&url=https://example.com/share&isSave=1'","method":"POST","name":"外部转存","params":[{"desc":"统一外部 API Key","name":"api_key","required":"是"},{"desc":"网盘分享链接","name":"url","required":"是"},{"desc":"提取码","name":"code","required":"否"},{"desc":"1 正式资源，2 临时资源；默认 2","name":"expired_type","required":"否"},{"desc":"网盘适配器类型，默认 0","name":"isType","required":"否"},{"desc":"是否写入资源库，1 写入","name":"isSave","required":"否"},{"desc":"写入资源库时指定分类","name":"source_category_id","required":"否"},{"desc":"写入资源库时指定标签","name":"tag_names","required":"否"}],"path":"/api/open/transfer","response":"{\"code\":200,\"message\":\"转存成功\",\"data\":{\"url\":\"转存后的资源链接\"}}"}]},"message":""},"method":"post","url":"/admin/api/getExternalApiConfig"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    loading: false,
+                    regenerating: false,
+                    apiKey: '',
+                    endpoints: []
+                }
+            },
+            created() {
+                this.getConfig();
+            },
+            methods: {
+                getConfig() {
+                    var that = this;
+                    that.loading = true;
+                    axios.post('/admin/api/getExternalApiConfig', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == CODE_SUCCESS) {
+                                that.apiKey = res.data.data.api_key || '';
+                                that.endpoints = res.data.data.endpoints || [];
+                            } else {
+                                that.$message.error(res.data.msg || res.data.message || '获取 API 配置失败');
+                            }
+                        })
+                        .finally(function () {
+                            that.loading = false;
+                        });
+                },
+                regenerateApiKey() {
+                    var that = this;
+                    that.$confirm('重新生成后，旧 API Key 会立即失效，确认继续吗？', '重新生成 API Key', {
+                        confirmButtonText: '确认生成',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        that.regenerating = true;
+                        axios.post('/admin/api/regenerateApiKey', Object.assign({}, PostBase))
+                            .then(function (res) {
+                                if (res.data.code == CODE_SUCCESS) {
+                                    that.apiKey = res.data.data.api_key || '';
+                                    that.endpoints = res.data.data.endpoints || [];
+                                    that.$message.success(res.data.msg || res.data.message || 'API Key 已重新生成');
+                                } else {
+                                    that.$message.error(res.data.msg || res.data.message || '重新生成失败');
+                                }
+                            })
+                            .finally(function () {
+                                that.regenerating = false;
+                            });
+                    }).catch(function () {});
+                },
+                copyText(text) {
+                    if (!text) {
+                        this.$message.warning('暂无可复制内容');
+                        return;
+                    }
+                    var input = document.createElement('textarea');
+                    input.value = text;
+                    input.setAttribute('readonly', 'readonly');
+                    input.style.position = 'absolute';
+                    input.style.left = '-9999px';
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    this.$message.success('已复制');
+                }
+            }
+        });
+    </script>
+</head>
+
+</html>

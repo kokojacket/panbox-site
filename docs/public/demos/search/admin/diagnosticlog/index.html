@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>诊断日志</title>
+    <style>
+        .diagnostic-toolbar { margin-bottom:14px; }
+        .diagnostic-detail-scroll { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        .diagnostic-detail-table { width:100%; min-width:660px; border-collapse:collapse; font-size:13px; }
+        .diagnostic-context pre { box-sizing:border-box; max-width:100%; }
+        @media (max-width:767px) {
+            .diagnostic-detail-table { min-width:620px; }
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'3'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'3-121'"
+        :collapse="false" :default-openeds="['3']">
+                <el-menu-item index="107"
+            onclick="location.href='/demos/search/admin/conf/base.html';" >
+            <i class="el-icon-s-operation" ></i>
+            站点配置        </el-menu-item>
+                                <el-menu-item index="120"
+            onclick="location.href='/demos/search/admin/accesslog/index.html';" >
+            <i class="el-icon-view" ></i>
+            访问日志        </el-menu-item>
+                                <el-menu-item index="125"
+            onclick="location.href='/demos/search/admin/searchlog/index.html';" >
+            <i class="el-icon-search" ></i>
+            搜索日志        </el-menu-item>
+                                <el-menu-item index="121"
+            onclick="location.href='/demos/search/admin/diagnosticlog/index.html';" class="is-active" >
+            <i class="el-icon-warning-outline" ></i>
+            诊断日志        </el-menu-item>
+                                <el-menu-item index="126"
+            onclick="location.href='/demos/search/admin/accessguard/index.html';" >
+            <i class="el-icon-lock" ></i>
+            防护规则        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'3-121'"
+        :collapse="false" :default-openeds="['3']">
+                <el-menu-item index="mobile-107"
+            onclick="location.href='/demos/search/admin/conf/base.html';" >
+            <i class="el-icon-s-operation" ></i>
+            站点配置        </el-menu-item>
+                                <el-menu-item index="mobile-120"
+            onclick="location.href='/demos/search/admin/accesslog/index.html';" >
+            <i class="el-icon-view" ></i>
+            访问日志        </el-menu-item>
+                                <el-menu-item index="mobile-125"
+            onclick="location.href='/demos/search/admin/searchlog/index.html';" >
+            <i class="el-icon-search" ></i>
+            搜索日志        </el-menu-item>
+                                <el-menu-item index="mobile-121"
+            onclick="location.href='/demos/search/admin/diagnosticlog/index.html';" class="is-active" >
+            <i class="el-icon-warning-outline" ></i>
+            诊断日志        </el-menu-item>
+                                <el-menu-item index="mobile-126"
+            onclick="location.href='/demos/search/admin/accessguard/index.html';" >
+            <i class="el-icon-lock" ></i>
+            防护规则        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--diagnosticlog-index">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>诊断日志</h1>
+                                                    </header>
+                        
+
+    <el-alert title="诊断日志用于查看用户点击、全网搜、网盘转存等业务链路；原始系统日志可能包含 Cookie、Token、服务器路径等敏感信息，请谨慎导出和发送。" type="warning" :closable="false" show-icon style="margin-bottom:14px;"></el-alert>
+
+    <div class="diagnostic-toolbar">
+        <el-form :inline="true" :model="form" size="small">
+            <el-form-item label="筛选字段">
+                <el-select v-model="form.filter" placeholder="筛选字段" style="width: 140px;">
+                    <el-option label="trace_id" value="trace_id"></el-option>
+                    <el-option label="visitor_id" value="visitor_id"></el-option>
+                    <el-option label="IP" value="ip"></el-option>
+                    <el-option label="关键词" value="keyword"></el-option>
+                    <el-option label="User-Agent" value="user_agent"></el-option>
+                    <el-option label="来源地址" value="referer"></el-option>
+                    <el-option label="请求URL" value="request_url"></el-option>
+                    <el-option label="动作" value="action"></el-option>
+                    <el-option label="错误码" value="error_code"></el-option>
+                    <el-option label="摘要" value="message"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="关键词">
+                <el-input v-model="form.keyword" placeholder="请输入关键词" clearable></el-input>
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-select v-model="form.status" placeholder="全部" clearable style="width: 110px;">
+                    <el-option label="成功" value="success"></el-option>
+                    <el-option label="失败" value="failed"></el-option>
+                    <el-option label="异常" value="error"></el-option>
+                    <el-option label="超时" value="timeout"></el-option>
+                    <el-option label="信息" value="info"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="模块">
+                <el-select v-model="form.module" placeholder="全部" clearable style="width: 120px;">
+                    <el-option label="全网搜" value="web_search"></el-option>
+                    <el-option label="资源" value="source"></el-option>
+                    <el-option label="网盘" value="netdisk"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="网盘">
+                <el-select v-model="form.netdisk_type" placeholder="全部" clearable style="width: 110px;">
+                    <el-option label="夸克" value="0"></el-option>
+                    <el-option label="阿里" value="1"></el-option>
+                    <el-option label="百度" value="2"></el-option>
+                    <el-option label="UC" value="3"></el-option>
+                    <el-option label="迅雷" value="4"></el-option>
+                    <el-option label="光鸭" value="5"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="开始日期">
+                <el-date-picker v-model="form.start_time" type="date" value-format="yyyy-MM-dd" placeholder="开始日期" style="width:150px;"></el-date-picker>
+            </el-form-item>
+            <el-form-item label="结束日期">
+                <el-date-picker v-model="form.end_time" type="date" value-format="yyyy-MM-dd" placeholder="结束日期" style="width:150px;"></el-date-picker>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="searchList">查询</el-button>
+                <el-button @click="resetSearch">重置</el-button>
+                <el-button icon="el-icon-refresh" @click="getList">刷新</el-button>
+                <el-button type="success" icon="el-icon-download" @click="downloadDiagnosticLog">导出诊断日志</el-button>
+                <el-button type="warning" icon="el-icon-document-copy" @click="downloadSystemLog">导出原始系统日志</el-button>
+                <el-button type="danger" icon="el-icon-delete" @click="clearDiagnosticLog">清空诊断日志</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+
+    <el-table v-loading="loading" :data="dataList.data" border style="width:100%;" empty-text="暂无诊断日志">
+        <el-table-column prop="create_time" label="时间" min-width="170"></el-table-column>
+        <el-table-column label="状态" width="90">
+            <template slot-scope="scope">
+                <el-tag :type="statusTagType(scope.row.status)" size="small">{{ statusText(scope.row.status) }}</el-tag>
+            </template>
+        </el-table-column>
+        <el-table-column prop="module" label="模块" min-width="100"></el-table-column>
+        <el-table-column prop="action" label="动作" min-width="150" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="source" label="来源" min-width="100"></el-table-column>
+        <el-table-column label="网盘" width="90">
+            <template slot-scope="scope">{{ netdiskText(scope.row.netdisk_type) }}</template>
+        </el-table-column>
+        <el-table-column prop="keyword" label="关键词" min-width="160" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="duration_ms" label="耗时(ms)" width="100"></el-table-column>
+        <el-table-column prop="ip" label="IP" min-width="130"></el-table-column>
+        <el-table-column prop="message" label="摘要" min-width="240" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="trace_id" label="trace_id" min-width="220" show-overflow-tooltip></el-table-column>
+        <el-table-column label="操作" width="80" fixed="right">
+            <template slot-scope="scope">
+                <el-button type="text" size="small" @click="showDetail(scope.row)">详情</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <div v-if="Number(dataList.total) > 0" class="page">
+        <el-pagination @size-change="handleSizeChange" :page-sizes="[20, 50, 100, 200, 500]" :page-size="form.per_page"
+            layout="total, sizes, prev, pager, next, jumper" background @current-change="changeCurrentPage"
+            :current-page="dataList.current_page" :page-count="dataList.last_page" :total="dataList.total">
+        </el-pagination>
+    </div>
+
+    <el-dialog title="诊断日志详情" :visible.sync="detailVisible" width="760px" append-to-body>
+        <div class="diagnostic-detail-scroll">
+        <table v-if="detail" class="diagnostic-detail-table">
+            <tr>
+                <th style="width:120px;background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">时间</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.create_time }}</td>
+                <th style="width:120px;background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">状态</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ statusText(detail.status) }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">trace_id</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.trace_id }}</td>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">visitor_id</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.visitor_id }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">模块</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.module }}</td>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">动作</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.action }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">来源</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.source }}</td>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">网盘</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ netdiskText(detail.netdisk_type) }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">关键词</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.keyword }}</td>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">资源ID</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.resource_id }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">耗时</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.duration_ms }} ms</td>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">IP</th>
+                <td style="border:1px solid #e5e7eb;padding:8px;">{{ detail.ip }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">摘要</th>
+                <td colspan="3" style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.message }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">错误码</th>
+                <td colspan="3" style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.error_code }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">请求URL</th>
+                <td colspan="3" style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.request_url }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">错误详情</th>
+                <td colspan="3" style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.error_detail }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">User-Agent</th>
+                <td colspan="3" style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.user_agent }}</td>
+            </tr>
+            <tr>
+                <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Referer</th>
+                <td colspan="3" style="border:1px solid #e5e7eb;padding:8px;word-break:break-all;">{{ detail.referer }}</td>
+            </tr>
+        </table>
+        </div>
+        <div class="diagnostic-context" style="margin-top:14px;">
+            <div style="font-weight:600;margin-bottom:8px;">Context</div>
+            <pre style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:4px;padding:12px;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto;">{{ formatContext(detail && detail.context) }}</pre>
+        </div>
+    </el-dialog>
+
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"dataList":{"current_page":1,"data":[{"action":"detail_view","context":"[]","create_time":"2026-07-20 22:51:31","diagnostic_log_id":1,"duration_ms":0,"error_code":"","error_detail":"","ip":"203.0.113.42","keyword":"[DEMO] UC永久资源 029","message":"用户访问资源详情","module":"source","netdisk_type":3,"referer":"","request_url":"","resource_id":29,"source":"frontend","status":"success","trace_id":"demo-trace-0001","update_time":"2026-07-20 22:51:31","user_agent":"Mozilla/5.0 Demo Browser","user_id":0,"visitor_id":"demo-visitor-0001"}],"has_more":false,"last_page":1,"per_page":50,"total":1},"detail":null,"detailVisible":false,"form":{"end_time":"","filter":"trace_id","keyword":"","module":"","netdisk_type":"","order":"diagnostic_log_id desc","page":1,"per_page":50,"start_time":"","status":""},"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"loading":false},"responses":[{"data":{"code":200,"message":"数据获取成功","data":{"current_page":1,"data":[{"action":"detail_view","context":"[]","create_time":"2026-07-20 22:51:31","diagnostic_log_id":1,"duration_ms":0,"error_code":"","error_detail":"","ip":"203.0.113.42","keyword":"[DEMO] UC永久资源 029","message":"用户访问资源详情","module":"source","netdisk_type":3,"referer":"","request_url":"","resource_id":29,"source":"frontend","status":"success","trace_id":"demo-trace-0001","update_time":"2026-07-20 22:51:31","user_agent":"Mozilla/5.0 Demo Browser","user_id":0,"visitor_id":"demo-visitor-0001"}],"has_more":false,"last_page":1,"per_page":50,"total":1}},"method":"post","url":"/admin/diagnostic_log/getList"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    loading: true,
+                    dataList: [],
+                    detailVisible: false,
+                    detail: null,
+                    form: {
+                        page: 1,
+                        per_page: 50,
+                        order: 'diagnostic_log_id desc',
+                        filter: 'trace_id',
+                        keyword: '',
+                        status: '',
+                        module: '',
+                        netdisk_type: '',
+                        start_time: '',
+                        end_time: ''
+                    },
+                }
+            },
+            created() {
+                this.getList();
+            },
+            methods: {
+                handleSizeChange(per_page) {
+                    this.form.per_page = per_page;
+                    this.getList();
+                },
+                changeCurrentPage(page) {
+                    this.form.page = page;
+                    this.getList();
+                },
+                searchList() {
+                    this.form.page = 1;
+                    this.getList();
+                },
+                resetSearch() {
+                    this.form.filter = 'trace_id';
+                    this.form.keyword = '';
+                    this.form.status = '';
+                    this.form.module = '';
+                    this.form.netdisk_type = '';
+                    this.form.start_time = '';
+                    this.form.end_time = '';
+                    this.form.page = 1;
+                    this.getList();
+                },
+                buildDownloadQuery(params) {
+                    var query = [];
+                    Object.keys(params).forEach(function (key) {
+                        if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+                            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+                        }
+                    });
+                    return query.join('&');
+                },
+                downloadDiagnosticLog() {
+                    var params = Object.assign({}, PostBase, this.form, {
+                        page: undefined,
+                        per_page: undefined,
+                        limit: 10000
+                    });
+                    window.open('/admin/diagnostic_log/download?' + this.buildDownloadQuery(params));
+                },
+                downloadSystemLog() {
+                    var that = this;
+                    this.$confirm('原始系统日志可能包含 Cookie、Token、接口返回内容、服务器路径等敏感信息。请仅在排查问题时导出，并谨慎发送给可信开发者。是否继续？', '导出原始系统日志', {
+                        confirmButtonText: '继续导出',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        window.open('/admin/diagnostic_log/downloadSystem?' + that.buildDownloadQuery(PostBase));
+                    }).catch(function () {});
+                },
+                clearDiagnosticLog() {
+                    var that = this;
+                    this.$confirm('确认清空全部诊断日志？该操作不可恢复。', '清空诊断日志', {
+                        confirmButtonText: '确认清空',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        axios.post('/admin/diagnostic_log/clear', Object.assign({}, PostBase)).then(function (response) {
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.$message.success(response.data.message);
+                                that.getList();
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        }).catch(function () {
+                            that.$message.error('服务器内部错误');
+                        });
+                    }).catch(function () {});
+                },
+                getList() {
+                    var that = this;
+                    that.loading = true;
+                    axios.post('/admin/diagnostic_log/getList', Object.assign({}, PostBase, that.form))
+                        .then(function (response) {
+                            that.loading = false;
+                            if (response.data.code == CODE_SUCCESS) {
+                                that.dataList = response.data.data;
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function () {
+                            that.loading = false;
+                            that.$message.error('服务器内部错误');
+                        });
+                },
+                showDetail(row) {
+                    this.detail = row;
+                    this.detailVisible = true;
+                },
+                statusTagType(status) {
+                    if (status === 'success') return 'success';
+                    if (status === 'failed' || status === 'error') return 'danger';
+                    if (status === 'timeout') return 'warning';
+                    return 'info';
+                },
+                statusText(status) {
+                    var map = { success: '成功', failed: '失败', error: '异常', timeout: '超时', info: '信息' };
+                    return map[status] || status || '-';
+                },
+                netdiskText(type) {
+                    var map = { '0': '夸克', '1': '阿里', '2': '百度', '3': 'UC', '4': '迅雷', '5': '光鸭' };
+                    return map[String(type)] || '未知';
+                },
+                formatContext(value) {
+                    if (!value) return '-';
+                    try {
+                        return JSON.stringify(JSON.parse(value), null, 2);
+                    } catch (e) {
+                        return value;
+                    }
+                }
+            }
+        })
+    </script>
+
+</html>

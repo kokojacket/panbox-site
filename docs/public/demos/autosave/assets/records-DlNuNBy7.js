@@ -1,0 +1,1 @@
+import{a as r}from"./index-CsRLLtpJ.js";const a={getList(t={}){return r.get("/api/records",{params:t})},getDetail(t){return r.get(`/api/records/${t}`)},getStats(){return r.get("/api/records/stats")}};export{a as r};

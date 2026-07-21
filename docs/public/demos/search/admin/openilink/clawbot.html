@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>微信机器人</title>
+        <style>
+        .openilink-page,
+        .openilink-page .el-card__body,
+        .openilink-page .el-tabs__content,
+        .openilink-page .el-tab-pane {
+            min-width: 0;
+        }
+
+        .openilink-page .section-tip {
+            margin: 0 0 18px;
+            color: #909399;
+            line-height: 1.6;
+        }
+
+        .openilink-page .form-panel {
+            max-width: 860px;
+        }
+
+        .openilink-page .form-panel .el-input,
+        .openilink-page .form-panel .el-input-number,
+        .openilink-page .form-panel .el-select,
+        .openilink-page .form-panel .el-textarea {
+            max-width: 100%;
+        }
+
+        .openilink-page .inline-help {
+            margin-left: 10px;
+            color: #909399;
+        }
+
+        .openilink-page .result-box {
+            margin-top: 12px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .conversation-layout {
+            box-sizing: border-box;
+            display: flex;
+            width: 100%;
+            height: calc(100vh - 230px);
+            min-height: 560px;
+            max-height: 680px;
+            overflow: hidden;
+            border: 1px solid #ebeef5;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .conversation-sidebar {
+            box-sizing: border-box;
+            display: flex;
+            flex: 0 0 300px;
+            flex-direction: column;
+            width: 300px;
+            height: 100%;
+            padding: 12px;
+            border-right: 1px solid #ebeef5;
+        }
+
+        .conversation-list {
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-top: 12px;
+            overflow-y: auto;
+        }
+
+        .conversation-user {
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .conversation-user:hover,
+        .conversation-user.active {
+            border-color: #dcdfe6;
+            background: #f5f7fa;
+        }
+
+        .conversation-user-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .sender-short {
+            color: #303133;
+        }
+
+        .sender-full,
+        .conversation-meta,
+        .conversation-preview {
+            margin-top: 4px;
+            overflow: hidden;
+            color: #909399;
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .conversation-pagination {
+            flex: 0 0 auto;
+            margin-top: 12px;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .conversation-panel {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-width: 0;
+            height: 100%;
+        }
+
+        .conversation-header {
+            display: flex;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #ebeef5;
+        }
+
+        .chat-window {
+            box-sizing: border-box;
+            flex: 1 1 auto;
+            min-height: 0;
+            padding: 18px;
+            overflow-y: auto;
+            background: #f7f8fa;
+        }
+
+        .chat-row {
+            display: flex;
+            margin-bottom: 14px;
+        }
+
+        .chat-row.from-user {
+            justify-content: flex-start;
+        }
+
+        .chat-row.from-bot {
+            justify-content: flex-end;
+        }
+
+        .chat-bubble {
+            box-sizing: border-box;
+            max-width: 72%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+        }
+
+        .from-user .chat-bubble {
+            border: 1px solid #ebeef5;
+            background: #fff;
+        }
+
+        .from-bot .chat-bubble {
+            border: 1px solid #d9ecff;
+            background: #ecf5ff;
+        }
+
+        .chat-row.failed .chat-bubble {
+            border-color: #fbc4c4;
+            background: #fef0f0;
+        }
+
+        .chat-content {
+            line-height: 1.6;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .chat-content a {
+            color: #409eff;
+            text-decoration: none;
+        }
+
+        .chat-content a:hover {
+            text-decoration: underline;
+        }
+
+        .chat-content code {
+            padding: 1px 4px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, .06);
+        }
+
+        .chat-content hr {
+            margin: 8px 0;
+            border: 0;
+            border-top: 1px solid #dcdfe6;
+        }
+
+        .chat-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 8px;
+            color: #909399;
+            font-size: 12px;
+        }
+
+        .system-message {
+            margin: 0 auto;
+            padding: 6px 12px;
+            border-radius: 14px;
+            color: #909399;
+            background: #f0f2f5;
+            font-size: 12px;
+        }
+
+        .chat-time {
+            margin-left: 8px;
+        }
+
+        .conversation-empty {
+            padding: 40px 0;
+            color: #909399;
+            text-align: center;
+        }
+
+        .conversation-composer {
+            flex: 0 0 auto;
+            padding: 12px 16px;
+            border-top: 1px solid #ebeef5;
+            background: #fff;
+        }
+
+        .conversation-composer .el-alert {
+            margin-bottom: 10px;
+        }
+
+        .conversation-composer-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            .conversation-sidebar {
+                flex-basis: 240px;
+                width: 240px;
+            }
+
+            .chat-bubble {
+                max-width: 80%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .openilink-page .form-panel {
+                max-width: 100%;
+            }
+
+            .conversation-layout {
+                flex-direction: column;
+                height: auto;
+                min-height: 0;
+                max-height: none;
+            }
+
+            .conversation-sidebar {
+                flex: 0 0 auto;
+                width: 100%;
+                height: auto;
+                max-height: 300px;
+                border-right: 0;
+                border-bottom: 1px solid #ebeef5;
+            }
+
+            .conversation-list {
+                max-height: 220px;
+            }
+
+            .conversation-panel {
+                height: 560px;
+                min-height: 520px;
+            }
+
+            .conversation-header,
+            .conversation-composer-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .openilink-page .el-card__body {
+                padding: 14px;
+            }
+
+            .openilink-page .section-tip {
+                margin-bottom: 14px;
+                font-size: 13px;
+            }
+
+            .openilink-page .el-tabs__header {
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+
+            .openilink-page .el-tabs__header::-webkit-scrollbar {
+                display: none;
+            }
+
+            .openilink-page .el-tabs__nav-wrap,
+            .openilink-page .el-tabs__nav-scroll {
+                overflow: visible;
+            }
+
+            .openilink-page .el-tabs__nav {
+                float: none;
+                white-space: nowrap;
+            }
+
+            .openilink-page .form-panel .el-form-item__label,
+            body .el-dialog .el-form-item__label {
+                float: none;
+                width: auto !important;
+                padding: 0 0 8px;
+                line-height: 1.4;
+                text-align: left;
+            }
+
+            .openilink-page .form-panel .el-form-item__content,
+            body .el-dialog .el-form-item__content {
+                margin-left: 0 !important;
+            }
+
+            .openilink-page .form-panel .el-input,
+            .openilink-page .form-panel .el-input-number,
+            .openilink-page .form-panel .el-select,
+            .openilink-page .form-panel .el-textarea,
+            .openilink-page .form-panel .el-button,
+            .openilink-page .el-form--inline .el-form-item,
+            body .el-dialog .el-input-number {
+                width: 100% !important;
+                max-width: 100%;
+            }
+
+            .openilink-page .inline-help {
+                display: block;
+                margin: 7px 0 0;
+                line-height: 1.5;
+            }
+
+            .conversation-sidebar {
+                padding: 10px;
+            }
+
+            .conversation-panel {
+                height: 520px;
+                min-height: 480px;
+            }
+
+            .conversation-header,
+            .conversation-composer {
+                padding: 10px 12px;
+            }
+
+            .chat-window {
+                min-height: 320px;
+                padding: 12px;
+            }
+
+            .chat-bubble {
+                max-width: 88%;
+            }
+
+            body .el-dialog {
+                width: calc(100vw - 24px) !important;
+                margin-top: 12px !important;
+            }
+
+            body .el-dialog__body {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .conversation-panel {
+                height: 480px;
+            }
+
+            .chat-bubble {
+                max-width: 92%;
+            }
+
+            .chat-footer {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .conversation-composer-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .conversation-composer-actions .el-button {
+                width: 100%;
+            }
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-123'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" class="is-active" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-123'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" class="is-active" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--openilink-clawbot">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>微信机器人</h1>
+                                                    </header>
+                        
+    <el-card class="box-card openilink-page" shadow="never" v-loading="loading">
+        <p class="section-tip">本页配置仅作用于微信机器人，不会影响元器机器人 API 搜索。</p>
+        <el-tabs v-model="activeName" @tab-click="handleTabClick">
+            <el-tab-pane label="基础配置" name="base">
+                <p class="section-tip">内置微信机器人基础配置只保留总开关；前台绑定二维码由模板固定展示，不再依赖外部服务配置。</p>
+                <el-form class="form-panel" label-width="180px">
+                    <el-form-item label="启用微信机器人">
+                        <el-switch v-model="form.openilink_clawbot_enabled" active-value="1" inactive-value="0"></el-switch>
+                    </el-form-item>
+                    <el-form-item label="客服消息前缀">
+                        <el-input v-model="form.openilink_customer_message_prefix" placeholder="【客服消息】"></el-input>
+                        <span class="inline-help">后台单聊发送时自动拼接为“前缀：正文”，留空不拼接</span>
+                    </el-form-item>
+                    <el-form-item label="群发消息前缀">
+                        <el-input v-model="form.openilink_broadcast_message_prefix" placeholder="【通知消息】"></el-input>
+                        <span class="inline-help">群发通知时自动拼接为“前缀：正文”，留空不拼接</span>
+                    </el-form-item>
+                    <el-divider content-position="left">绑定二维码防护</el-divider>
+                    <el-form-item label="IP 统计窗口">
+                        <el-input-number v-model="numberForm.openilink_qrcode_ip_window_seconds" :min="60" :max="3600" controls-position="right"></el-input-number>
+                        <span class="inline-help">单位秒，默认 600</span>
+                    </el-form-item>
+                    <el-form-item label="IP 生成上限">
+                        <el-input-number v-model="numberForm.openilink_qrcode_ip_max_attempts" :min="1" :max="1000" controls-position="right"></el-input-number>
+                        <span class="inline-help">统计窗口内同 IP 最多新生成次数，默认 20；复用二维码不计数</span>
+                    </el-form-item>
+                    <el-form-item label="访客生成上限">
+                        <el-input-number v-model="numberForm.openilink_qrcode_visitor_max_attempts" :min="1" :max="100" controls-position="right"></el-input-number>
+                        <span class="inline-help">同浏览器访客在复用时间内最多新生成次数，默认 3</span>
+                    </el-form-item>
+                    <el-form-item label="访客复用时间">
+                        <el-input-number v-model="numberForm.openilink_qrcode_visitor_reuse_seconds" :min="60" :max="3600" controls-position="right"></el-input-number>
+                        <span class="inline-help">单位秒，默认 600；未过期二维码优先复用</span>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="saveConfig">保存配置</el-button>
+                        <el-button icon="el-icon-picture-outline" @click="showStaticQrcode">生成静态二维码</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+
+            <el-tab-pane label="插件管理" name="route">
+                <template v-if="!pluginDetail">
+                <p class="section-tip">插件管理用于配置插件启用、前缀命令、权重、是否打断后续插件。前缀命令直接判断消息开头，不处理分隔符；例如配置 ai，则 ai你好、aiphone 都会命中。前缀命令优先；重复前缀允许，重复时按权重排序。打断后续插件默认开启，匹配并执行后停止后续插件。</p>
+                <el-table :data="pluginRows" border stripe style="width: 100%; margin-bottom: 18px;">
+                    <el-table-column prop="name" label="插件" min-width="160"></el-table-column>
+                    <el-table-column label="状态" width="110" align="center">
+                        <template slot-scope="scope">
+                            <el-switch v-model="form[scope.row.enabledKey]" active-value="1" inactive-value="0"></el-switch>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="前缀命令" min-width="220">
+                        <template slot-scope="scope">
+                            <el-input v-model="form[scope.row.triggerKey]" :placeholder="scope.row.triggerPlaceholder"></el-input>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="权重" width="140" align="center">
+                        <template slot-scope="scope">
+                            <el-input-number v-model="numberForm[scope.row.weightKey]" :min="0" :max="999" controls-position="right" style="width: 110px;"></el-input-number>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="打断后续插件" width="150" align="center">
+                        <template slot-scope="scope">
+                            <el-switch v-model="form[scope.row.interruptKey]" active-value="1" inactive-value="0"></el-switch>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="110" align="center">
+                        <template slot-scope="scope">
+                            <el-button type="primary" size="mini" @click="openPluginDetail(scope.row)">配置</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <el-button type="primary" @click="saveConfig">保存配置</el-button>
+                </template>
+
+                <template v-if="pluginDetail === 'ai'">
+                <div style="margin-bottom: 18px;">
+                    <el-button icon="el-icon-arrow-left" @click="backToPluginList">返回插件管理</el-button>
+                    <span style="margin-left: 12px; font-size: 18px; font-weight: 600; color: #303133;">AI 聊天插件配置</span>
+                </div>
+                <p class="section-tip">使用 OpenAI 兼容 Chat Completions 协议。Base URL 只填写基础地址，不需要包含 /chat/completions。</p>
+                <el-form class="form-panel" label-width="180px">
+                    <el-form-item label="AI Base URL">
+                        <el-input v-model="form.openilink_ai_base_url" placeholder="https://api.openai.com/v1"></el-input>
+                    </el-form-item>
+                    <el-form-item label="AI API Key">
+                        <el-input type="password" show-password v-model="form.openilink_ai_api_key" placeholder="留空不修改已有 Key"></el-input>
+                    </el-form-item>
+                    <el-form-item label="模型">
+                        <el-input v-model="form.openilink_ai_model" placeholder="gpt-4o-mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label="温度">
+                        <el-input-number v-model="numberForm.openilink_ai_temperature" :min="0" :max="2" :step="0.1" controls-position="right"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="最大 Tokens">
+                        <el-input-number v-model="numberForm.openilink_ai_max_tokens" :min="1" :max="32000" controls-position="right"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="上下文轮数">
+                        <el-input-number v-model="numberForm.openilink_ai_context_turns" :min="0" :max="50" controls-position="right"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="系统提示词">
+                        <el-input type="textarea" :rows="6" v-model="form.openilink_ai_system_prompt"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="saveConfig">保存配置</el-button>
+                    </el-form-item>
+                </el-form>
+                <el-divider content-position="left">AI 回复测试</el-divider>
+                <el-form class="form-panel" label-width="180px">
+                    <el-form-item label="测试消息">
+                        <el-input type="textarea" :rows="3" v-model="aiTest.message" placeholder="输入一条测试消息"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="success" :loading="aiTest.loading" @click="testAiReply">测试 AI 回复</el-button>
+                    </el-form-item>
+                    <el-alert v-if="aiTest.reply" title="AI 回复" type="success" :closable="false">
+                        <div class="result-box">{{ aiTest.reply }}</div>
+                    </el-alert>
+                </el-form>
+                </template>
+
+                <template v-if="pluginDetail === 'search'">
+                <div style="margin-bottom: 18px;">
+                    <el-button icon="el-icon-arrow-left" @click="backToPluginList">返回插件管理</el-button>
+                    <span style="margin-left: 12px; font-size: 18px; font-weight: 600; color: #303133;">资源搜索插件配置</span>
+                </div>
+                <p class="section-tip">机器人搜索会先走本地搜索，本地无结果时再走全网搜。全网搜只展示标题候选，用户发送序号后再转存返回链接。</p>
+                <el-form class="form-panel" label-width="180px">
+                    <el-divider content-position="left">基本消息配置</el-divider>
+                    <el-form-item label="等待提示词">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_waiting_text" placeholder="支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="全网搜提示词">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_remote_waiting_text" placeholder="支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="获取资源提示词">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_transfer_waiting_text" placeholder="支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="无结果提示">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_no_result_text" placeholder="支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="搜索错误提示">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_error_text" placeholder="支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="转存失败提示词">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_transfer_failed_text" placeholder="支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="回复前缀">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_reply_prefix" placeholder="仅拼接最终结果消息，支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="回复后缀">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_reply_suffix" placeholder="仅拼接最终结果消息，支持 {keyword}、{title}"></el-input>
+                    </el-form-item>
+
+                    <el-divider content-position="left">本地搜索配置</el-divider>
+                    <el-form-item label="结果总数量">
+                        <el-input-number v-model="numberForm.openilink_local_result_limit" :min="1" :max="20" controls-position="right"></el-input-number>
+                        <span class="inline-help">本地命中后直接返回的总条数</span>
+                    </el-form-item>
+                    <el-form-item label="搜索模式">
+                        <el-radio-group v-model="form.openilink_local_search_mode">
+                            <el-radio label="exact">精准搜索</el-radio>
+                            <el-radio label="fuzzy">模糊搜索</el-radio>
+                        </el-radio-group>
+                        <span class="inline-help">本地 MySQL 搜索默认允许全部网盘类型；精准为完整关键词匹配，模糊为关键词分词 AND</span>
+                    </el-form-item>
+
+                    <el-divider content-position="left">全网搜配置</el-divider>
+                    <p class="section-tip">这里只配置全网搜使用哪些接口；最终返回哪些网盘、每个网盘多少条，由下面的触发命令决定。</p>
+                    <el-form-item label="使用接口">
+                        <el-select v-model="form.openilink_remote_api_ids" multiple filterable collapse-tags placeholder="留空使用全部启用接口" style="width: 520px;">
+                            <el-option v-for="(item, index) in searchApiList" :key="String(item.id)" :label="formatApiLabel(item, index)" :value="String(item.id)"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="无上次关键词提示">
+                        <el-input type="textarea" :rows="2" v-model="form.openilink_search_no_last_keyword_text" placeholder="用户直接发送全网搜命令但没有上一次搜索关键词时回复"></el-input>
+                    </el-form-item>
+
+                    <el-divider content-position="left">全网搜触发命令</el-divider>
+                    <p class="section-tip">用户发送精确匹配的触发词时，以上一次搜索关键词调用全网搜。接口使用上面的全局配置；最终返回总数等于该命令下所有网盘数量相加。默认触发命令用于本地无结果时自动全网搜。</p>
+                    <el-form-item label="默认触发命令">
+                        <el-select v-model="form.openilink_default_remote_search_command" placeholder="请选择" style="width: 260px;">
+                            <el-option v-for="item in remoteSearchCommands" :key="item.trigger" :label="item.trigger" :value="item.trigger"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <div v-for="(cmd, ci) in remoteSearchCommands" :key="ci" style="border:1px solid #ebeef5;border-radius:6px;padding:12px 14px;margin-bottom:10px;background:#fafafa;max-width:650px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <span style="font-size:12px;color:#909399;white-space:nowrap;">触发词</span>
+                            <el-input v-model="cmd.trigger" size="small" placeholder="如：搜更多" style="flex:1;"></el-input>
+                            <el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c;" @click="removeRemoteSearchCommand(ci)"></el-button>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:8px;">
+                            <span style="font-size:12px;color:#909399;white-space:nowrap;padding-top:6px;">网盘筛选</span>
+                            <div>
+                                <div v-if="!cmd.pan_filters || cmd.pan_filters.length === 0" style="font-size:12px;color:#c0c4cc;padding-top:6px;">不限（按全网搜配置）</div>
+                                <div v-for="(filter, fi) in cmd.pan_filters" :key="fi" style="display:inline-flex;align-items:center;gap:4px;margin:0 6px 6px 0;">
+                                    <el-select v-model="filter.type" size="mini" style="width:80px;">
+                                        <el-option v-for="item in pantypeOptions" :key="item.value" :label="item.label" :value="Number(item.value)" :disabled="remotePanTypeDisabled(cmd, filter, item.value)"></el-option>
+                                    </el-select>
+                                    <el-input v-model.number="filter.count" size="mini" style="width:54px;" placeholder="条数"></el-input>
+                                    <span style="font-size:12px;color:#909399;">条</span>
+                                    <el-button type="text" size="mini" icon="el-icon-close" @click="cmd.pan_filters.splice(fi,1)"></el-button>
+                                </div>
+                                <el-button type="text" size="mini" @click="addRemotePanFilter(cmd)">+ 添加网盘</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <el-form-item>
+                        <el-button icon="el-icon-plus" @click="addRemoteSearchCommand">新增命令</el-button>
+                        <el-button type="primary" @click="saveConfig">保存配置</el-button>
+                    </el-form-item>
+                </el-form>
+                </template>
+
+                <template v-if="pluginDetail === 'keyword_reply'">
+                <div style="margin-bottom: 18px;">
+                    <el-button icon="el-icon-arrow-left" @click="backToPluginList">返回插件管理</el-button>
+                    <span style="margin-left: 12px; font-size: 18px; font-weight: 600; color: #303133;">关键词回复插件配置</span>
+                </div>
+                <p class="section-tip">一行规则对应一个关键词和一条回复。匹配模式由插件统一配置，启用后优先于搜索和 AI 插件响应。</p>
+                <el-form class="form-panel" label-width="180px" style="margin-bottom: 16px;">
+                    <el-form-item label="匹配模式">
+                        <el-radio-group v-model="form.openilink_keyword_reply_match_mode">
+                            <el-radio label="exact">完全匹配</el-radio>
+                            <el-radio label="contains">包含匹配</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-form>
+                <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <el-button type="primary" icon="el-icon-plus" @click="openKeywordReplyDialog()">新增规则</el-button>
+                        <el-button icon="el-icon-refresh" :loading="keywordReplyLoading" @click="getKeywordReplyRules">刷新</el-button>
+                    </div>
+                    <el-button type="success" @click="saveConfig">保存插件配置</el-button>
+                </div>
+                <el-table :data="keywordReplyRules" border stripe size="small" style="width: 100%;" v-loading="keywordReplyLoading">
+                    <el-table-column prop="keyword" label="关键词" min-width="160" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="回复内容" min-width="260" show-overflow-tooltip>
+                        <template slot-scope="scope">{{ scope.row.reply_content }}</template>
+                    </el-table-column>
+                    <el-table-column label="排序" width="90" align="center">
+                        <template slot-scope="scope">{{ scope.row.sort }}</template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="150" align="center">
+                        <template slot-scope="scope">
+                            <el-button type="primary" size="mini" @click="openKeywordReplyDialog(scope.row)">编辑</el-button>
+                            <el-button type="danger" size="mini" @click="deleteKeywordReplyRule(scope.row)">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                </template>
+            </el-tab-pane>
+
+            <el-tab-pane label="群发消息" name="broadcast">
+                <p class="section-tip">向最近 24 小时内有可用会话上下文的用户群发通知消息。每个用户仍需满足 iLink 24 小时发送窗口。</p>
+                <el-form class="form-panel" label-width="180px">
+                    <el-form-item label="可发送用户">
+                        <el-tag type="success">{{ broadcastStats.can_send || 0 }} 人可发送</el-tag>
+                        <el-tag type="info" style="margin-left: 8px;">{{ broadcastStats.total || 0 }} 个会话</el-tag>
+                        <el-button size="mini" icon="el-icon-refresh" style="margin-left: 8px;" @click="getBroadcastStats">刷新</el-button>
+                    </el-form-item>
+                    <el-form-item label="通知内容">
+                        <el-input type="textarea" :rows="8" v-model="broadcastForm.text" placeholder="输入群发通知 Markdown 内容" maxlength="2000" show-word-limit></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" :loading="broadcastForm.loading" :disabled="!broadcastForm.text.trim() || !broadcastStats.can_send" @click="sendBroadcastMessage">群发通知</el-button>
+                        <span class="inline-help">发送时自动拼接群发消息前缀，默认“【通知消息】：”。</span>
+                    </el-form-item>
+                    <el-alert v-if="broadcastResult" title="群发结果" type="success" :closable="false">
+                        <div class="result-box">{{ broadcastResult }}</div>
+                    </el-alert>
+                </el-form>
+            </el-tab-pane>
+
+            <el-tab-pane label="消息日志" name="logs">
+                <p class="section-tip">记录微信机器人收到的消息、回复内容和异常信息。对话视图按发送者聚合，适合排查某个用户的完整交互链路。</p>
+                <el-radio-group v-model="logViewMode" size="small" style="margin-bottom: 16px;" @change="loadActiveData">
+                    <el-radio-button label="conversation">对话视图</el-radio-button>
+                    <el-radio-button label="raw">原始日志</el-radio-button>
+                </el-radio-group>
+
+                <div v-if="logViewMode === 'conversation'" class="conversation-layout">
+                    <div class="conversation-sidebar">
+                        <el-form size="small" @submit.native.prevent>
+                            <el-input v-model="conversationSearch.keyword" placeholder="搜索用户/消息/回复" clearable @keyup.enter.native="getConversationList(1)">
+                                <el-button slot="append" icon="el-icon-search" @click="getConversationList(1)"></el-button>
+                            </el-input>
+                        </el-form>
+                        <div class="conversation-list" v-loading="conversationLoading">
+                            <div v-for="item in conversationList.data" :key="item.sender_id" class="conversation-user" :class="{ active: item.sender_id === currentSenderId }" @click="selectConversation(item)">
+                                <div class="conversation-user-main">
+                                    <span class="sender-short">{{ shortSender(item.sender_id) }}</span>
+                                    <el-tag v-if="Number(item.failed_count) > 0" size="mini" type="danger">失败 {{ item.failed_count }}</el-tag>
+                                </div>
+                                <div class="conversation-preview">{{ conversationPreview(item) }}</div>
+                                <div class="conversation-meta">{{ formatTimestamp(item.last_time) }} · {{ item.message_count }} 条</div>
+                            </div>
+                            <div v-if="!conversationList.data.length" class="conversation-empty">暂无会话</div>
+                        </div>
+                        <div v-if="Number(conversationList.total) > 0" class="conversation-pagination">
+                            <el-pagination small layout="prev,pager,next" :page-size="conversationSearch.per_page" :current-page="conversationSearch.page" :total="conversationList.total || 0" @current-change="getConversationList"></el-pagination>
+                        </div>
+                    </div>
+                    <div class="conversation-panel">
+                        <div v-if="currentSenderId" class="conversation-header">
+                            <div>
+                                <strong>{{ shortSender(currentSenderId) }}</strong>
+                                <div class="sender-full">{{ currentSenderId }}</div>
+                            </div>
+                            <div>
+                                <el-button size="mini" icon="el-icon-refresh" @click="getConversationMessages">刷新</el-button>
+                            </div>
+                        </div>
+                        <div class="chat-window" ref="chatWindow" v-loading="conversationMessagesLoading">
+                            <div v-if="!currentSenderId" class="conversation-empty">请选择左侧用户查看对话</div>
+                            <div v-for="msg in conversationMessages" :key="msg.id" class="chat-row" :class="messageClass(msg)">
+                                <div v-if="msg.direction === 'system'" class="system-message">
+                                    {{ msg.error_message || msg.reply_text || msg.message_text || '系统事件' }}
+                                    <span class="chat-time">{{ formatTimestamp(msg.create_time) }}</span>
+                                </div>
+                                <div v-else class="chat-bubble">
+                                    <div class="chat-content" v-html="renderMessageContent(msg)"></div>
+                                    <div class="chat-footer">
+                                        <span>{{ directionLabel(msg.direction) }} · {{ statusLabel(msg.status) }}</span>
+                                        <span>{{ formatTimestamp(msg.create_time) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="currentSenderId" class="conversation-composer">
+                            <el-alert v-if="!conversationCanSend()" :title="conversationSendDisabledReason" type="warning" :closable="false" show-icon></el-alert>
+                            <el-input type="textarea" :rows="3" v-model="conversationReply.text" placeholder="输入要发送的 Markdown 消息" maxlength="2000" show-word-limit></el-input>
+                            <div class="conversation-composer-actions">
+                                <span class="inline-help">将以机器人消息发送给当前用户，支持 Markdown。</span>
+                                <el-button type="primary" size="small" :loading="conversationReply.loading" :disabled="!conversationCanSend() || !conversationReply.text.trim()" @click="sendConversationMessage">发送</el-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="logViewMode === 'raw'">
+                    <el-form inline size="small">
+                        <el-form-item label="关键词">
+                            <el-input v-model="logSearch.keyword" placeholder="消息/回复/用户/错误" clearable></el-input>
+                        </el-form-item>
+                        <el-form-item label="状态">
+                            <el-select v-model="logSearch.status" placeholder="全部" clearable style="width: 130px;">
+                                <el-option label="已收到" value="received"></el-option>
+                                <el-option label="已回复" value="replied"></el-option>
+                                <el-option label="已发送" value="sent"></el-option>
+                                <el-option label="已跳过" value="skipped"></el-option>
+                                <el-option label="失败" value="failed"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="方向">
+                            <el-select v-model="logSearch.direction" placeholder="全部" clearable style="width: 120px;">
+                                <el-option label="收到" value="in"></el-option>
+                                <el-option label="发出" value="out"></el-option>
+                                <el-option label="系统" value="system"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="getMessageLogs(1)">查询</el-button>
+                            <el-button @click="resetLogSearch">重置</el-button>
+                        </el-form-item>
+                    </el-form>
+                    <el-table :data="logList.data" border stripe size="small" style="width: 100%;">
+                        <el-table-column prop="id" label="ID" width="70"></el-table-column>
+                        <el-table-column prop="direction" label="方向" width="80"></el-table-column>
+                        <el-table-column prop="status" label="状态" width="90"></el-table-column>
+                        <el-table-column prop="sender_id" label="发送者" min-width="150" show-overflow-tooltip></el-table-column>
+                        <el-table-column prop="message_text" label="消息内容" min-width="220" show-overflow-tooltip></el-table-column>
+                        <el-table-column prop="reply_text" label="回复内容" min-width="240" show-overflow-tooltip></el-table-column>
+                        <el-table-column prop="error_message" label="错误" min-width="180" show-overflow-tooltip></el-table-column>
+                        <el-table-column prop="create_time" label="时间" width="160" :formatter="formatTime"></el-table-column>
+                    </el-table>
+                    <div v-if="Number(logList.total) > 0" style="margin-top: 16px; text-align: right;">
+                        <el-pagination background layout="prev,pager,next,total" :page-size="logSearch.per_page" :current-page="logSearch.page" :total="logList.total || 0" @current-change="getMessageLogs"></el-pagination>
+                    </div>
+                </div>
+            </el-tab-pane>
+        </el-tabs>
+
+        <el-dialog title="静态绑定入口二维码" :visible.sync="staticQrDialogVisible" width="460px" append-to-body @opened="renderStaticQrcode">
+            <div style="text-align: center;">
+                <div ref="staticQrCanvas" style="display: inline-block; width: 240px; height: 240px;"></div>
+                <el-input v-model="staticQrUrl" readonly style="margin-top: 18px;">
+                    <el-button slot="append" icon="el-icon-document-copy" @click="copyStaticQrUrl"></el-button>
+                </el-input>
+                <p class="section-tip" style="margin-top: 12px; text-align: left;">用户扫描该静态二维码后会打开动态绑定页，再长按识别页面中的二维码完成绑定。</p>
+            </div>
+        </el-dialog>
+
+        <el-dialog :title="keywordReplyDialogTitle" :visible.sync="keywordReplyDialogVisible" width="620px" append-to-body>
+            <el-form label-width="110px">
+                <el-form-item label="关键词">
+                    <el-input v-model="keywordReplyForm.keyword" placeholder="请输入关键词"></el-input>
+                </el-form-item>
+                <el-form-item label="回复内容">
+                    <el-input type="textarea" :rows="6" v-model="keywordReplyForm.reply_content" placeholder="请输入回复内容"></el-input>
+                </el-form-item>
+                <el-form-item label="排序">
+                    <el-input-number v-model="keywordReplyForm.sort" :min="0" :max="9999" controls-position="right"></el-input-number>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="keywordReplyDialogVisible = false">取消</el-button>
+                <el-button type="primary" :loading="keywordReplySaving" @click="saveKeywordReplyRule">保存</el-button>
+            </span>
+        </el-dialog>
+    </el-card>
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"activeName":"base","aiTest":{"loading":false,"message":"","reply":""},"broadcastForm":{"loading":false,"text":""},"broadcastResult":"","broadcastStats":{"total":128,"can_send":116,"expired":12},"conversationCanSendState":true,"conversationList":{"current_page":1,"data":[{"sender_id":"demo-user-01","nickname":"演示访客","message_count":6,"failed_count":0,"last_message":"仙逆","last_reply":"已找到 5 条相关资源","last_time":"2026-07-20 20:10:00"}],"has_more":false,"last_page":1,"per_page":20,"total":1},"conversationLoading":false,"conversationMessages":[{"id":2,"sender_id":"demo-user-01","direction":"in","status":"received","message_text":"仙逆","reply_text":"","error_message":"","create_time":"2026-07-20 20:10:00"},{"id":1,"sender_id":"demo-user-01","direction":"out","status":"sent","message_text":"","reply_text":"已找到 5 条相关资源","error_message":"","create_time":"2026-07-20 20:10:02"}],"conversationMessagesLoading":false,"conversationReply":{"loading":false,"text":""},"conversationSearch":{"keyword":"","page":1,"per_page":20},"conversationSendDisabledReason":"最近会话已超过 24 小时，需要用户先发送一条消息进行激活","currentSenderId":"demo-user-01","form":{"openilink_ai_api_key":"","openilink_ai_base_url":"https://demo.panbox.local","openilink_ai_context_turns":"6","openilink_ai_enabled":"1","openilink_ai_interrupt":"1","openilink_ai_max_tokens":"demo-openilink-ai-max-tokens","openilink_ai_model":"gpt-4o-mini","openilink_ai_system_prompt":"你是 Panbox Search 的微信搜索助手。回答要简洁、准确；用户需要资源时，引导其发送搜索关键词。","openilink_ai_temperature":"0.7","openilink_ai_trigger":"","openilink_ai_weight":"50","openilink_broadcast_message_prefix":"【通知消息】","openilink_clawbot_enabled":"0","openilink_customer_message_prefix":"【客服消息】","openilink_default_line_id":"","openilink_default_pantype":"0","openilink_default_remote_search_command":"搜更多","openilink_http_retry_base_delay_ms":"500","openilink_http_retry_max_attempts":"3","openilink_http_retry_max_delay_ms":"5000","openilink_keyword_reply_enabled":"0","openilink_keyword_reply_interrupt":"1","openilink_keyword_reply_match_mode":"exact","openilink_keyword_reply_trigger":"","openilink_keyword_reply_weight":"150","openilink_local_result_limit":"20","openilink_local_search_mode":"exact","openilink_no_result_text":"未找到相关资源","openilink_qrcode_ip_max_attempts":"20","openilink_qrcode_ip_window_seconds":"600","openilink_qrcode_visitor_max_attempts":"3","openilink_qrcode_visitor_reuse_seconds":"600","openilink_remote_allowed_pantypes":"0,2,3,4","openilink_remote_api_ids":[],"openilink_remote_per_pantype_limit":"5","openilink_remote_result_limit":"5","openilink_remote_search_commands":"[{\"trigger\":\"搜更多\",\"pan_filters\":[{\"type\":0,\"count\":5},{\"type\":2,\"count\":5}]}]","openilink_result_limit":"5","openilink_search_enabled":"1","openilink_search_error_text":"搜索【{keyword}】时出现异常，请稍后重试","openilink_search_interrupt":"1","openilink_search_no_last_keyword_text":"请先发送要搜索的内容，再发送全网搜命令","openilink_search_no_result_text":"未找到与【{keyword}】相关的资源","openilink_search_remote_waiting_text":"正在进行全网搜索【**{keyword}**】，请稍等","openilink_search_reply_prefix":"","openilink_search_reply_suffix":"","openilink_search_transfer_failed_text":"【{title}】转存失败，请换一个资源试试","openilink_search_transfer_waiting_text":"正在获取资源【{title}】","openilink_search_trigger":"","openilink_search_waiting_text":"正在搜索【**{keyword}**】，请稍等","openilink_search_weight":"100","openilink_welcome_text":"欢迎使用微信专属搜索机器人，发送关键词即可搜索资源。"},"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"keywordReplyDialogTitle":"新增规则","keywordReplyDialogVisible":false,"keywordReplyForm":{"id":"","keyword":"","reply_content":"","sort":100},"keywordReplyLoading":false,"keywordReplyRules":[],"keywordReplySaving":false,"loadedData":{"broadcastStats":true,"conversationList":true,"keywordReplyRules":false,"messageLogs":false,"searchApiList":false},"loading":false,"logList":{"current_page":1,"data":[{"id":2,"sender_id":"demo-user-01","direction":"in","status":"received","message_text":"仙逆","reply_text":"","error_message":"","create_time":"2026-07-20 20:10:00"},{"id":1,"sender_id":"demo-user-01","direction":"out","status":"sent","message_text":"","reply_text":"已找到 5 条相关资源","error_message":"","create_time":"2026-07-20 20:10:02"}],"has_more":false,"last_page":1,"per_page":20,"total":2},"logSearch":{"direction":"","keyword":"","page":1,"per_page":20,"status":""},"logViewMode":"conversation","numberForm":{"openilink_ai_context_turns":6,"openilink_ai_max_tokens":"demo-openilink-ai-max-tokens","openilink_ai_temperature":0.7,"openilink_ai_weight":50,"openilink_keyword_reply_weight":150,"openilink_local_result_limit":20,"openilink_qrcode_ip_max_attempts":20,"openilink_qrcode_ip_window_seconds":600,"openilink_qrcode_visitor_max_attempts":3,"openilink_qrcode_visitor_reuse_seconds":600,"openilink_result_limit":5,"openilink_search_weight":100},"pantypeOptions":[{"label":"夸克","value":"0"},{"label":"阿里","value":"1"},{"label":"百度","value":"2"},{"label":"UC","value":"3"},{"label":"迅雷","value":"4"}],"pluginDetail":"","pluginRows":[{"detailKey":"search","enabledKey":"openilink_search_enabled","interruptKey":"openilink_search_interrupt","name":"资源搜索插件","triggerKey":"openilink_search_trigger","triggerPlaceholder":"例如：搜索；留空默认触发","weightKey":"openilink_search_weight"},{"detailKey":"keyword_reply","enabledKey":"openilink_keyword_reply_enabled","interruptKey":"openilink_keyword_reply_interrupt","name":"关键词回复插件","triggerKey":"openilink_keyword_reply_trigger","triggerPlaceholder":"默认不加前缀命令","weightKey":"openilink_keyword_reply_weight"},{"detailKey":"ai","enabledKey":"openilink_ai_enabled","interruptKey":"openilink_ai_interrupt","name":"AI 聊天插件","triggerKey":"openilink_ai_trigger","triggerPlaceholder":"例如：ai；留空默认触发","weightKey":"openilink_ai_weight"}],"remotePantypeOptions":[{"label":"夸克","value":"0"},{"label":"百度","value":"2"},{"label":"UC","value":"3"},{"label":"迅雷","value":"4"}],"remoteSearchCommands":[{"command":"搜更多","enabled":"1","pan_filters":[{"count":5,"type":0},{"count":5,"type":2}],"trigger":"搜更多"}],"searchApiList":[],"staticQrDialogVisible":false,"staticQrUrl":""},"responses":[{"data":{"code":200,"data":{"openilink_ai_api_key":"","openilink_ai_base_url":"https://demo.panbox.local","openilink_ai_context_turns":"6","openilink_ai_enabled":"1","openilink_ai_interrupt":"1","openilink_ai_max_tokens":"demo-openilink-ai-max-tokens","openilink_ai_model":"gpt-4o-mini","openilink_ai_system_prompt":"你是 Panbox Search 的微信搜索助手。回答要简洁、准确；用户需要资源时，引导其发送搜索关键词。","openilink_ai_temperature":"0.7","openilink_ai_trigger":"","openilink_ai_weight":"50","openilink_broadcast_message_prefix":"【通知消息】","openilink_clawbot_enabled":"0","openilink_customer_message_prefix":"【客服消息】","openilink_default_line_id":"","openilink_default_pantype":"0","openilink_default_remote_search_command":"搜更多","openilink_http_retry_base_delay_ms":"500","openilink_http_retry_max_attempts":"3","openilink_http_retry_max_delay_ms":"5000","openilink_keyword_reply_enabled":"0","openilink_keyword_reply_interrupt":"1","openilink_keyword_reply_match_mode":"exact","openilink_keyword_reply_trigger":"","openilink_keyword_reply_weight":"150","openilink_local_result_limit":"20","openilink_local_search_mode":"exact","openilink_no_result_text":"未找到相关资源","openilink_qrcode_ip_max_attempts":"20","openilink_qrcode_ip_window_seconds":"600","openilink_qrcode_visitor_max_attempts":"3","openilink_qrcode_visitor_reuse_seconds":"600","openilink_remote_allowed_pantypes":"0,2,3,4","openilink_remote_api_ids":"","openilink_remote_per_pantype_limit":"5","openilink_remote_result_limit":"5","openilink_remote_search_commands":"[{\"trigger\":\"搜更多\",\"pan_filters\":[{\"type\":0,\"count\":5},{\"type\":2,\"count\":5}]}]","openilink_result_limit":"5","openilink_search_enabled":"1","openilink_search_error_text":"搜索【{keyword}】时出现异常，请稍后重试","openilink_search_interrupt":"1","openilink_search_no_last_keyword_text":"请先发送要搜索的内容，再发送全网搜命令","openilink_search_no_result_text":"未找到与【{keyword}】相关的资源","openilink_search_remote_waiting_text":"正在进行全网搜索【**{keyword}**】，请稍等","openilink_search_reply_prefix":"","openilink_search_reply_suffix":"","openilink_search_transfer_failed_text":"【{title}】转存失败，请换一个资源试试","openilink_search_transfer_waiting_text":"正在获取资源【{title}】","openilink_search_trigger":"","openilink_search_waiting_text":"正在搜索【**{keyword}**】，请稍等","openilink_search_weight":"100","openilink_welcome_text":"欢迎使用微信专属搜索机器人，发送关键词即可搜索资源。"},"message":"数据获取成功"},"method":"post","url":"/admin/open_ilink/getConfig"},{"data":{"code":200,"data":{"can_send":0,"expired":0,"total":0},"message":"数据获取成功"},"method":"post","url":"/admin/open_ilink/getBroadcastStats"},{"data":{"code":200,"message":"数据获取成功","data":{"current_page":1,"data":[{"sender_id":"demo-user-01","nickname":"演示访客","message_count":6,"failed_count":0,"last_message":"仙逆","last_reply":"已找到 5 条相关资源","last_time":"2026-07-20 20:10:00"}],"has_more":false,"last_page":1,"per_page":20,"total":1}},"method":"post","url":"/admin/open_ilink/getConversationList"},{"method":"post","url":"/admin/open_ilink/getConversationMessages","data":{"code":200,"message":"数据获取成功","data":{"messages":[{"id":2,"sender_id":"demo-user-01","direction":"in","status":"received","message_text":"仙逆","reply_text":"","error_message":"","create_time":"2026-07-20 20:10:00"},{"id":1,"sender_id":"demo-user-01","direction":"out","status":"sent","message_text":"","reply_text":"已找到 5 条相关资源","error_message":"","create_time":"2026-07-20 20:10:02"}],"can_send":true,"send_disabled_reason":""}}},{"method":"post","url":"/admin/open_ilink/getMessageLogList","data":{"code":200,"message":"数据获取成功","data":{"current_page":1,"data":[{"id":2,"sender_id":"demo-user-01","direction":"in","status":"received","message_text":"仙逆","reply_text":"","error_message":"","create_time":"2026-07-20 20:10:00"},{"id":1,"sender_id":"demo-user-01","direction":"out","status":"sent","message_text":"","reply_text":"已找到 5 条相关资源","error_message":"","create_time":"2026-07-20 20:10:02"}],"has_more":false,"last_page":1,"per_page":20,"total":2}}}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script src="/demos/search/assets/front/js/qrcanvas@3.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: function () {
+                return {
+                    loading: false,
+                    activeName: 'base',
+                    pluginDetail: '',
+                    form: {},
+                    pluginRows: [
+                        {
+                            name: '资源搜索插件',
+                            enabledKey: 'openilink_search_enabled',
+                            triggerKey: 'openilink_search_trigger',
+                            triggerPlaceholder: '例如：搜索；留空默认触发',
+                            weightKey: 'openilink_search_weight',
+                            interruptKey: 'openilink_search_interrupt',
+                            detailKey: 'search'
+                        },
+                        {
+                            name: '关键词回复插件',
+                            enabledKey: 'openilink_keyword_reply_enabled',
+                            triggerKey: 'openilink_keyword_reply_trigger',
+                            triggerPlaceholder: '默认不加前缀命令',
+                            weightKey: 'openilink_keyword_reply_weight',
+                            interruptKey: 'openilink_keyword_reply_interrupt',
+                            detailKey: 'keyword_reply'
+                        },
+                        {
+                            name: 'AI 聊天插件',
+                            enabledKey: 'openilink_ai_enabled',
+                            triggerKey: 'openilink_ai_trigger',
+                            triggerPlaceholder: '例如：ai；留空默认触发',
+                            weightKey: 'openilink_ai_weight',
+                            interruptKey: 'openilink_ai_interrupt',
+                            detailKey: 'ai'
+                        }
+                    ],
+                    numberForm: {
+                        openilink_search_weight: 100,
+                        openilink_keyword_reply_weight: 150,
+                        openilink_ai_weight: 50,
+                        openilink_ai_temperature: 0.7,
+                        openilink_ai_max_tokens: 1000,
+                        openilink_ai_context_turns: 6,
+                        openilink_qrcode_ip_window_seconds: 600,
+                        openilink_qrcode_ip_max_attempts: 20,
+                        openilink_qrcode_visitor_max_attempts: 3,
+                        openilink_qrcode_visitor_reuse_seconds: 600,
+                        openilink_result_limit: 5,
+                        openilink_local_result_limit: 20
+                    },
+                    pantypeOptions: [
+                        { value: '0', label: '夸克' },
+                        { value: '1', label: '阿里' },
+                        { value: '2', label: '百度' },
+                        { value: '3', label: 'UC' },
+                        { value: '4', label: '迅雷' }
+                    ],
+                    remotePantypeOptions: [
+                        { value: '0', label: '夸克' },
+                        { value: '2', label: '百度' },
+                        { value: '3', label: 'UC' },
+                        { value: '4', label: '迅雷' }
+                    ],
+                    searchApiList: [],
+                    remoteSearchCommands: [],
+                    keywordReplyRules: [],
+                    keywordReplyLoading: false,
+                    keywordReplySaving: false,
+                    keywordReplyDialogVisible: false,
+                    keywordReplyDialogTitle: '新增规则',
+                    keywordReplyForm: {
+                        id: '',
+                        keyword: '',
+                        reply_content: '',
+                        sort: 100
+                    },
+                    staticQrDialogVisible: false,
+                    staticQrUrl: '',
+                    aiTest: {
+                        message: '',
+                        reply: '',
+                        loading: false
+                    },
+                    logViewMode: 'conversation',
+                    logSearch: {
+                        page: 1,
+                        per_page: 20,
+                        keyword: '',
+                        status: '',
+                        direction: ''
+                    },
+                    logList: { data: [], total: 0 },
+                    conversationSearch: {
+                        page: 1,
+                        per_page: 20,
+                        keyword: ''
+                    },
+                    conversationList: { data: [], total: 0 },
+                    conversationLoading: false,
+                    currentSenderId: '',
+                    conversationMessages: [],
+                    conversationMessagesLoading: false,
+                    conversationCanSendState: false,
+                    conversationSendDisabledReason: '最近会话已超过 24 小时，需要用户先发送一条消息进行激活',
+                    conversationReply: {
+                        text: '',
+                        loading: false
+                    },
+                    broadcastStats: { total: 0, can_send: 0, expired: 0 },
+                    broadcastForm: {
+                        text: '',
+                        loading: false
+                    },
+                    broadcastResult: '',
+                    loadedData: {
+                        searchApiList: false,
+                        keywordReplyRules: false,
+                        broadcastStats: false,
+                        conversationList: false,
+                        messageLogs: false
+                    }
+                }
+            },
+            created: function () {
+                this.getConfig();
+            },
+            methods: {
+                handleTabClick: function () {
+                    if (this.activeName !== 'route') {
+                        this.pluginDetail = '';
+                    }
+                    this.loadActiveData();
+                },
+                loadActiveData: function () {
+                    if (this.activeName === 'route' && this.pluginDetail === 'search' && !this.loadedData.searchApiList) {
+                        this.getSearchApiList();
+                    } else if (this.activeName === 'route' && this.pluginDetail === 'keyword_reply' && !this.loadedData.keywordReplyRules) {
+                        this.getKeywordReplyRules();
+                    } else if (this.activeName === 'broadcast' && !this.loadedData.broadcastStats) {
+                        this.getBroadcastStats();
+                    } else if (this.activeName === 'logs' && this.logViewMode === 'raw' && !this.loadedData.messageLogs) {
+                        this.getMessageLogs(1);
+                    } else if (this.activeName === 'logs' && this.logViewMode === 'conversation') {
+                        if (!this.loadedData.conversationList) {
+                            this.getConversationList(1);
+                        } else {
+                            this.scrollChatToBottom();
+                        }
+                    }
+                },
+                openPluginDetail: function (row) {
+                    this.activeName = 'route';
+                    this.pluginDetail = row.detailKey;
+                    this.loadActiveData();
+                },
+                backToPluginList: function () {
+                    this.pluginDetail = '';
+                },
+                showStaticQrcode: function () {
+                    this.staticQrUrl = window.location.origin + '/api/wechat/qrcodePage';
+                    this.staticQrDialogVisible = true;
+                    this.$nextTick(this.renderStaticQrcode);
+                },
+                renderStaticQrcode: function () {
+                    var target = this.$refs.staticQrCanvas;
+                    if (!target || !this.staticQrUrl) {
+                        return;
+                    }
+                    target.innerHTML = '';
+                    if (typeof qrcanvas === 'undefined' || typeof qrcanvas.qrcanvas !== 'function') {
+                        target.innerHTML = '<div style="color:#f56c6c;line-height:240px;">二维码组件加载失败</div>';
+                        return;
+                    }
+                    var canvas = qrcanvas.qrcanvas({
+                        data: this.staticQrUrl,
+                        size: 240,
+                        correctLevel: 'H'
+                    });
+                    target.appendChild(canvas);
+                },
+                copyStaticQrUrl: function () {
+                    var url = this.staticQrUrl;
+                    if (!url) {
+                        return;
+                    }
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(url);
+                        this.$message.success('链接已复制');
+                        return;
+                    }
+                    var input = document.createElement('input');
+                    input.value = url;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    this.$message.success('链接已复制');
+                },
+                formatTime: function (row, column, cellValue) {
+                    var ts = cellValue;
+                    if (ts === null || ts === undefined || ts === '') {
+                        return '';
+                    }
+                    ts = parseInt(ts, 10);
+                    if (isNaN(ts) || ts <= 0) {
+                        return cellValue;
+                    }
+                    // 统一按北京时间（UTC+8）展示
+                    var d = new Date((ts + 8 * 3600) * 1000);
+                    var p = function (n) { return n < 10 ? '0' + n : '' + n; };
+                    return d.getUTCFullYear() + '-' + p(d.getUTCMonth() + 1) + '-' + p(d.getUTCDate())
+                        + ' ' + p(d.getUTCHours()) + ':' + p(d.getUTCMinutes()) + ':' + p(d.getUTCSeconds());
+                },
+                getConfig: function () {
+                    var that = this;
+                    that.loading = true;
+                    axios.post('/admin/open_ilink/getConfig', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.form = res.data.data || {};
+                                that.syncNumberForm();
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.loading = false;
+                        });
+                },
+                syncNumberForm: function () {
+                    this.numberForm.openilink_search_weight = Number(this.form.openilink_search_weight || 100);
+                    this.numberForm.openilink_keyword_reply_weight = Number(this.form.openilink_keyword_reply_weight || 150);
+                    this.numberForm.openilink_ai_weight = Number(this.form.openilink_ai_weight || 50);
+                    this.numberForm.openilink_ai_temperature = Number(this.form.openilink_ai_temperature || 0.7);
+                    this.numberForm.openilink_ai_max_tokens = Number(this.form.openilink_ai_max_tokens || 1000);
+                    this.numberForm.openilink_ai_context_turns = Number(this.form.openilink_ai_context_turns || 6);
+                    this.numberForm.openilink_qrcode_ip_window_seconds = Number(this.form.openilink_qrcode_ip_window_seconds || 600);
+                    this.numberForm.openilink_qrcode_ip_max_attempts = Number(this.form.openilink_qrcode_ip_max_attempts || 20);
+                    this.numberForm.openilink_qrcode_visitor_max_attempts = Number(this.form.openilink_qrcode_visitor_max_attempts || 3);
+                    this.numberForm.openilink_qrcode_visitor_reuse_seconds = Number(this.form.openilink_qrcode_visitor_reuse_seconds || 600);
+                    this.numberForm.openilink_result_limit = Number(this.form.openilink_result_limit || 5);
+                    this.numberForm.openilink_local_result_limit = Number(this.form.openilink_local_result_limit || 20);
+                    if (!this.form.openilink_local_search_mode) {
+                        this.form.openilink_local_search_mode = 'exact';
+                    }
+                    this.form.openilink_remote_api_ids = this.normalizeMultiValue(this.form.openilink_remote_api_ids, '');
+                    this.remoteSearchCommands = this.parseRemoteSearchCommands(this.form.openilink_remote_search_commands);
+                    if (!this.form.openilink_default_remote_search_command) {
+                        this.form.openilink_default_remote_search_command = this.remoteSearchCommands.length ? this.remoteSearchCommands[0].trigger : '搜更多';
+                    }
+                    if (!this.form.openilink_search_no_last_keyword_text) {
+                        this.form.openilink_search_no_last_keyword_text = '请先发送要搜索的内容，再发送全网搜命令';
+                    }
+                    if (!this.form.openilink_search_interrupt) {
+                        this.form.openilink_search_interrupt = '1';
+                    }
+                    if (this.form.openilink_keyword_reply_trigger === undefined || this.form.openilink_keyword_reply_trigger === null) {
+                        this.form.openilink_keyword_reply_trigger = '';
+                    }
+                    if (!this.form.openilink_keyword_reply_match_mode) {
+                        this.form.openilink_keyword_reply_match_mode = 'exact';
+                    }
+                    if (!this.form.openilink_keyword_reply_interrupt) {
+                        this.form.openilink_keyword_reply_interrupt = '1';
+                    }
+                    if (!this.form.openilink_ai_interrupt) {
+                        this.form.openilink_ai_interrupt = '1';
+                    }
+                },
+                normalizeMultiValue: function (value, fallback) {
+                    if (Array.isArray(value)) {
+                        return value.map(function (item) { return String(item); });
+                    }
+                    if (value === undefined || value === null || value === '') {
+                        value = fallback;
+                    }
+                    return String(value || '').split(',').map(function (item) {
+                        return item.trim();
+                    }).filter(function (item) {
+                        return item !== '';
+                    });
+                },
+                joinMultiValue: function (value) {
+                    if (!Array.isArray(value)) {
+                        return String(value || '');
+                    }
+                    return value.map(function (item) {
+                        return String(item).trim();
+                    }).filter(function (item, index, list) {
+                        return item !== '' && list.indexOf(item) === index;
+                    }).join(',');
+                },
+                parseRemoteSearchCommands: function (value) {
+                    var list = [];
+                    try {
+                        list = JSON.parse(value || '[]');
+                    } catch (e) {
+                        list = [];
+                    }
+                    if (!Array.isArray(list) || !list.length) {
+                        list = [this.defaultRemoteSearchCommand()];
+                    }
+                    return list.map(function (item) {
+                        item = item || {};
+                        return {
+                            trigger: String(item.trigger || item.command || '搜更多'),
+                            command: String(item.command || item.trigger || '搜更多'),
+                            enabled: String(item.enabled === '0' ? '0' : '1'),
+                            pan_filters: this.normalizeRemotePanFilters(item.pan_filters || [])
+                        };
+                    }, this);
+                },
+                defaultRemoteSearchCommand: function () {
+                    return { trigger: '搜更多', command: '搜更多', enabled: '1', pan_filters: [{ type: 0, count: 5 }, { type: 2, count: 5 }] };
+                },
+                addRemoteSearchCommand: function () {
+                    this.remoteSearchCommands.push(this.defaultRemoteSearchCommand());
+                    if (!this.form.openilink_default_remote_search_command) {
+                        this.form.openilink_default_remote_search_command = '搜更多';
+                    }
+                },
+                removeRemoteSearchCommand: function (index) {
+                    this.remoteSearchCommands.splice(index, 1);
+                    if (!this.remoteSearchCommands.length) {
+                        this.remoteSearchCommands.push(this.defaultRemoteSearchCommand());
+                    }
+                    if (!this.remoteSearchCommands.some(function (item) { return item.trigger === this.form.openilink_default_remote_search_command; }, this)) {
+                        this.form.openilink_default_remote_search_command = this.remoteSearchCommands[0].trigger;
+                    }
+                },
+                addRemotePanFilter: function (cmd) {
+                    if (!cmd.pan_filters) {
+                        this.$set(cmd, 'pan_filters', []);
+                    }
+                    var used = cmd.pan_filters.map(function (item) { return Number(item.type); });
+                    var next = this.pantypeOptions.map(function (item) { return Number(item.value); }).find(function (type) {
+                        return used.indexOf(type) === -1;
+                    });
+                    if (next === undefined) {
+                        return this.$message.warning('已添加全部网盘类型');
+                    }
+                    cmd.pan_filters.push({ type: next, count: 5 });
+                },
+                remotePanTypeDisabled: function (cmd, current, type) {
+                    type = Number(type);
+                    return (cmd.pan_filters || []).some(function (item) {
+                        return item !== current && Number(item.type) === type;
+                    });
+                },
+                normalizeRemotePanFilters: function (filters) {
+                    if (!Array.isArray(filters)) {
+                        return [];
+                    }
+                    var seen = {};
+                    return filters.map(function (item) {
+                        item = item || {};
+                        return { type: Number(item.type || 0), count: Number(item.count || 1) };
+                    }).filter(function (item) {
+                        if (item.type < 0 || item.type > 4 || item.count <= 0 || seen[item.type]) {
+                            return false;
+                        }
+                        seen[item.type] = true;
+                        return true;
+                    });
+                },
+                serializeRemoteSearchCommands: function () {
+                    return JSON.stringify(this.remoteSearchCommands.map(function (item) {
+                        var trigger = String(item.trigger || item.command || '').trim();
+                        return {
+                            trigger: trigger,
+                            command: trigger,
+                            enabled: String(item.enabled === '0' ? '0' : '1'),
+                            pan_filters: this.normalizeRemotePanFilters(item.pan_filters || [])
+                        };
+                    }, this).filter(function (item) { return item.trigger !== ''; }));
+                },
+                formatApiLabel: function (item, index) {
+                    var typeMap = { '0': '夸克', '1': '阿里', '2': '百度', '3': 'UC', '4': '迅雷' };
+                    var pantype = typeMap[String(item.pantype)] || ('类型' + item.pantype);
+                    return (index + 1) + '. [' + pantype + '] ' + item.name;
+                },
+                getSearchApiList: function () {
+                    var that = this;
+                    that.loadedData.searchApiList = true;
+                    axios.post('/admin/open_ilink/getSearchApiList', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.searchApiList = res.data.data || [];
+                            } else {
+                                that.loadedData.searchApiList = false;
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.loadedData.searchApiList = false;
+                            that.$message.error('搜索接口获取失败');
+                            console.log(error);
+                        });
+                },
+                buildPostData: function () {
+                    var data = Object.assign({}, this.form);
+                    for (var key in this.numberForm) {
+                        data[key] = this.numberForm[key];
+                    }
+                    data.openilink_remote_api_ids = this.joinMultiValue(data.openilink_remote_api_ids);
+                    data.openilink_remote_search_commands = this.serializeRemoteSearchCommands();
+                    return Object.assign({}, PostBase, data);
+                },
+                saveConfig: function () {
+                    var that = this;
+                    that.loading = true;
+                    axios.post('/admin/open_ilink/updateConfig', that.buildPostData())
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.$message.success(res.data.message);
+                                that.getConfig();
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.loading = false;
+                        });
+                },
+                normalizeKeywordReplyRule: function (rule) {
+                    rule = rule || {};
+                    return {
+                        id: rule.id || rule.rule_id || '',
+                        keyword: rule.keyword || '',
+                        reply_content: rule.reply_content || rule.reply_text || rule.reply || '',
+                        sort: Number(rule.sort || 100)
+                    };
+                },
+                resetKeywordReplyForm: function () {
+                    this.keywordReplyForm = {
+                        id: '',
+                        keyword: '',
+                        reply_content: '',
+                        sort: 100
+                    };
+                },
+                openKeywordReplyDialog: function (row) {
+                    if (row) {
+                        this.keywordReplyDialogTitle = '编辑规则';
+                        this.keywordReplyForm = this.normalizeKeywordReplyRule(row);
+                    } else {
+                        this.keywordReplyDialogTitle = '新增规则';
+                        this.resetKeywordReplyForm();
+                    }
+                    this.keywordReplyDialogVisible = true;
+                },
+                getKeywordReplyRules: function () {
+                    var that = this;
+                    that.loadedData.keywordReplyRules = true;
+                    that.keywordReplyLoading = true;
+                    axios.post('/admin/open_ilink/getKeywordReplyRules', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                var data = res.data.data || [];
+                                if (data.data && Array.isArray(data.data)) {
+                                    data = data.data;
+                                }
+                                that.keywordReplyRules = (Array.isArray(data) ? data : []).map(function (item) {
+                                    return that.normalizeKeywordReplyRule(item);
+                                });
+                            } else {
+                                that.loadedData.keywordReplyRules = false;
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.loadedData.keywordReplyRules = false;
+                            that.$message.error('关键词回复规则获取失败');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.keywordReplyLoading = false;
+                        });
+                },
+                saveKeywordReplyRule: function () {
+                    var that = this;
+                    var form = Object.assign({}, that.keywordReplyForm);
+                    form.keyword = String(form.keyword || '').trim();
+                    form.reply_content = String(form.reply_content || '').trim();
+                    form.sort = Number(form.sort || 100);
+                    if (!form.keyword) {
+                        return that.$message.error('关键词必须填写');
+                    }
+                    if (!form.reply_content) {
+                        return that.$message.error('回复内容必须填写');
+                    }
+                    that.keywordReplySaving = true;
+                    axios.post('/admin/open_ilink/saveKeywordReplyRule', Object.assign({}, PostBase, form))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.$message.success(res.data.message);
+                                that.keywordReplyDialogVisible = false;
+                                that.getKeywordReplyRules();
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('关键词回复规则保存失败');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.keywordReplySaving = false;
+                        });
+                },
+                deleteKeywordReplyRule: function (row) {
+                    var that = this;
+                    that.$confirm('确认删除该关键词回复规则吗？', '删除确认', {
+                        confirmButtonText: '确认删除',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        axios.post('/admin/open_ilink/deleteKeywordReplyRule', Object.assign({}, PostBase, {
+                            id: row.id || row.rule_id
+                        }))
+                            .then(function (res) {
+                                if (res.data.code == 200) {
+                                    that.$message.success(res.data.message);
+                                    that.getKeywordReplyRules();
+                                } else {
+                                    that.$message.error(res.data.message);
+                                }
+                            })
+                            .catch(function (error) {
+                                that.$message.error('关键词回复规则删除失败');
+                                console.log(error);
+                            });
+                    }).catch(function () {});
+                },
+                getMessageLogs: function (page) {
+                    var that = this;
+                    that.loadedData.messageLogs = true;
+                    that.logSearch.page = page || 1;
+                    axios.post('/admin/open_ilink/getMessageLogList', Object.assign({}, PostBase, that.logSearch))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.logList = res.data.data || { data: [], total: 0 };
+                            } else {
+                                that.loadedData.messageLogs = false;
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.loadedData.messageLogs = false;
+                            that.$message.error('消息日志获取失败');
+                            console.log(error);
+                        });
+                },
+                resetLogSearch: function () {
+                    this.logSearch.keyword = '';
+                    this.logSearch.status = '';
+                    this.logSearch.direction = '';
+                    this.getMessageLogs(1);
+                },
+                getConversationList: function (page) {
+                    var that = this;
+                    that.loadedData.conversationList = true;
+                    that.conversationSearch.page = page || 1;
+                    that.conversationLoading = true;
+                    axios.post('/admin/open_ilink/getConversationList', Object.assign({}, PostBase, {
+                        page: that.conversationSearch.page,
+                        per_page: that.conversationSearch.per_page,
+                        keyword: that.conversationSearch.keyword
+                    }))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.conversationList = res.data.data || { data: [], total: 0 };
+                                if (!that.currentSenderId && that.conversationList.data && that.conversationList.data.length) {
+                                    that.selectConversation(that.conversationList.data[0]);
+                                }
+                            } else {
+                                that.loadedData.conversationList = false;
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.loadedData.conversationList = false;
+                            that.$message.error('会话列表获取失败');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.conversationLoading = false;
+                        });
+                },
+                selectConversation: function (item) {
+                    this.currentSenderId = item.sender_id || '';
+                    this.conversationReply.text = '';
+                    this.getConversationMessages();
+                },
+                conversationCanSend: function () {
+                    return this.conversationCanSendState;
+                },
+                getConversationMessages: function () {
+                    var that = this;
+                    if (!that.currentSenderId) {
+                        that.conversationMessages = [];
+                        return;
+                    }
+                    that.conversationMessagesLoading = true;
+                    axios.post('/admin/open_ilink/getConversationMessages', Object.assign({}, PostBase, {
+                        sender_id: that.currentSenderId,
+                        limit: 120
+                    }))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                var data = res.data.data || {};
+                                if (Array.isArray(data)) {
+                                    that.conversationMessages = data;
+                                    that.conversationCanSendState = false;
+                                    that.conversationSendDisabledReason = '最近会话已超过 24 小时，需要用户先发送一条消息进行激活';
+                                } else {
+                                    that.conversationMessages = data.messages || [];
+                                    that.conversationCanSendState = !!data.can_send;
+                                    that.conversationSendDisabledReason = data.send_disabled_reason || '最近会话已超过 24 小时，需要用户先发送一条消息进行激活';
+                                }
+                                that.scrollChatToBottom();
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('会话消息获取失败');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.conversationMessagesLoading = false;
+                        });
+                },
+                sendConversationMessage: function () {
+                    var that = this;
+                    var text = that.conversationReply.text.trim();
+                    if (!that.currentSenderId || !text) {
+                        return;
+                    }
+                    if (!that.conversationCanSend()) {
+                        return that.$message.warning('最近会话已超过 24 小时，需要用户先发送一条消息进行激活');
+                    }
+                    that.conversationReply.loading = true;
+                    axios.post('/admin/open_ilink/sendConversationMessage', Object.assign({}, PostBase, {
+                        sender_id: that.currentSenderId,
+                        text: text
+                    }))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.$message.success(res.data.message);
+                                that.conversationReply.text = '';
+                                that.getConversationMessages();
+                                that.getConversationList(that.conversationSearch.page);
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('消息发送失败');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.conversationReply.loading = false;
+                        });
+                },
+                shortSender: function (senderId) {
+                    senderId = String(senderId || '');
+                    if (senderId.length <= 18) {
+                        return senderId || '未知用户';
+                    }
+                    return senderId.slice(0, 10) + '...' + senderId.slice(-6);
+                },
+                conversationPreview: function (item) {
+                    var text = item.last_message || item.last_reply || '';
+                    text = String(text).replace(/\s+/g, ' ').trim();
+                    return text || '暂无摘要';
+                },
+                formatTimestamp: function (value) {
+                    return this.formatTime({}, {}, value);
+                },
+                messageText: function (msg) {
+                    if (msg.direction === 'in') {
+                        return msg.message_text || '';
+                    }
+                    if (msg.status === 'failed' && msg.error_message) {
+                        return msg.error_message;
+                    }
+                    return msg.message_text || msg.reply_text || msg.error_message || '';
+                },
+                scrollChatToBottom: function () {
+                    this.$nextTick(function () {
+                        var el = this.$refs.chatWindow;
+                        if (el) {
+                            el.scrollTop = el.scrollHeight;
+                        }
+                    });
+                },
+                renderMessageContent: function (msg) {
+                    var text = this.messageText(msg);
+                    if (msg.direction !== 'out') {
+                        return this.escapeHtml(text).replace(/\n/g, '<br>');
+                    }
+                    return this.renderSafeMarkdown(text);
+                },
+                renderSafeMarkdown: function (text) {
+                    var html = this.escapeHtml(text);
+                    html = html.replace(/\\([_\[\]()*`])/g, '$1');
+                    html = html.replace(/^---$/gm, '<hr>');
+                    html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+                    html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+                    html = html.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, function (match, label, url) {
+                        return '<a href="' + url.replace(/&amp;/g, '&') + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+                    });
+                    return html.replace(/\n/g, '<br>');
+                },
+                escapeHtml: function (text) {
+                    return String(text || '').replace(/[&<>"']/g, function (ch) {
+                        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+                    });
+                },
+                messageClass: function (msg) {
+                    return {
+                        'from-user': msg.direction === 'in',
+                        'from-bot': msg.direction === 'out',
+                        'from-system': msg.direction === 'system',
+                        'failed': msg.status === 'failed'
+                    };
+                },
+                directionLabel: function (direction) {
+                    var map = { in: '用户', out: '机器人', system: '系统' };
+                    return map[direction] || direction || '';
+                },
+                statusLabel: function (status) {
+                    var map = { received: '已收到', replied: '已回复', sent: '已发送', skipped: '已跳过', failed: '失败' };
+                    return map[status] || status || '';
+                },
+                testAiReply: function () {
+                    var that = this;
+                    if (!that.aiTest.message) {
+                        return that.$message.error('测试消息必须填写');
+                    }
+                    that.aiTest.loading = true;
+                    that.aiTest.reply = '';
+                    axios.post('/admin/open_ilink/testAiReply', Object.assign({}, PostBase, {
+                        message: that.aiTest.message
+                    }))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.aiTest.reply = res.data.data.reply || '';
+                                that.$message.success(res.data.message);
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        })
+                        .then(function () {
+                            that.aiTest.loading = false;
+                        });
+                },
+                getBroadcastStats: function () {
+                    var that = this;
+                    that.loadedData.broadcastStats = true;
+                    axios.post('/admin/open_ilink/getBroadcastStats', Object.assign({}, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.broadcastStats = res.data.data || { total: 0, can_send: 0, expired: 0 };
+                            } else {
+                                that.loadedData.broadcastStats = false;
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.loadedData.broadcastStats = false;
+                            that.$message.error('群发统计获取失败');
+                            console.log(error);
+                        });
+                },
+                sendBroadcastMessage: function () {
+                    var that = this;
+                    var text = that.broadcastForm.text.trim();
+                    if (!text) {
+                        return that.$message.error('群发内容不能为空');
+                    }
+                    if (!that.broadcastStats.can_send) {
+                        return that.$message.warning('最近 24 小时内没有可发送的会话');
+                    }
+                    that.$confirm('将向 ' + that.broadcastStats.can_send + ' 个最近 24 小时内可发送的用户群发消息，是否继续？', '确认群发', {
+                        confirmButtonText: '确认发送',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(function () {
+                        that.broadcastForm.loading = true;
+                        that.broadcastResult = '';
+                        axios.post('/admin/open_ilink/sendBroadcastMessage', Object.assign({}, PostBase, {
+                            text: text
+                        }))
+                            .then(function (res) {
+                                if (res.data.code == 200) {
+                                    var data = res.data.data || {};
+                                    that.broadcastResult = '可发送 ' + (data.total || 0) + ' 人，成功 ' + (data.sent || 0) + ' 人，失败 ' + (data.failed || 0) + ' 人';
+                                    that.broadcastForm.text = '';
+                                    that.$message.success(res.data.message);
+                                    that.getBroadcastStats();
+                                    if (that.loadedData.messageLogs) {
+                                        that.getMessageLogs(1);
+                                    }
+                                    if (that.loadedData.conversationList) {
+                                        that.getConversationList(that.conversationSearch.page);
+                                        if (that.currentSenderId) {
+                                            that.getConversationMessages();
+                                        }
+                                    }
+                                } else {
+                                    that.$message.error(res.data.message);
+                                }
+                            })
+                            .catch(function (error) {
+                                that.$message.error('群发消息失败');
+                                console.log(error);
+                            })
+                            .then(function () {
+                                that.broadcastForm.loading = false;
+                            });
+                    }).catch(function () {});
+                }
+            }
+        })
+    </script>
+</head>
+</html>

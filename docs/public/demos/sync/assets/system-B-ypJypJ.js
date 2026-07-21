@@ -1,0 +1,6 @@
+import{U as c,r as o,x as a}from"./index-CsIU4Bnl.js";import{a as l,u}from"./settings-B7EEQNdm.js";import{c as f}from"./createLucideIcon-BhQj-ilL.js";const p=c("settings",()=>{const t=o(null),e=o(!1);async function r(){e.value=!0;try{t.value=await l()}catch(s){throw console.error("Fetch settings failed:",s),s}finally{e.value=!1}}async function i(s){e.value=!0;try{const n=await u(s);return await r(),n}catch(n){throw console.error("Update settings failed:",n),n}finally{e.value=!1}}return{settings:t,loading:e,fetchSettings:r,updateSettings:i}});/**
+ * @license lucide-vue-next v0.556.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const w=f("copy",[["rect",{width:"14",height:"14",x:"8",y:"8",rx:"2",ry:"2",key:"17jyea"}],["path",{d:"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",key:"zix9uf"}]]);async function m(){const{data:t}=await a.get("/system/version");return t}async function h(){const{data:t}=await a.get("/system/upload-traffic");return t}async function S(){await a.post("/system/reset-upload-traffic")}async function v(){const{data:t}=await a.get("/system/logs");return t.files}async function x(t){return(await a.get("/system/logs/download",{params:{file:t},responseType:"blob"})).data}export{w as C,v as a,m as b,x as d,h as g,S as r,p as u};

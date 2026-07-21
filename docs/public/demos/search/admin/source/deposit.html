@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none';">
+    <title>账号管理</title>
+    <style>
+        textarea {
+            height: 300px;
+        }
+    </style>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- import CSS -->
+<link rel="stylesheet" href="/demos/search/assets/admin/css/element.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/YAdmin.css?v=3.137">
+<link rel="stylesheet" href="/demos/search/assets/admin/css/theme-modern.css?v=3.137">
+<link rel="icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+<link rel="shortcut icon" href="/demos/search/assets/admin/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <input id="qfadmin-mobile-nav-toggle" class="qfadmin-mobile-nav-control" type="checkbox" tabindex="-1" aria-hidden="true">
+        <el-container>
+            <el-header>
+                <div class="qfadmin-mobile-header-brand">
+                    <button type="button" class="qfadmin-mobile-menu-button" aria-label="打开后台菜单"
+                        aria-controls="qfadmin-mobile-nav" aria-expanded="false" onclick="setQfadminMobileNav(true, false)">
+                        <i class="el-icon-menu"></i>
+                    </button>
+                    <a class="qfadmin-mobile-logo" href="/demos/search/admin.html">
+                        <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+                        <span>Panbox Search</span>
+                    </a>
+                </div>
+                <el-col class="qfadmin-top-menu" style="width: auto;">
+                    <el-menu class="el-menu-vertical" text-color="#333333" :default-active="'108'" unique-opened
+                        style="border:none;" mode="horizontal" active-text-color="#333333">
+                                                    <el-menu-item index="1"
+                                onclick="location.href='/demos/search/admin.html';" >
+                                <i class="el-icon-house"></i> 概况                            </el-menu-item>
+                                                                                                    <el-menu-item index="108"
+                            onclick="location.href='/demos/search/admin/source/index.html';" >
+                            <i class="el-icon-files"></i> 资源                        </el-menu-item>
+                                                                        <el-menu-item index="3"
+                            onclick="location.href='/demos/search/admin/conf/base.html';" >
+                            <i class="el-icon-data-board"></i> 系统                        </el-menu-item>
+                                                                                                                    </el-menu>
+                </el-col>
+
+                <el-col class="qfadmin-header-user" style="width: 240px;float: right;">
+                    <span class="topArea">
+                        <el-link :underline="false" class="el-icon-full-screen menuicon" onclick="requestFullScreen()"></el-link>
+                        <!-- <el-link :underline="false" class="el-icon-brush menuicon"></el-link> -->
+                        <el-dropdown trigger="click" @visible-change="onHeaderUserDropdownVisible">
+                            <el-link :underline="false">&nbsp;演示用户<i class="el-icon-arrow-down"></i></el-link>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item disabled>套餐：pro</el-dropdown-item>
+                                <el-dropdown-item disabled>实例绑定：演示用户</el-dropdown-item>
+                                <el-dropdown-item divided disabled>我的邀请码：{{ headerInviteInfo.invite_code || '暂无' }}</el-dropdown-item>
+                                <el-dropdown-item disabled>已邀请人数：{{ headerInviteInfo.invited_count || 0 }}</el-dropdown-item>
+                                <el-dropdown-item disabled>
+                                    <div>已邀请用户：</div>
+                                    <div v-if="headerInviteInfoLoading">加载中...</div>
+                                    <template v-else-if="headerInviteInfo.invited_users && headerInviteInfo.invited_users.length">
+                                        <div v-for="(item, index) in headerInviteInfo.invited_users.slice(0, 5)" :key="(item.id || item.email || item.username || 'user') + '-' + index">
+                                            {{ item.username || item.email || ('用户' + (index + 1)) }}
+                                        </div>
+                                    </template>
+                                    <div v-else>暂无</div>
+                                </el-dropdown-item>
+                                <el-dropdown-item divided onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">修改密码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">兑换激活码
+                                </el-dropdown-item>
+                                <el-dropdown-item onclick="window.__panboxDemoMessage('演示模式：账号与系统操作已禁用')">清除缓存
+                                </el-dropdown-item>
+                                <el-dropdown-item divided :disabled="instanceOwnerUnbinding" @click.native="unbindInstanceOwner">
+                                    <i class="el-icon-unlock"></i>{{ instanceOwnerUnbinding ? '解绑中...' : '解除实例绑定' }}
+                                </el-dropdown-item>
+                                <el-dropdown-item  onclick="window.__panboxDemoMessage('演示模式：不会退出真实账号')">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </span>
+                </el-col>
+            </el-header>
+            <!-- License 未激活提醒 -->
+            
+            <!-- License 试用提醒（Trial） -->
+            
+            <!-- License 宽限期提醒 -->
+            
+            <!-- License 过期提醒（剩余 0-7 天时显示） -->
+                        <el-container class="body">
+                <el-aside width="212px">
+    <a class="titlehome" href="/demos/search/admin.html">
+        <img src="/demos/search/assets/admin/images/logo.png" alt="" aria-hidden="true" />
+        <span>Panbox Search</span>
+    </a>
+    <el-menu class="el-menu-vertical-demo" text-color="#333333" default-active="'108-112'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" class="is-active" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                                <div style="height: 120px;"></div>
+    </el-menu>
+    <div class="version">Panbox Search<br> Version 3.137</div>
+</el-aside>
+<button type="button" class="qfadmin-mobile-nav-mask" tabindex="-1" aria-label="关闭后台菜单"
+    onclick="setQfadminMobileNav(false, true)"></button>
+<nav id="qfadmin-mobile-nav" class="qfadmin-mobile-nav" aria-label="移动端后台菜单" aria-hidden="true">
+    <div class="qfadmin-mobile-nav__head">
+        <a class="qfadmin-mobile-nav__brand" href="/demos/search/admin.html">
+            <img src="/demos/search/assets/admin/images/logo.png" alt="Panbox Search">
+            <span>Panbox Search</span>
+        </a>
+        <button type="button" class="qfadmin-mobile-nav__close" aria-label="关闭后台菜单"
+            onclick="setQfadminMobileNav(false, true)">
+            <i class="el-icon-close"></i>
+        </button>
+    </div>
+    <el-menu class="el-menu-vertical-demo qfadmin-mobile-menu" text-color="#333333" default-active="'108-112'"
+        :collapse="false" :default-openeds="['108']">
+                <el-menu-item index="mobile-109"
+            onclick="location.href='/demos/search/admin/source/index.html';" >
+            <i class="el-icon-folder-opened" ></i>
+            资源管理        </el-menu-item>
+                                <el-menu-item index="mobile-127"
+            onclick="location.href='/demos/search/admin/source/hot.html';" >
+            <i class="el-icon-star-on" ></i>
+            热门资源        </el-menu-item>
+                                <el-menu-item index="mobile-118"
+            onclick="location.href='/demos/search/admin/source/category.html';" >
+            <i class="el-icon-s-operation" ></i>
+            分类管理        </el-menu-item>
+                                <el-menu-item index="mobile-105"
+            onclick="location.href='/demos/search/admin/attach/index.html';" >
+            <i class="el-icon-connection" ></i>
+            附件管理        </el-menu-item>
+                                <el-menu-item index="mobile-112"
+            onclick="location.href='/demos/search/admin/source/deposit.html';" class="is-active" >
+            <i class="el-icon-crop" ></i>
+            账号管理        </el-menu-item>
+                                <el-menu-item index="mobile-124"
+            onclick="location.href='/demos/search/admin/source/detect.html';" >
+            <i class="el-icon-finished" ></i>
+            资源检测        </el-menu-item>
+                                <el-menu-item index="mobile-119"
+            onclick="location.href='/demos/search/admin/source/apilist.html';" >
+            <i class="el-icon-link" ></i>
+            接口配置        </el-menu-item>
+                                <el-menu-item index="mobile-122"
+            onclick="location.href='/demos/search/admin/api/index.html';" >
+            <i class="el-icon-key" ></i>
+            外部 API        </el-menu-item>
+                                <el-menu-item index="mobile-123"
+            onclick="location.href='/demos/search/admin/openilink/clawbot.html';" >
+            <i class="el-icon-chat-dot-round" ></i>
+            微信机器人        </el-menu-item>
+                                <el-menu-item index="mobile-129"
+            onclick="location.href='/demos/search/admin/botconfig/index.html';" >
+            <i class="el-icon-cpu" ></i>
+            元器机器人        </el-menu-item>
+                                <el-menu-item index="mobile-113"
+            onclick="location.href='/demos/search/admin/source/log.html';" >
+            <i class="el-icon-discover" ></i>
+            资源日志        </el-menu-item>
+                                <el-menu-item index="mobile-114"
+            onclick="location.href='/demos/search/admin/source/feedback.html';" >
+            <i class="el-icon-edit" ></i>
+            用户需求        </el-menu-item>
+                            </el-menu>
+    <div class="qfadmin-mobile-nav__version">Version 3.137</div>
+</nav>
+
+                <el-main>
+                    <div class="qfadmin-view qfadmin-view--source-deposit">
+                                                <header class="qfadmin-view__header">
+                                                        <h1>账号管理</h1>
+                                                    </header>
+                        
+    <el-card class="box-card" shadow="never">
+        <el-tabs v-model="activeName">
+            <el-tab-pane label="夸克网盘" name="0">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>夸克网盘</span>
+                    </div>
+                    <div style="font-size:14px;color:#666;">
+                        <el-form :model="form">
+                            <el-form-item label="设置cookie">
+                                <el-input style="width: 100%;" v-model="form.quark_cookie" placeholder="请输入">
+                                    <el-button slot="prepend" @click="getFile(0)">账号检测</el-button>
+                                </el-input>
+                                <span class="f_tips">cookie修改后，请保存后再选择转存目录和检测</span>
+                            </el-form-item>
+                            <el-form-item label="默认转存目录">
+                                <el-input style="width: 100%" v-model="form.quark_file" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.quark_file" :props="quark_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="临时资源目录">
+                                <el-input style="width: 100%" v-model="form.quark_file_time" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.quark_file_time" :props="quark_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit">保存</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-card>
+            </el-tab-pane>
+            <el-tab-pane label="阿里云盘" name="1">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>阿里云盘</span>
+                    </div>
+                    <div style="font-size:14px;color:#666;">
+                        <el-form :model="form">
+                            <el-form-item label="设置Token">
+                                <el-input style="width: 100%;" v-model="form.Authorization" placeholder="请输入">
+                                    <el-button slot="prepend" @click="getFile(1)">账号检测</el-button>
+                                </el-input>
+                                <span class="f_tips">token修改后，请保存后再选择转存目录和检测</span>
+                            </el-form-item>
+                            <el-form-item label="默认转存目录">
+                                <el-input style="width: 100%" v-model="form.ali_file" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.ali_file" :props="ali_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="临时资源目录">
+                                <el-input style="width: 100%" v-model="form.ali_file_time" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.ali_file_time" :props="ali_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit">保存</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <p>Tips：转存目录不能为空，为空将无法转存; <font color=orangered>阿里网盘禁止香港及海外服务器调用分享接口</font>
+                        </p>
+                    </div>
+                </el-card>
+            </el-tab-pane>
+            <el-tab-pane label="百度网盘" name="2">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>百度网盘</span>
+                    </div>
+                    <div style="font-size:14px;color:#666;">
+                        <el-form :model="form">
+                            <el-form-item label="设置cookie">
+                                <el-input style="width: 100%;" v-model="form.baidu_cookie" placeholder="请输入">
+                                    <el-button slot="prepend" @click="getFile(2)">账号检测</el-button>
+                                </el-input>
+                                <span class="f_tips">cookie修改后，请保存后再选择转存目录和检测</span>
+                            </el-form-item>
+                            <el-form-item label="默认转存目录">
+                                <el-input style="width: 100%;" v-model="form.baidu_file" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.baidu_file" :props="baidu_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="临时资源目录">
+                                <el-input style="width: 100%;" v-model="form.baidu_file_time" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.baidu_file_time" :props="baidu_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit">保存</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-card>
+            </el-tab-pane>
+            <el-tab-pane label="UC网盘" name="3">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>UC网盘</span>
+                    </div>
+                    <div style="font-size:14px;color:#666;">
+                        <el-form :model="form">
+                            <el-form-item label="设置cookie">
+                                <el-input style="width: 100%;" v-model="form.uc_cookie" placeholder="请输入">
+                                    <el-button slot="prepend" @click="getFile(3)">账号检测</el-button>
+                                </el-input>
+                                <span class="f_tips">cookie修改后，请保存后再选择转存目录和检测</span>
+                            </el-form-item>
+                            <el-form-item label="默认转存目录">
+                                <el-input style="width: 100%" v-model="form.uc_file" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.uc_file" :props="uc_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="临时资源目录">
+                                <el-input style="width: 100%" v-model="form.uc_file_time" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.uc_file_time" :props="uc_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit">保存</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-card>
+            </el-tab-pane>
+            <el-tab-pane label="迅雷云盘" name="4">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>迅雷云盘</span>
+                    </div>
+                    <div style="font-size:14px;color:#666;">
+                        <el-form :model="form">
+                            <el-form-item label="设置refresh_token">
+                                <el-input style="width: 100%;" v-model="form.xunlei_cookie" placeholder="请输入">
+                                    <el-button slot="prepend" @click="getFile(4)">账号检测</el-button>
+                                </el-input>
+                                <span class="f_tips">refresh_token修改后，请保存后再选择转存目录和检测，如何获取看文档吧</span>
+                            </el-form-item>
+                            <el-form-item label="默认转存目录">
+                                <el-input style="width: 100%" v-model="form.xunlei_file" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.xunlei_file" :props="xunlei_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="临时资源目录">
+                                <el-input style="width: 100%" v-model="form.xunlei_file_time" placeholder="请输入或选择">
+                                    <div slot="prepend" style="position: relative;">
+                                        <p>请选择</p>
+                                        <el-cascader style="opacity: 0; height: 38px; position: absolute;inset: 0;"
+                                            v-model="form.xunlei_file_time" :props="xunlei_props"></el-cascader>
+                                    </div>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit">保存</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-card>
+            </el-tab-pane>
+        </el-tabs>
+    </el-card>
+    </div>
+</el-main>
+</el-container>
+</el-container>
+<Uploads ref="upload"></Uploads>
+<Goodslists ref="goodslist"></Goodslists>
+</div>
+<script>
+    window.setQfadminMobileNav = function (open, restoreFocus) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        var trigger = document.querySelector('.qfadmin-mobile-menu-button');
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        var background = document.querySelectorAll('.el-header, .body > .el-main, .body > .el-aside, #app > .el-container > .el-alert');
+        if (!control) {
+            return;
+        }
+        control.checked = Boolean(open);
+        document.body.classList.toggle('qfadmin-mobile-nav-open', Boolean(open));
+        background.forEach(function (element) {
+            element.inert = Boolean(open);
+        });
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (nav) {
+            nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+            nav.inert = !Boolean(open);
+            nav.querySelectorAll('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title').forEach(function (item) {
+                item.tabIndex = open ? 0 : -1;
+            });
+            if (open) {
+                var closeButton = nav.querySelector('.qfadmin-mobile-nav__close');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+        }
+        if (!open && restoreFocus && trigger) {
+            trigger.focus();
+        }
+    };
+    window.setQfadminMobileNav(false, false);
+    document.addEventListener('keydown', function (event) {
+        var control = document.getElementById('qfadmin-mobile-nav-toggle');
+        if (!control || !control.checked) {
+            return;
+        }
+        var nav = document.getElementById('qfadmin-mobile-nav');
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.setQfadminMobileNav(false, true);
+            return;
+        }
+        var menuItem = event.target.closest && event.target.closest('.qfadmin-mobile-menu .el-menu-item, .qfadmin-mobile-menu .el-submenu__title');
+        if (menuItem && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            menuItem.click();
+            return;
+        }
+        if (event.key === 'Tab' && nav) {
+            var focusable = Array.prototype.filter.call(
+                nav.querySelectorAll('a[href], button:not([disabled]), .el-menu-item[tabindex="0"], .el-submenu__title[tabindex="0"]'),
+                function (element) { return element.getClientRects().length > 0; }
+            );
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) {
+            window.setQfadminMobileNav(false, false);
+        }
+    });
+</script>
+</body>
+<template id="Upload">
+    <el-dialog title="图片库" :visible.sync="visible" :modal-append-to-body='false' append-to-body :close-on-click-modal="false"
+        width="725px">
+        <div class="upload-boxs">
+            <label class="upload-native upload-right" v-loading.fullscreen.lock="fullscreenLoading">
+                <span class="el-button el-button--primary el-button--small">
+                    <i class="el-icon-upload"></i>
+                    <span>上传图片</span>
+                </span>
+                <input ref="imageUploadInput" class="upload-native-input" type="file" accept="image/jpeg,image/png" @change="handleNativeUploadChange">
+            </label>
+        </div>
+        <ul class="storage-list">
+            <li :class="item.select?'active':''" v-for="(item, index) in dataList.data" :key="index" @click="select(index)">
+                <el-image fit="contain" :src="item.attach_path"></el-image>
+                <p>{{item.attach_name}}</p>
+            </li>
+        </ul>
+        <p v-if="dataList.data&&dataList.data.length==0" style="text-align: center;">暂无资源</p>
+        <el-pagination @current-change="changeCurrentPage" layout="prev, pager, next" :current-page="dataList.current_page"
+            :page-count="dataList.last_page" hide-on-single-page background>
+        </el-pagination>
+        <div slot="footer" class="dialog-footer">
+            <div style="float: left; font-size: 13px;">
+                <span v-if="multiple">
+                    当前已选 <span style="color: #F56C6C;">{{selectList.length+selected_num}}</span> 个，最多允许选择 <span
+                        style="color: #F56C6C;">{{total_num}}</span> 个资源
+                </span>
+                <span v-else>当前已选 <span style="color: #F56C6C;">{{selectList.length}}</span> 个资源</span>
+            </div>
+            <el-button @click="visible = false" size="small">取消</el-button>
+            <el-button type="primary" @click="save" size="small">确定</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+
+<template id="Single">
+    <div class="slectimg" v-if="multiple">
+        <block v-if="value.length>0">
+            <draggable v-model="value" chosenClass="chosen" forceFallback="true" animation="600" @start="onStart"
+                @end="onEnd">
+                <transition-group>
+                    <div class="imgs" v-for="(v, s) in value" :key="s" style="cursor: all-scroll;">
+                        <el-image fit="contain" :src="v" :preview-src-list="value" :z-index="s"></el-image>
+                        <!-- <el-image fit="contain" :src="v" ></el-image> -->
+                        <i class="close el-icon-error" @click="deles(s)"></i>
+                    </div>
+                </transition-group>
+            </draggable>
+        </block>
+        <div class="noimg" @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+    <div class="slectimg" v-else>
+        <div class="imgs" v-if="value.length>0">
+            <el-image fit="contain" :src="value" :preview-src-list="[value]"></el-image>
+            <i class="close el-icon-error" @click="deles()"></i>
+        </div>
+        <div class="noimg" v-else @click="selectimg()">
+            <i class="el-icon-plus"></i>
+        </div>
+    </div>
+</template>
+
+<template id="Ueditor">
+    <Ueditors v-model="value" ref="Ueditor" :config="config"></Ueditors>
+</template>
+
+
+<template id="skuforms">
+    <div>
+        <div style="padding-bottom: 10px;">
+            <el-input style="width: 120px;" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small"
+                @keyup.enter.native="handleInputConfirm" placeholder="回车确定">
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput" style="width: 120px;">+添加规格组</el-button>
+        </div>
+        <sku-form :source-attribute="sourceAttribute" :attribute.sync="attribute" :structure="structure" :sku.sync="sku"
+            ref="skuForm"></sku-form>
+    </div>
+</template>
+
+
+<template id="Goodslist">
+    <el-dialog title="商品库" :before-close="handleClose" :visible.sync="visible" :modal-append-to-body='false' append-to-body
+        :close-on-click-modal="false" width="900px">
+        
+        <el-form :inline="true">
+            <div style="float:right">
+                <el-form-item style="width:100px; margin-bottom: 0;">
+                    <el-cascader v-model="search.classify" placeholder="商品分类" :options="categoryList" :props="cascaderProps"
+                        style="width: 100%;" filterable clearable size="small" :show-all-levels="false">
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-input placeholder="输入商品名称搜索" size="small" v-model="search.keyword" @keyup.enter.native="getList_search"
+                        clearable @clear="getList_search"></el-input>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 0;">
+                    <el-button type="primary" icon="el-icon-search" size="small" @click="getList_search" plain>搜索
+                    </el-button>
+                    <el-button icon="el-icon-refresh-left" size="small" @click="getList_search(0)" plain>重置</el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+
+        <el-table :data="dataList.data" ref="multipleTable" @selection-change="changeSelection" row-key="goods_id" reserve-selection="true" style="min-height: 425px;" v-loading="loading">
+            <el-table-column align="center" type="selection" reserve-selection="true"  width="55"></el-table-column>
+
+            <el-table-column label="商品" prop="goods_id" min-width="380">
+                <template slot-scope="scope">
+                    <el-image class="goods-image" style="width: 50px;height: 50px;" :src="scope.row.picture[0]" :preview-src-list="[scope.row.picture[0]]"
+                        fit="contain" lazy></el-image>
+
+                    <div class="goods-info cs-ml">
+                        <p class="action" style="overflow:hidden;text-overflow:ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">
+                            <span :title="scope.row.goods_name" class="link">{{scope.row.goods_name}}</span>
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="本店价" prop="goods_price">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span class="goods-shop-price">{{scope.row.goods_price}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="库存" prop="stock_total">
+                <template slot-scope="scope">
+                    <div class="action">
+                        <span>{{scope.row.stock_total}}</span>
+                    </div>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <p style="padding-bottom: 10px;">
+                <el-pagination :hide-on-single-page="true" layout="prev, pager, next" background :current-page="form.page" @current-change="changeCurrentPage" :page-size="5" :total="dataList.total">
+                </el-pagination>
+            </p>
+            <p>
+                <el-button @click="cancels" size="small">取消</el-button>
+                <el-button type="primary" @click="save" size="small">确定</el-button>
+            </p>
+        </div>
+    </el-dialog>
+</template>
+
+<script src="/demos/search/assets/admin/js/vue-2.6.10.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/axios.min.js?v=3.137"></script><script>window.__PANBOX_DEMO_ADMIN__={"state":{"activeName":"0","ali_props":{"checkStrictly":true,"emitPath":false,"lazy":true},"baidu_props":{"checkStrictly":true,"emitPath":false,"lazy":true},"configKeys":["quark_cookie","quark_file","quark_file_time","baidu_cookie","baidu_file","baidu_file_time","Authorization","ali_file","ali_file_time","uc_cookie","uc_file","uc_file_time","xunlei_cookie","xunlei_file","xunlei_file_time"],"form":{"Authorization":"","ali_file":"","ali_file_time":"","baidu_cookie":"","baidu_file":"","baidu_file_time":"","quark_cookie":"","quark_file":"","quark_file_time":"","uc_cookie":"","uc_file":"","uc_file_time":"","xunlei_cookie":"","xunlei_file":"","xunlei_file_time":""},"headerInviteInfo":{"invite_code":"PANBOX-DEMO","invited_count":3,"invited_users":[{"username":"演示用户 A"},{"username":"演示用户 B"}]},"headerInviteInfoLoaded":true,"headerInviteInfoLoading":false,"instanceOwnerUnbinding":false,"quark_files":[],"quark_props":{"checkStrictly":true,"emitPath":false,"lazy":true},"uc_props":{"checkStrictly":true,"emitPath":false,"lazy":true},"xunlei_props":{"checkStrictly":true,"emitPath":false,"lazy":true}},"responses":[{"data":{"code":200,"data":[{"conf_content":["MySQL 本地库=>mysql","Mongo yz-cms 只读库=>mongo_yzcms"],"conf_createtime":1780272000,"conf_desc":"默认使用 MySQL 本地资源库；选择 Mongo 并保存成功后将切换为 Mongo 只读资源库","conf_id":130,"conf_int":0,"conf_key":"resource_provider","conf_sort":1000,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"资源数据源","conf_type":14,"conf_updatetime":1780272000,"conf_value":"mysql"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"搜索限流总开关","conf_id":145,"conf_int":0,"conf_key":"search_guard_rate_enabled","conf_sort":1000,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"开启搜索限流","conf_type":12,"conf_updatetime":1780444800,"conf_value":"1"},{"conf_content":null,"conf_createtime":1714035639,"conf_desc":"出现这些词的资源，转存时删除；格式如：影视资源,年会员","conf_id":25,"conf_int":0,"conf_key":"quark_banned","conf_sort":999,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"广告词","conf_type":4,"conf_updatetime":1723795683,"conf_value":"失效,年会员,空间容量,微信,微信群,全网资源,影视资源,扫码,最新资源,公众号,IMG_,资源汇总,緑铯粢源,.url,网盘推广,大额优惠券,资源文档,dy8.xyz,妙妙屋,资源合集,kkdm"},{"conf_content":null,"conf_createtime":1725006679,"conf_desc":"","conf_id":30,"conf_int":0,"conf_key":"app_title","conf_sort":999,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"SEO标题","conf_type":9,"conf_updatetime":1725325013,"conf_value":""},{"conf_content":null,"conf_createtime":1725006403,"conf_desc":"网站关键词，有利于对整站的SEO优化","conf_id":29,"conf_int":0,"conf_key":"app_keywords","conf_sort":998,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"SEO关键词","conf_type":9,"conf_updatetime":1725411476,"conf_value":""},{"conf_content":null,"conf_createtime":1712451778,"conf_desc":"","conf_id":24,"conf_int":0,"conf_key":"app_description","conf_sort":996,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"SEO描述","conf_type":9,"conf_updatetime":1725411481,"conf_value":""},{"conf_content":null,"conf_createtime":1725325341,"conf_desc":"直接填写统计代码即可，如51LA： \u003cscript charset=\"UTF-8\" id=\"XXXXX\" src=\"//sdk.51.la/js-sdk-pro.min.js\">\u003c/script> \t\u003cscript>LA.init({id:\"XXXXX\",ck:\"XXXX\",hashMode:true})\u003c/script>","conf_id":42,"conf_int":0,"conf_key":"seo_statistics","conf_sort":995,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"统计代码","conf_type":9,"conf_updatetime":1725411486,"conf_value":""},{"conf_content":["启用=>1","关闭=>0"],"conf_createtime":1780272000,"conf_desc":"兼容旧版本配置；新版本由资源数据源自动维护","conf_id":131,"conf_int":0,"conf_key":"mongo_resource_enabled","conf_sort":990,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"Mongo 资源库兼容开关","conf_type":14,"conf_updatetime":1780272000,"conf_value":"0"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"同 IP 1 分钟超过 120 次后只返回缓存，兼容共享出口 IP","conf_id":146,"conf_int":0,"conf_key":"search_guard_ip_per_minute","conf_sort":990,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP 每分钟缓存模式阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"120"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"内置微信机器人总开关","conf_id":173,"conf_int":0,"conf_key":"openilink_clawbot_enabled","conf_sort":990,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"启用微信机器人","conf_type":13,"conf_updatetime":1777967000,"conf_value":"0"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"后台单聊人工发送消息前缀，为空则不拼接；发送时自动追加冒号","conf_id":121,"conf_int":0,"conf_key":"openilink_customer_message_prefix","conf_sort":985,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"客服消息前缀","conf_type":13,"conf_updatetime":1777967000,"conf_value":"【客服消息】"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"群发通知消息前缀，为空则不拼接；发送时自动追加冒号","conf_id":122,"conf_int":0,"conf_key":"openilink_broadcast_message_prefix","conf_sort":984,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"群发消息前缀","conf_type":13,"conf_updatetime":1777967000,"conf_value":"【通知消息】"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"同一 IP 新生成二维码的滑动统计窗口，单位秒","conf_id":165,"conf_int":0,"conf_key":"openilink_qrcode_ip_window_seconds","conf_sort":983,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"二维码 IP 统计窗口","conf_type":13,"conf_updatetime":1777967000,"conf_value":"600"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"同一 IP 在统计窗口内最多新生成二维码次数，已复用二维码不计数","conf_id":166,"conf_int":0,"conf_key":"openilink_qrcode_ip_max_attempts","conf_sort":982,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"二维码 IP 生成上限","conf_type":13,"conf_updatetime":1777967000,"conf_value":"20"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"同一浏览器访客在复用时间内最多新生成二维码次数，已复用二维码不计数","conf_id":167,"conf_int":0,"conf_key":"openilink_qrcode_visitor_max_attempts","conf_sort":981,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"二维码访客生成上限","conf_type":13,"conf_updatetime":1777967000,"conf_value":"3"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"仅填写主机名或 IP，不包含 mongodb:// 与账号密码","conf_id":132,"conf_int":0,"conf_key":"mongo_resource_host","conf_sort":980,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 地址","conf_type":14,"conf_updatetime":1780272000,"conf_value":""},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"同 visitor_id 1 分钟超过 10 次后只返回缓存","conf_id":147,"conf_int":0,"conf_key":"search_guard_visitor_per_minute","conf_sort":980,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同浏览器每分钟缓存模式阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"10"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"同一浏览器访客在该时间内优先复用未过期二维码，单位秒","conf_id":168,"conf_int":0,"conf_key":"openilink_qrcode_visitor_reuse_seconds","conf_sort":980,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"二维码访客复用时间","conf_type":13,"conf_updatetime":1777967000,"conf_value":"600"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"默认 27017","conf_id":133,"conf_int":0,"conf_key":"mongo_resource_port","conf_sort":970,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 端口","conf_type":14,"conf_updatetime":1780272000,"conf_value":"27017"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"防止重复刷同一关键词；默认值允许用户刷新和重试","conf_id":148,"conf_int":0,"conf_key":"search_guard_ip_keyword_30s","conf_sort":970,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP + 同关键词 30 秒上限","conf_type":12,"conf_updatetime":1780444800,"conf_value":"20"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"是否启用机器人关键词回复插件，默认关闭避免升级后拦截现有搜索","conf_id":125,"conf_int":0,"conf_key":"openilink_keyword_reply_enabled","conf_sort":960,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"启用关键词回复插件","conf_type":13,"conf_updatetime":1777967000,"conf_value":"0"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"无认证时留空","conf_id":134,"conf_int":0,"conf_key":"mongo_resource_username","conf_sort":960,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 用户名","conf_type":14,"conf_updatetime":1780272000,"conf_value":""},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"空 Referer 且空 visitor_id 1 分钟超过 30 次后只返回缓存","conf_id":149,"conf_int":0,"conf_key":"search_guard_empty_identity_per_minute","conf_sort":960,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"空身份每分钟缓存模式阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"30"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"直接判断消息开头，不处理分隔符；留空则默认匹配普通文本","conf_id":126,"conf_int":0,"conf_key":"openilink_keyword_reply_trigger","conf_sort":955,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"关键词回复前缀命令","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"空 Referer 且空 visitor_id 1 分钟超过 80 次后直接拒绝","conf_id":150,"conf_int":0,"conf_key":"search_guard_empty_identity_reject_per_minute","conf_sort":955,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"空身份每分钟拒绝阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"80"},{"conf_content":["完全匹配=>exact","包含匹配=>contains"],"conf_createtime":1777967000,"conf_desc":"关键词回复插件统一匹配方式","conf_id":129,"conf_int":0,"conf_key":"openilink_keyword_reply_match_mode","conf_sort":952,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"关键词回复匹配模式","conf_type":13,"conf_updatetime":1777967000,"conf_value":"exact"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"前缀命令优先；重复前缀允许，重复时按权重从大到小排序","conf_id":127,"conf_int":0,"conf_key":"openilink_keyword_reply_weight","conf_sort":950,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"关键词回复插件权重","conf_type":13,"conf_updatetime":1777967000,"conf_value":"150"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"保存后仅用于服务端连接，不会在错误信息中明文输出","conf_id":135,"conf_int":0,"conf_key":"mongo_resource_password","conf_sort":950,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 密码","conf_type":14,"conf_updatetime":1780272000,"conf_value":""},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"旧版评分字段兼容开关；简单规则体系默认关闭，仅作日志参考","conf_id":151,"conf_int":0,"conf_key":"search_guard_score_enabled","conf_sort":950,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"兼容风险评分","conf_type":12,"conf_updatetime":1780444800,"conf_value":"0"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"匹配并执行后停止后续插件","conf_id":128,"conf_int":0,"conf_key":"openilink_keyword_reply_interrupt","conf_sort":945,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"关键词回复打断后续插件","conf_type":13,"conf_updatetime":1777967000,"conf_value":"1"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"账号认证使用的 authSource，默认 admin","conf_id":136,"conf_int":0,"conf_key":"mongo_resource_auth_database","conf_sort":940,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 认证库","conf_type":14,"conf_updatetime":1780272000,"conf_value":"admin"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"旧版评分阈值兼容字段，仅作日志参考","conf_id":152,"conf_int":0,"conf_key":"search_guard_score_slowdown_threshold","conf_sort":940,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"兼容缓存模式阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"6"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"是否启用机器人资源搜索能力","conf_id":174,"conf_int":0,"conf_key":"openilink_search_enabled","conf_sort":940,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"启用资源搜索","conf_type":13,"conf_updatetime":1777967000,"conf_value":"1"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"yz-cms 资源所在数据库名","conf_id":137,"conf_int":0,"conf_key":"mongo_resource_database","conf_sort":930,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 数据库","conf_type":14,"conf_updatetime":1780272000,"conf_value":"yz_cms_db"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"旧版评分阈值兼容字段，仅作日志参考","conf_id":153,"conf_int":0,"conf_key":"search_guard_score_reject_threshold","conf_sort":930,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"兼容拒绝阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"10"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"留空则默认匹配普通文本","conf_id":175,"conf_int":0,"conf_key":"openilink_search_trigger","conf_sort":930,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"搜索触发词","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"yz-cms 资源集合名","conf_id":138,"conf_int":0,"conf_key":"mongo_resource_collection","conf_sort":920,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 集合","conf_type":14,"conf_updatetime":1780272000,"conf_value":"d_site_resource"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"旧版评分阈值兼容字段，仅作日志参考","conf_id":154,"conf_int":0,"conf_key":"search_guard_score_block_threshold","conf_sort":920,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"兼容封禁阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"20"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"多个能力同时匹配时，数值越大越优先","conf_id":176,"conf_int":0,"conf_key":"openilink_search_weight","conf_sort":920,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"搜索权重","conf_type":13,"conf_updatetime":1777967000,"conf_value":"100"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"搜索插件命中并执行后是否停止后续插件","conf_id":123,"conf_int":0,"conf_key":"openilink_search_interrupt","conf_sort":919,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"搜索插件打断后续插件","conf_type":13,"conf_updatetime":1777967000,"conf_value":"1"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"可选；填写后只读取 source 字段等于该值的资源","conf_id":139,"conf_int":0,"conf_key":"mongo_resource_source_filter","conf_sort":910,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo source 过滤","conf_type":14,"conf_updatetime":1780272000,"conf_value":""},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"自动封禁总开关；默认关闭，先记录和限流，避免共享 IP 误封普通用户","conf_id":155,"conf_int":0,"conf_key":"search_guard_auto_block_enabled","conf_sort":910,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"开启自动封禁","conf_type":12,"conf_updatetime":1780444800,"conf_value":"0"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"全网搜候选结果数量，范围 1-20","conf_id":177,"conf_int":0,"conf_key":"openilink_result_limit","conf_sort":910,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"搜索结果数量","conf_type":13,"conf_updatetime":1777967000,"conf_value":"5"},{"conf_content":null,"conf_createtime":1780272000,"conf_desc":"范围 500-10000，默认 1500","conf_id":140,"conf_int":0,"conf_key":"mongo_resource_timeout_ms","conf_sort":900,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Mongo 超时毫秒","conf_type":14,"conf_updatetime":1780272000,"conf_value":"1500"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"高频请求封禁；开启自动封禁后生效","conf_id":156,"conf_int":0,"conf_key":"search_guard_block_ip_1m_count","conf_sort":900,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP 1 分钟封禁阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"180"},{"conf_content":["夸克=>0","阿里=>1","百度=>2","UC=>3","迅雷=>4"],"conf_createtime":1777967000,"conf_desc":"复用系统 is_type 映射","conf_id":178,"conf_int":0,"conf_key":"openilink_default_pantype","conf_sort":900,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"默认网盘类型","conf_type":13,"conf_updatetime":1777967000,"conf_value":"0"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"同 IP 10 分钟达到 500 次后直接拒绝；自动封禁关闭时不写入黑名单","conf_id":157,"conf_int":0,"conf_key":"search_guard_block_ip_10m_count","conf_sort":890,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP 10 分钟拒绝阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"500"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"为空时按现有线路权重选择","conf_id":179,"conf_int":0,"conf_key":"openilink_default_line_id","conf_sort":890,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"默认线路 ID","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"本地搜索开始前发送的提示，支持 {keyword}/{title}","conf_id":106,"conf_int":0,"conf_key":"openilink_search_waiting_text","conf_sort":888,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"等待提示词","conf_type":13,"conf_updatetime":1777967000,"conf_value":"正在搜索【**{keyword}**】，请稍等"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"全网搜开始前发送的提示，支持 {keyword}/{title}","conf_id":107,"conf_int":0,"conf_key":"openilink_search_remote_waiting_text","conf_sort":887,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"全网搜提示词","conf_type":13,"conf_updatetime":1777967000,"conf_value":"正在进行全网搜索【**{keyword}**】，请稍等"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"用户选择全网搜候选后开始获取资源时发送的提示，支持 {keyword}/{title}","conf_id":108,"conf_int":0,"conf_key":"openilink_search_transfer_waiting_text","conf_sort":886,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"获取资源提示词","conf_type":13,"conf_updatetime":1777967000,"conf_value":"正在获取资源【{title}】"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"本地和全网搜均无结果时回复，支持 {keyword}/{title}","conf_id":109,"conf_int":0,"conf_key":"openilink_search_no_result_text","conf_sort":885,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"无结果提示","conf_type":13,"conf_updatetime":1777967000,"conf_value":"未找到与【{keyword}】相关的资源"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"搜索异常时回复，支持 {keyword}/{title}","conf_id":110,"conf_int":0,"conf_key":"openilink_search_error_text","conf_sort":884,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"搜索错误提示","conf_type":13,"conf_updatetime":1777967000,"conf_value":"搜索【{keyword}】时出现异常，请稍后重试"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"用户选择全网搜候选但转存失败时回复，支持 {keyword}/{title}","conf_id":111,"conf_int":0,"conf_key":"openilink_search_transfer_failed_text","conf_sort":883,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"全网搜转存失败提示词","conf_type":13,"conf_updatetime":1777967000,"conf_value":"【{title}】转存失败，请换一个资源试试"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"仅拼接到最终结果消息前，与正文用 --- 分隔","conf_id":112,"conf_int":0,"conf_key":"openilink_search_reply_prefix","conf_sort":882,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"最终回复前缀","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"仅拼接到最终结果消息后，与正文用 --- 分隔","conf_id":113,"conf_int":0,"conf_key":"openilink_search_reply_suffix","conf_sort":881,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"最终回复后缀","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"本地搜索最多返回数量，范围 1-20","conf_id":114,"conf_int":0,"conf_key":"openilink_local_result_limit","conf_sort":880,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"本地结果总数量","conf_type":13,"conf_updatetime":1777967000,"conf_value":"20"},{"conf_content":["精准搜索=>exact","模糊搜索=>fuzzy"],"conf_createtime":1777967000,"conf_desc":"机器人本地搜索使用精准或模糊模式，不使用分词搜索","conf_id":120,"conf_int":0,"conf_key":"openilink_local_search_mode","conf_sort":880,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"本地搜索模式","conf_type":13,"conf_updatetime":1777967000,"conf_value":"exact"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"采集型封禁；开启自动封禁后生效","conf_id":158,"conf_int":0,"conf_key":"search_guard_block_ip_10m_keyword_count","conf_sort":880,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP 10 分钟关键词数阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"200"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"是否启用机器人 AI 聊天能力","conf_id":180,"conf_int":0,"conf_key":"openilink_ai_enabled","conf_sort":880,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"启用 AI 聊天","conf_type":13,"conf_updatetime":1777967000,"conf_value":"1"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"全网搜候选最多返回数量，范围 1-20","conf_id":116,"conf_int":0,"conf_key":"openilink_remote_result_limit","conf_sort":877,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"全网搜结果数量","conf_type":13,"conf_updatetime":1777967000,"conf_value":"5"},{"conf_content":["夸克=>0","阿里=>1","百度=>2","UC=>3","迅雷=>4"],"conf_createtime":1777967000,"conf_desc":"全网搜允许的 is_type 列表；当前全网搜不支持阿里","conf_id":117,"conf_int":0,"conf_key":"openilink_remote_allowed_pantypes","conf_sort":876,"conf_spec":3,"conf_status":1,"conf_system":1,"conf_title":"全网搜允许网盘类型","conf_type":13,"conf_updatetime":1777967000,"conf_value":"0,2,3,4"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"全网搜每个网盘最多返回数量，范围 1-20","conf_id":118,"conf_int":0,"conf_key":"openilink_remote_per_pantype_limit","conf_sort":875,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"全网搜每个网盘数量","conf_type":13,"conf_updatetime":1777967000,"conf_value":"5"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"为空使用全部启用线路；多选时只使用指定线路","conf_id":119,"conf_int":0,"conf_key":"openilink_remote_api_ids","conf_sort":874,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"全网搜接口","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"机器人自定义全网搜命令列表，JSON 格式","conf_id":169,"conf_int":0,"conf_key":"openilink_remote_search_commands","conf_sort":873,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"全网搜命令配置","conf_type":13,"conf_updatetime":1777967000,"conf_value":"[{\"trigger\":\"搜更多\",\"pan_filters\":[{\"type\":0,\"count\":5},{\"type\":2,\"count\":5}]}]"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"本地搜索无结果时自动使用的全网搜命令","conf_id":170,"conf_int":0,"conf_key":"openilink_default_remote_search_command","conf_sort":872,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"默认全网搜命令","conf_type":13,"conf_updatetime":1777967000,"conf_value":"搜更多"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"用户直接发送全网搜命令但没有上一次搜索关键词时回复","conf_id":171,"conf_int":0,"conf_key":"openilink_search_no_last_keyword_text","conf_sort":871,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"无上次关键词提示","conf_type":13,"conf_updatetime":1777967000,"conf_value":"请先发送要搜索的内容，再发送全网搜命令"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"百分比；开启自动封禁后生效，默认仅拦截极端探测","conf_id":159,"conf_int":0,"conf_key":"search_guard_block_zero_result_rate","conf_sort":870,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP 10 分钟零结果率阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"95"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"留空则默认匹配普通文本","conf_id":181,"conf_int":0,"conf_key":"openilink_ai_trigger","conf_sort":870,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"AI 触发词","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"多个能力同时匹配时，数值越大越优先","conf_id":96,"conf_int":0,"conf_key":"openilink_ai_weight","conf_sort":860,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"AI 权重","conf_type":13,"conf_updatetime":1777967000,"conf_value":"50"},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"重复刷词封禁；开启自动封禁后生效","conf_id":160,"conf_int":0,"conf_key":"search_guard_block_ip_keyword_1m_count","conf_sort":860,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"同 IP + 同关键词 1 分钟阈值","conf_type":12,"conf_updatetime":1780444800,"conf_value":"50"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1777967000,"conf_desc":"AI 插件命中并执行后是否停止后续插件","conf_id":124,"conf_int":0,"conf_key":"openilink_ai_interrupt","conf_sort":859,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"AI 插件打断后续插件","conf_type":13,"conf_updatetime":1777967000,"conf_value":"1"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"OpenAI 兼容接口基础地址，不包含 /chat/completions","conf_id":97,"conf_int":0,"conf_key":"openilink_ai_base_url","conf_sort":850,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"AI Base URL","conf_type":13,"conf_updatetime":1777967000,"conf_value":"https://api.openai.com/v1"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"OpenAI 兼容接口密钥","conf_id":98,"conf_int":0,"conf_key":"openilink_ai_api_key","conf_sort":840,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"AI API Key","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"默认聊天模型","conf_id":99,"conf_int":0,"conf_key":"openilink_ai_model","conf_sort":830,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"AI 模型","conf_type":13,"conf_updatetime":1777967000,"conf_value":"gpt-4o-mini"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"范围 0-2","conf_id":100,"conf_int":0,"conf_key":"openilink_ai_temperature","conf_sort":820,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"AI 温度","conf_type":13,"conf_updatetime":1777967000,"conf_value":"0.7"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"单次回复最大输出 token","conf_id":101,"conf_int":0,"conf_key":"openilink_ai_max_tokens","conf_sort":810,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"AI 最大 Tokens","conf_type":13,"conf_updatetime":1777967000,"conf_value":""},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"机器人聊天的 system prompt","conf_id":102,"conf_int":0,"conf_key":"openilink_ai_system_prompt","conf_sort":800,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"AI 系统提示词","conf_type":13,"conf_updatetime":1777967000,"conf_value":"你是 Panbox Search 的微信搜索助手。回答要简洁、准确；用户需要资源时，引导其发送搜索关键词。"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"AI 聊天保留上下文轮数","conf_id":103,"conf_int":0,"conf_key":"openilink_ai_context_turns","conf_sort":790,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"上下文轮数","conf_type":13,"conf_updatetime":1777967000,"conf_value":"6"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"首次关注或帮助提示文案","conf_id":104,"conf_int":0,"conf_key":"openilink_welcome_text","conf_sort":780,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"欢迎语","conf_type":13,"conf_updatetime":1777967000,"conf_value":"欢迎使用微信专属搜索机器人，发送关键词即可搜索资源。"},{"conf_content":null,"conf_createtime":1777967000,"conf_desc":"搜索无结果时回复的文案","conf_id":105,"conf_int":0,"conf_key":"openilink_no_result_text","conf_sort":770,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"无结果文案","conf_type":13,"conf_updatetime":1777967000,"conf_value":"未找到相关资源"},{"conf_content":null,"conf_createtime":0,"conf_desc":"","conf_id":1,"conf_int":0,"conf_key":"app_name","conf_sort":99,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"网站名称","conf_type":0,"conf_updatetime":1725411498,"conf_value":"Panbox Search"},{"conf_content":null,"conf_createtime":1712114435,"conf_desc":"","conf_id":22,"conf_int":0,"conf_key":"quark_cookie","conf_sort":99,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"夸克Cookie","conf_type":4,"conf_updatetime":1712114652,"conf_value":""},{"conf_content":["显示=>0","隐藏=>1"],"conf_createtime":1725411632,"conf_desc":"默认显示：logo包含文字的可以隐藏网站名称","conf_id":46,"conf_int":0,"conf_key":"app_name_hide","conf_sort":98,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"隐藏网站名称","conf_type":0,"conf_updatetime":1725411763,"conf_value":"0"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":54,"conf_int":0,"conf_key":"quark_file","conf_sort":98,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"夸克默认转存目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":["默认主题=>default","主题1=>theme1","主题 2=>theme2"],"conf_createtime":1784559937,"conf_desc":"控制前台首页、搜索页、详情页所使用的主题模板","conf_id":189,"conf_int":0,"conf_key":"frontend_theme","conf_sort":98,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"前台默认主题","conf_type":3,"conf_updatetime":1784559937,"conf_value":"default"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":55,"conf_int":0,"conf_key":"quark_file_time","conf_sort":97,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"夸克临时资源目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":["有图模式=>image","无图模式=>text"],"conf_createtime":1784559937,"conf_desc":"控制默认主题首页榜单以有图或无图形式展示；最新列表等模块的实际效果由当前主题与显示模式共同决定","conf_id":190,"conf_int":0,"conf_key":"frontend_theme_display_mode","conf_sort":97,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"默认主题显示模式","conf_type":3,"conf_updatetime":1784559937,"conf_value":"image"},{"conf_content":["数据库资源=>database","在线热门资源=>hot"],"conf_createtime":1783180800,"conf_desc":"控制前台首页资源卡片使用本地数据库资源或在线热门榜单资源","conf_id":172,"conf_int":0,"conf_key":"frontend_home_resource_source","conf_sort":96,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"首页资源数据源","conf_type":3,"conf_updatetime":1784559937,"conf_value":"hot"},{"conf_content":"","conf_createtime":1725007588,"conf_desc":"","conf_id":32,"conf_int":0,"conf_key":"home_bg","conf_sort":95,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"大图背景","conf_type":3,"conf_updatetime":1784351259,"conf_value":""},{"conf_content":null,"conf_createtime":1726302688,"conf_desc":"","conf_id":51,"conf_int":0,"conf_key":"home_new_img","conf_sort":95,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"最新图标","conf_type":3,"conf_updatetime":1784351259,"conf_value":""},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"元器机器人 API 访问 Token","conf_id":83,"conf_int":0,"conf_key":"bot_api_token","conf_sort":95,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"元器机器人 Token","conf_type":20,"conf_updatetime":1736596800,"conf_value":""},{"conf_content":null,"conf_createtime":1725006792,"conf_desc":"免费分享百万级网盘资源，致力打造顶尖网盘搜索引擎，让您畅享资源无忧！","conf_id":31,"conf_int":0,"conf_key":"app_subname","conf_sort":94,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"网站宣传语","conf_type":0,"conf_updatetime":1725006869,"conf_value":""},{"conf_content":null,"conf_createtime":1725324697,"conf_desc":"直接写css样式就行","conf_id":41,"conf_int":0,"conf_key":"home_css","conf_sort":94,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"自定义CSS","conf_type":3,"conf_updatetime":1784351259,"conf_value":""},{"conf_content":["1=>1","0=>0"],"conf_createtime":1736596800,"conf_desc":"1=启用, 0=停用","conf_id":84,"conf_int":0,"conf_key":"bot_api_token_enabled","conf_sort":94,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"元器机器人 Token 开关","conf_type":20,"conf_updatetime":1784351182,"conf_value":"1"},{"conf_content":null,"conf_createtime":1711636952,"conf_desc":"方形LOGO，最佳显示尺寸为80*80像素","conf_id":21,"conf_int":0,"conf_key":"logo","conf_sort":93,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"网站LOGO","conf_type":0,"conf_updatetime":1725006864,"conf_value":""},{"conf_content":null,"conf_createtime":1725027432,"conf_desc":"默认文字颜色：#000000","conf_id":36,"conf_int":0,"conf_key":"home_color","conf_sort":93,"conf_spec":7,"conf_status":1,"conf_system":1,"conf_title":"文字颜色","conf_type":3,"conf_updatetime":1784351259,"conf_value":null},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"本地搜索默认返回数量","conf_id":85,"conf_int":0,"conf_key":"bot_result_count","conf_sort":93,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"元器机器人本地返回条数","conf_type":20,"conf_updatetime":1736596800,"conf_value":"5"},{"conf_content":null,"conf_createtime":1725027499,"conf_desc":"默认：#1e80ff","conf_id":37,"conf_int":0,"conf_key":"home_theme","conf_sort":92,"conf_spec":7,"conf_status":1,"conf_system":1,"conf_title":"主题色","conf_type":3,"conf_updatetime":1784351259,"conf_value":null},{"conf_content":null,"conf_createtime":1725326071,"conf_desc":"","conf_id":43,"conf_int":0,"conf_key":"app_icon","conf_sort":92,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"网站icon","conf_type":0,"conf_updatetime":1725326071,"conf_value":""},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"全网搜索默认返回数量","conf_id":86,"conf_int":0,"conf_key":"bot_remote_result_count","conf_sort":92,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"元器机器人全网搜条数","conf_type":20,"conf_updatetime":1736596800,"conf_value":"10"},{"conf_content":null,"conf_createtime":1725007770,"conf_desc":"默认：#fafafa","conf_id":33,"conf_int":0,"conf_key":"home_background","conf_sort":91,"conf_spec":7,"conf_status":1,"conf_system":1,"conf_title":"背景颜色","conf_type":3,"conf_updatetime":1784351259,"conf_value":null},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"默认顺序：夸克→UC→百度→迅雷→阿里","conf_id":87,"conf_int":0,"conf_key":"bot_pan_priority","conf_sort":91,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"元器机器人网盘优先级","conf_type":20,"conf_updatetime":1736596800,"conf_value":"0,3,2,4,1"},{"conf_content":null,"conf_createtime":1725025185,"conf_desc":"示例：声明：本站是网盘索引系统,所有内容均来自互联网所提供的公开引用资源，未提供资源上传、存储服务。","conf_id":34,"conf_int":0,"conf_key":"footer_dec","conf_sort":90,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"底部介绍","conf_type":0,"conf_updatetime":1725325534,"conf_value":""},{"conf_content":null,"conf_createtime":1725028468,"conf_desc":"搜索框及其它元素北背景色 默认：#ffffff","conf_id":38,"conf_int":0,"conf_key":"other_background","conf_sort":90,"conf_spec":7,"conf_status":1,"conf_system":1,"conf_title":"其它元素背景","conf_type":3,"conf_updatetime":1784351259,"conf_value":null},{"conf_content":["跳转+扫码=>0","仅跳转=>1","仅扫码=>2"],"conf_createtime":1744861402,"conf_desc":"跳转：直接通过链接访问；扫码：提示用户用手机扫码访问","conf_id":67,"conf_int":0,"conf_key":"pc_type","conf_sort":90,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"PC端访问方式","conf_type":3,"conf_updatetime":1744861423,"conf_value":"0"},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"0=夸克,1=阿里,2=百度,3=UC,4=迅雷","conf_id":88,"conf_int":0,"conf_key":"bot_allowed_pan_types","conf_sort":90,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"元器机器人允许网盘类型","conf_type":20,"conf_updatetime":1736596800,"conf_value":"0,1,2,3,4"},{"conf_content":null,"conf_createtime":1725025262,"conf_desc":"示例：© 2024 XX搜剧 Powered by \u003ca href=\"https://www.XXXXX.com/\" target=\"_blank\">XX导航\u003c/a>","conf_id":35,"conf_int":0,"conf_key":"footer_copyright","conf_sort":89,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"底部版权","conf_type":0,"conf_updatetime":1725325624,"conf_value":""},{"conf_content":["开启=>0","关闭=>1"],"conf_createtime":1726299605,"conf_desc":"仅无图模式有效","conf_id":50,"conf_int":0,"conf_key":"home_new","conf_sort":89,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"最新列表","conf_type":3,"conf_updatetime":1784351259,"conf_value":"1"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":53,"conf_int":0,"conf_key":"baidu_cookie","conf_sort":89,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"百度Cookie","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"全网搜触发命令配置","conf_id":89,"conf_int":0,"conf_key":"bot_custom_commands","conf_sort":89,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"元器机器人自定义命令","conf_type":20,"conf_updatetime":1736596800,"conf_value":"[]"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":56,"conf_int":0,"conf_key":"baidu_file","conf_sort":88,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"百度默认转存目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":["显示=>1","隐藏=>0"],"conf_createtime":1765500000,"conf_desc":"前台资源卡片是否显示时间信息","conf_id":77,"conf_int":0,"conf_key":"source_show_time","conf_sort":88,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"资源显示时间","conf_type":3,"conf_updatetime":1784559937,"conf_value":"1"},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"关键词回复配置","conf_id":90,"conf_int":0,"conf_key":"bot_keywords","conf_sort":88,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"元器机器人关键词回复","conf_type":20,"conf_updatetime":1736596800,"conf_value":"[]"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":57,"conf_int":0,"conf_key":"baidu_file_time","conf_sort":87,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"百度临时资源目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":["仅标签=>0","仅时间=>1","标签优先否则时间=>2","同时显示标签和时间=>3"],"conf_createtime":1765500000,"conf_desc":"控制前台资源标签与时间的展示方式","conf_id":78,"conf_int":0,"conf_key":"source_label_time_mode","conf_sort":87,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"标签时间展示方式","conf_type":3,"conf_updatetime":1784559937,"conf_value":"2"},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"每条搜索结果前的固定文案","conf_id":91,"conf_int":0,"conf_key":"bot_reply_prefix","conf_sort":87,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"元器机器人回复前缀","conf_type":20,"conf_updatetime":1736596800,"conf_value":"🎬 为您找到「{keyword}」相关资源："},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"每条搜索结果后的固定文案","conf_id":92,"conf_int":0,"conf_key":"bot_reply_suffix","conf_sort":86,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"元器机器人回复后缀","conf_type":20,"conf_updatetime":1736596800,"conf_value":"💡 温馨提示：点击链接即可直接访问资源"},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 首页顶部大 Banner 图片，建议使用 1180×400 或更高分辨率同等比例图片","conf_id":195,"conf_int":0,"conf_key":"theme1_banner_image","conf_sort":86,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 图片","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"全网搜使用的线路 ID，逗号分隔","conf_id":93,"conf_int":0,"conf_key":"bot_remote_api_ids","conf_sort":85,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"元器机器人全网搜线路","conf_type":20,"conf_updatetime":1736596800,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 首页顶部大 Banner 主标题","conf_id":196,"conf_int":0,"conf_key":"theme1_banner_title","conf_sort":85,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 标题","conf_type":3,"conf_updatetime":1784559937,"conf_value":"发现你想看的影视资源"},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"未搜索到结果时展示的文案","conf_id":94,"conf_int":0,"conf_key":"bot_tpl_no_result","conf_sort":84,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"元器机器人无结果提示","conf_type":20,"conf_updatetime":1736596800,"conf_value":"没有找到『{keyword}』相关资源"},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 首页顶部大 Banner 副标题描述","conf_id":197,"conf_int":0,"conf_key":"theme1_banner_desc","conf_sort":84,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 描述","conf_type":3,"conf_updatetime":1784559937,"conf_value":"聚合全网热门影视、剧集与短剧资源，快速搜索并跳转获取。"},{"conf_content":null,"conf_createtime":1736596800,"conf_desc":"搜索异常时展示的文案","conf_id":95,"conf_int":0,"conf_key":"bot_tpl_error","conf_sort":83,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"元器机器人错误提示","conf_type":20,"conf_updatetime":1736596800,"conf_value":"搜索过程中出现错误，请稍后重试"},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 轮播第2张图片","conf_id":198,"conf_int":0,"conf_key":"theme1_banner_image_2","conf_sort":83,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 图片2","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 轮播第2张标题","conf_id":199,"conf_int":0,"conf_key":"theme1_banner_title_2","conf_sort":82,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 标题2","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":["开启=>0","关闭=>1"],"conf_createtime":1725326640,"conf_desc":"前台是否开启此功能 ；  默认开启","conf_id":44,"conf_int":0,"conf_key":"app_demand","conf_sort":81,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"提交需求","conf_type":3,"conf_updatetime":1725326707,"conf_value":"0"},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 轮播第2张描述","conf_id":200,"conf_int":0,"conf_key":"theme1_banner_desc_2","conf_sort":81,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 描述2","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1712451616,"conf_desc":"前台加入群聊开关；有图显示按钮，无图不显示","conf_id":23,"conf_int":0,"conf_key":"qcode","conf_sort":80,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"群二维码","conf_type":3,"conf_updatetime":1725326400,"conf_value":""},{"conf_content":null,"conf_createtime":1725326838,"conf_desc":"一行一个外链(a标签)：\u003ca href=\"https://www.XXXXX.com/\" target=\"_blank\">更多资源\u003c/a>","conf_id":45,"conf_int":0,"conf_key":"app_links","conf_sort":80,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"顶部其他外链","conf_type":3,"conf_updatetime":1725326838,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 轮播第3张图片","conf_id":201,"conf_int":0,"conf_key":"theme1_banner_image_3","conf_sort":80,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 图片3","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1722010465,"conf_desc":"此版本用不着","conf_id":26,"conf_int":0,"conf_key":"Authorization","conf_sort":79,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"阿里Authorization","conf_type":4,"conf_updatetime":1722010465,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 轮播第3张标题","conf_id":202,"conf_int":0,"conf_key":"theme1_banner_title_3","conf_sort":79,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 标题3","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1725160003,"conf_desc":"下次更新生效；排行榜数据每12个小时更新一次；右上角清除缓存立即生效","conf_id":40,"conf_int":0,"conf_key":"ranking_num","conf_sort":78,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"排行榜数量","conf_type":3,"conf_updatetime":1725171288,"conf_value":"10"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":58,"conf_int":0,"conf_key":"ali_file","conf_sort":78,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"阿里默认转存目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"主题1 轮播第3张描述","conf_id":203,"conf_int":0,"conf_key":"theme1_banner_desc_3","conf_sort":78,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"主题1 Banner 描述3","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1725412329,"conf_desc":"释：移动端最多显示数量","conf_id":47,"conf_int":0,"conf_key":"ranking_m_num","conf_sort":77,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"移动端限制数量","conf_type":3,"conf_updatetime":1725412329,"conf_value":"6"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":59,"conf_int":0,"conf_key":"ali_file_time","conf_sort":77,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"阿里临时资源目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":60,"conf_int":0,"conf_key":"uc_cookie","conf_sort":69,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"UcCookie","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":61,"conf_int":0,"conf_key":"uc_file","conf_sort":68,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"UC默认转存目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":["显示=>1","隐藏=>0"],"conf_createtime":1784559937,"conf_desc":"控制主题2搜索页右侧点映通知卡片是否显示","conf_id":191,"conf_int":0,"conf_key":"theme2_notice_enabled","conf_sort":68,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"主题2自定义板块开关","conf_type":3,"conf_updatetime":1784559937,"conf_value":"1"},{"conf_content":null,"conf_createtime":1743145595,"conf_desc":"","conf_id":62,"conf_int":0,"conf_key":"uc_file_time","conf_sort":67,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"UC临时资源目录","conf_type":4,"conf_updatetime":1743145595,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"搜索页右侧自定义板块图片，建议使用正方形二维码或海报图","conf_id":192,"conf_int":0,"conf_key":"theme2_notice_image","conf_sort":67,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"自定义板块图片","conf_type":3,"conf_updatetime":1784559937,"conf_value":""},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"搜索页右侧自定义板块标题","conf_id":193,"conf_int":0,"conf_key":"theme2_notice_title","conf_sort":66,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"自定义板块标题","conf_type":3,"conf_updatetime":1784559937,"conf_value":"点映通知"},{"conf_content":null,"conf_createtime":1784559937,"conf_desc":"搜索页右侧自定义板块说明文字","conf_id":194,"conf_int":0,"conf_key":"theme2_notice_desc","conf_sort":65,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"自定义板块文案","conf_type":3,"conf_updatetime":1784559937,"conf_value":"进群获取【每日更新/点映大结局】通知"},{"conf_content":null,"conf_createtime":1743149794,"conf_desc":"","conf_id":63,"conf_int":0,"conf_key":"xunlei_cookie","conf_sort":59,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"迅雷Cookie","conf_type":4,"conf_updatetime":1743149794,"conf_value":""},{"conf_content":null,"conf_createtime":1743149819,"conf_desc":"","conf_id":64,"conf_int":0,"conf_key":"xunlei_file","conf_sort":58,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"迅雷默认转存目录","conf_type":4,"conf_updatetime":1743149819,"conf_value":""},{"conf_content":null,"conf_createtime":1743149860,"conf_desc":"","conf_id":65,"conf_int":0,"conf_key":"xunlei_file_time","conf_sort":57,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"迅雷临时资源目录","conf_type":4,"conf_updatetime":1743149860,"conf_value":""},{"conf_content":null,"conf_createtime":1780444800,"conf_desc":"系统迁移用于判断是否已覆盖搜索防护默认配置，请勿手动修改","conf_id":144,"conf_int":0,"conf_key":"search_guard_defaults_version","conf_sort":10,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"搜索防护默认配置版本","conf_type":12,"conf_updatetime":1780444800,"conf_value":"20260605_simple_search_guard_v1"},{"conf_content":null,"conf_createtime":1784351182,"conf_desc":"系统迁移用于判断 autosave 默认超时是否已覆盖，请勿手动修改","conf_id":188,"conf_int":0,"conf_key":"autosave_timeout_default_version","conf_sort":7,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"Autosave 超时默认版本","conf_type":1,"conf_updatetime":1784351182,"conf_value":"20260625_raise_autosave_timeout_default"},{"conf_content":["关闭=>0","开启=>1"],"conf_createtime":1729928547,"conf_desc":"","conf_id":52,"conf_int":0,"conf_key":"is_quan","conf_sort":1,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"全网搜","conf_type":1,"conf_updatetime":1729928547,"conf_value":"1"},{"conf_content":["转存分享=>0","第三方直链=>1"],"conf_createtime":1744882575,"conf_desc":"第三方直链: 直接展示第三方接口的资源","conf_id":68,"conf_int":0,"conf_key":"is_quan_type","conf_sort":1,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"全网搜模式","conf_type":1,"conf_updatetime":1744882612,"conf_value":"0"},{"conf_content":null,"conf_createtime":1755842460,"conf_desc":"屏蔽搜索关键词，如：庆余年,凡人修仙传","conf_id":70,"conf_int":0,"conf_key":"ban_keywords","conf_sort":1,"conf_spec":1,"conf_status":1,"conf_system":1,"conf_title":"关键词屏蔽","conf_type":1,"conf_updatetime":1755842580,"conf_value":""},{"conf_content":null,"conf_createtime":1765400000,"conf_desc":"用于清理临时资源，仅删除本地资源记录，不删除网盘文件","conf_id":76,"conf_int":0,"conf_key":"quan_search_temp_minutes","conf_sort":1,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"临时资源保留分钟","conf_type":1,"conf_updatetime":1765400000,"conf_value":"1500"},{"conf_content":null,"conf_createtime":0,"conf_desc":"","conf_id":2,"conf_int":0,"conf_key":"upload_max_file","conf_sort":0,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"最大文件上传限制","conf_type":2,"conf_updatetime":1617352067,"conf_value":"4097152"},{"conf_content":null,"conf_createtime":0,"conf_desc":"","conf_id":3,"conf_int":0,"conf_key":"upload_file_type","conf_sort":0,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"允许文件上传类型","conf_type":2,"conf_updatetime":1617351959,"conf_value":"xls,xlsx"},{"conf_content":null,"conf_createtime":0,"conf_desc":"","conf_id":4,"conf_int":0,"conf_key":"upload_max_image","conf_sort":0,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"最大图片上传限制","conf_type":2,"conf_updatetime":1617351961,"conf_value":"2097152"},{"conf_content":null,"conf_createtime":0,"conf_desc":"","conf_id":5,"conf_int":0,"conf_key":"upload_image_type","conf_sort":0,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"允许上传图片类型","conf_type":2,"conf_updatetime":1617351964,"conf_value":"jpg,png,gif,jpeg,bmp"},{"conf_content":["开启=>1","关闭=>0"],"conf_createtime":1723014926,"conf_desc":"此版本用不着","conf_id":27,"conf_int":0,"conf_key":"mp4_online","conf_sort":0,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"在线观看资源","conf_type":4,"conf_updatetime":1723014926,"conf_value":"0"},{"conf_content":["精准搜索=>0","模糊搜索=>1","分词搜索=>2"],"conf_createtime":1724493746,"conf_desc":"精准搜索：只有查包含关键词的；模糊搜索：关键词顺序可乱但必须都包含；分词搜索：只要满足其中一个字就会搜索到","conf_id":28,"conf_int":0,"conf_key":"search_type","conf_sort":0,"conf_spec":2,"conf_status":1,"conf_system":1,"conf_title":"搜索模式","conf_type":1,"conf_updatetime":1724494058,"conf_value":"1"},{"conf_content":null,"conf_createtime":1726108804,"conf_desc":"为空时默认：未找到，可换个关键词尝试哦~","conf_id":48,"conf_int":0,"conf_key":"search_tips","conf_sort":0,"conf_spec":0,"conf_status":1,"conf_system":1,"conf_title":"未搜索提示词","conf_type":1,"conf_updatetime":1726108804,"conf_value":""},{"conf_content":null,"conf_createtime":1726108851,"conf_desc":"","conf_id":49,"conf_int":0,"conf_key":"search_bg","conf_sort":0,"conf_spec":4,"conf_status":1,"conf_system":1,"conf_title":"未搜索提示图","conf_type":1,"conf_updatetime":1726108851,"conf_value":""}],"message":""},"method":"post","url":"/admin/conf/getBaseConfig"},{"data":{"code":500,"message":"夸克未登录，请检查cookie"},"method":"post","url":"/admin/source/getFiles"},{"data":{"code":500,"message":"夸克未登录，请检查cookie"},"method":"post","url":"/admin/source/getFiles"},{"data":{"code":500,"message":"登录状态异常，获取access_token失败"},"method":"post","url":"/admin/source/getFiles"},{"data":{"code":500,"message":"登录状态异常，获取access_token失败"},"method":"post","url":"/admin/source/getFiles"}]};</script><script src="/demos/search/admin-runtime.js"></script>
+<script src="/demos/search/assets/admin/js/element.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/YAdmin.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/SkuForm.umd.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/vue-ueditor-wrap.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.config.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/UEditor/ueditor.all.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/component.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/Sortable.min.js?v=3.137"></script>
+<script src="/demos/search/assets/admin/js/vuedraggable.umd.min.js?v=3.137"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    activeName: '0',
+                    configKeys: ['quark_cookie', 'quark_file', 'quark_file_time', 'baidu_cookie', 'baidu_file', 'baidu_file_time', 'Authorization', 'ali_file', 'ali_file_time', 'uc_cookie', 'uc_file', 'uc_file_time', 'xunlei_cookie', 'xunlei_file', 'xunlei_file_time'],
+                    form: {
+                        quark_file: ''
+                    },
+                    quark_files: [],
+                    quark_props: {
+                        lazy: true,
+                        emitPath: false,
+                        checkStrictly: true,
+                        lazyLoad(node, resolve) {
+                            const { level, value } = node;
+                            let that = this;
+                            axios.post('/admin/source/getFiles', Object.assign({
+                                type: 0,
+                                pdir_fid: value || 0
+                            }, PostBase))
+                                .then(function (res) {
+                                    if (res.data.code == 200) {
+                                        // 只显示文件夹
+                                        const nodes = (res.data.data || [])
+                                            .map(item => ({
+                                                value: item.fid,
+                                                label: item.file_name,
+                                                disabled: !item.dir,
+                                            }));
+                                        resolve(nodes);
+                                    } else {
+                                        resolve([]);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error(error);
+                                    resolve([]);
+                                });
+                        }
+                    },
+                    baidu_props: {
+                        lazy: true,
+                        emitPath: false,
+                        checkStrictly: true,
+                        lazyLoad(node, resolve) {
+                            const { level, value } = node;
+                            let that = this;
+                            axios.post('/admin/source/getFiles', Object.assign({
+                                type: 2,
+                                pdir_fid: value || 0
+                            }, PostBase))
+                                .then(function (res) {
+                                    if (res.data.code == 200) {
+                                        // 只显示文件夹
+                                        const nodes = (res.data.data || [])
+                                            .map(item => ({
+                                                value: item.path,
+                                                label: item.server_filename,
+                                                disabled: !item.isdir,
+                                            }));
+                                        resolve(nodes);
+                                    } else {
+                                        resolve([]);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error(error);
+                                    resolve([]);
+                                });
+                        }
+                    },
+                    ali_props: {
+                        lazy: true,
+                        emitPath: false,
+                        checkStrictly: true,
+                        lazyLoad(node, resolve) {
+                            const { level, value } = node;
+                            let that = this;
+                            axios.post('/admin/source/getFiles', Object.assign({
+                                type: 1,
+                                pdir_fid: value || 0
+                            }, PostBase))
+                                .then(function (res) {
+                                    if (res.data.code == 200) {
+                                        // 只显示文件夹
+                                        const nodes = (res.data.data || [])
+                                            .map(item => ({
+                                                value: item.file_id,
+                                                label: item.name,
+                                                disabled: item.type != 'folder',
+                                            }));
+                                        resolve(nodes);
+                                    } else {
+                                        resolve([]);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error(error);
+                                    resolve([]);
+                                });
+                        }
+                    },
+                    uc_props: {
+                        lazy: true,
+                        emitPath: false,
+                        checkStrictly: true,
+                        lazyLoad(node, resolve) {
+                            const { level, value } = node;
+                            let that = this;
+                            axios.post('/admin/source/getFiles', Object.assign({
+                                type: 3,
+                                pdir_fid: value || 0
+                            }, PostBase))
+                                .then(function (res) {
+                                    if (res.data.code == 200) {
+                                        // 只显示文件夹
+                                        const nodes = (res.data.data || [])
+                                            .map(item => ({
+                                                value: item.fid,
+                                                label: item.file_name,
+                                                disabled: !item.dir,
+                                            }));
+                                        resolve(nodes);
+                                    } else {
+                                        resolve([]);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error(error);
+                                    resolve([]);
+                                });
+                        }
+                    },
+                    xunlei_props: {
+                        lazy: true,
+                        emitPath: false,
+                        checkStrictly: true,
+                        lazyLoad(node, resolve) {
+                            const { level, value } = node;
+                            let that = this;
+                            axios.post('/admin/source/getFiles', Object.assign({
+                                type: 4,
+                                pdir_fid: value || 0
+                            }, PostBase))
+                                .then(function (res) {
+                                    if (res.data.code == 200) {
+                                        // 只显示文件夹
+                                        const nodes = (res.data.data || [])
+                                            .map(item => ({
+                                                value: item.id,
+                                                label: item.name,
+                                                disabled: item.kind !== 'drive#folder',
+                                            }));
+                                        resolve(nodes);
+                                    } else {
+                                        resolve([]);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error(error);
+                                    resolve([]);
+                                });
+                        }
+                    },
+                };
+            },
+            created() {
+                this.getData();
+            },
+            methods: {
+                getData() {
+                    let that = this
+                    axios.post('/admin/conf/getBaseConfig', Object.assign({}, PostBase))
+                        .then(function (response) {
+                            if (response.data.code == 200) {
+                                for (let item of response.data.data) {
+                                    if (that.configKeys.includes(item.conf_key)) {
+                                        that.$set(that.form, item.conf_key, item.conf_value)
+                                    }
+                                }
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                        });
+                },
+                onSubmit() {
+                    let that = this
+                    axios.post('/admin/conf/updateBaseConfig', Object.assign({}, PostBase, that.form))
+                        .then(function (response) {
+                            if (response.data.code == 200) {
+                                that.$message({
+                                    message: response.data.message,
+                                    type: 'success'
+                                });
+                            } else {
+                                that.$message.error(response.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        });
+                },
+
+                getFile(type) {
+                    let that = this
+                    axios.post('/admin/source/getFiles', Object.assign({
+                        type
+                    }, PostBase))
+                        .then(function (res) {
+                            if (res.data.code == 200) {
+                                that.$message.success("已登录，cookie可用");
+                            } else {
+                                that.$message.error(res.data.message);
+                            }
+                        })
+                        .catch(function (error) {
+                            that.$message.error('服务器内部错误');
+                            console.log(error);
+                        });
+                },
+            }
+        })
+    </script>
+
+
+</html>
